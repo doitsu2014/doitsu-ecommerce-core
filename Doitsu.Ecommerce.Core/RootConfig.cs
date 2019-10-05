@@ -41,6 +41,7 @@ namespace Doitsu.Ecommerce.Core
     public static class RootConfig
     {
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        [System.Obsolete]
         public static void AppHosting(IApplicationBuilder app, IHostingEnvironment env, bool isConfigImageSharpWeb = false)
         {
             app.UseAuthentication();
@@ -50,6 +51,7 @@ namespace Doitsu.Ecommerce.Core
                 app.UseImageSharp();
         }
 
+        [System.Obsolete]
         public static void Service(IServiceCollection services, IConfiguration configuration, bool isConfigImageSharpWeb = false)
         {
             #region Identity Database Config
@@ -63,7 +65,7 @@ namespace Doitsu.Ecommerce.Core
                 .AddIdentity<EcommerceIdentityUser, EcommerceIdentityRole>()
                 .AddEntityFrameworkStores<EcommerceDbContext>()
                 .AddDefaultTokenProviders();
-
+            services.RegisterDefaultEntityChangesHandlers();
             services.AddScoped(typeof(DbContext), typeof(EcommerceDbContext));
             services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
             // Inject Identity Manager
@@ -103,6 +105,7 @@ namespace Doitsu.Ecommerce.Core
 
         }
         #region Config Image Sharp Methods
+        [System.Obsolete]
         private static void ConfigureCustomServicesAndCustomOptions(IServiceCollection services)
         {
             services.AddImageSharpCore(

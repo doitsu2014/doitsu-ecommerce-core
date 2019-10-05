@@ -1,5 +1,6 @@
 ﻿using Doitsu.Ecommerce.Core.Data.Entities;
 using EFCore.Abstractions.EntityConfigurations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
@@ -9,6 +10,23 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
         public override void Configure(EntityTypeBuilder<GalleryItems> builder)
         {
             base.Configure(builder);
+            builder.Property(e => e.ImageUrl)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+            builder.Property(e => e.Slug)
+                .IsRequired()
+                .HasMaxLength(255);
+
+            builder.Property(e => e.Title)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            builder.HasOne(d => d.Gallery)
+                .WithMany(p => p.GalleryItems)
+                .HasForeignKey(d => d.GalleryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__GalleryIt__Galle__0D7A0286");
         }
     }
 }

@@ -45,10 +45,6 @@ namespace Doitsu.Ecommerce.Core.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer("Server=103.114.104.24;Database=BachMoc_CodeFirst_Test;Trusted_Connection=False;User Id=sa;Password=zaQ@1234");
-            }
         }
 
         protected override void OnModelCreating(ModelBuilder builder)

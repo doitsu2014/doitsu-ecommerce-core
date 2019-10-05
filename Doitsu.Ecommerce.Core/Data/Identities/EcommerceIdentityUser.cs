@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Service.Core.Interfaces.EfCore;
 using Microsoft.AspNetCore.Identity;
 
@@ -16,5 +18,11 @@ namespace Doitsu.Ecommerce.Core.Data.Identities
         public string Country { get; set; }
         public int Gender { get; set; }
         public bool Active { get; set; }
+        public virtual ICollection<Blogs> BlogsCreater { get; set; }
+        public virtual ICollection<Blogs> BlogsPublisher { get; set; }
+        public virtual ICollection<BrandFeedbacks> BrandFeedbacks { get; set; }
+        public virtual ICollection<CustomerFeedbacks> CustomerFeedbacks { get; set; }
+        public virtual ICollection<MarketingCustomers> MarketingCustomers { get; set; }
+        public virtual ICollection<Orders> Orders { get; set; }
     }
 }
