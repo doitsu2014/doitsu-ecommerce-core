@@ -201,7 +201,7 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tags",
+                name: "Tag",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -213,7 +213,7 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tags", x => x.Id);
+                    table.PrimaryKey("PK_Tag", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -550,7 +550,7 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     table.ForeignKey(
                         name: "FK__BlogTags__TagId__08B54D69",
                         column: x => x.TagId,
-                        principalTable: "Tags",
+                        principalTable: "Tag",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -609,7 +609,7 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     table.ForeignKey(
                         name: "FK__ProductTa__TagId__1332DBDC",
                         column: x => x.TagId,
-                        principalTable: "Tags",
+                        principalTable: "Tag",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -787,7 +787,7 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_Title",
-                table: "Tags",
+                table: "Tag",
                 column: "Title");
         }
 
@@ -854,7 +854,7 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 name: "Products");
 
             migrationBuilder.DropTable(
-                name: "Tags");
+                name: "Tag");
 
             migrationBuilder.DropTable(
                 name: "BlogCategories");

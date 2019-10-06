@@ -902,7 +902,7 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.HasIndex("Title")
                         .HasName("IX_Title");
 
-                    b.ToTable("Tags");
+                    b.ToTable("Tag");
                 });
 
             modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Identities.EcommerceIdentityRole", b =>

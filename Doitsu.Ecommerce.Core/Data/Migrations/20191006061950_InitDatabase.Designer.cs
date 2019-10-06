@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20191005172842_InitDatabase")]
+    [Migration("20191006061950_InitDatabase")]
     partial class InitDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -904,7 +904,7 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.HasIndex("Title")
                         .HasName("IX_Title");
 
-                    b.ToTable("Tags");
+                    b.ToTable("Tag");
                 });
 
             modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Identities.EcommerceIdentityRole", b =>

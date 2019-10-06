@@ -34,7 +34,7 @@ namespace Doitsu.Ecommerce.Core.Data
         public DbSet<Products> Products { get; set; }
         public DbSet<ProductTag> ProductTags { get; set; }
         public DbSet<Sliders> Sliders { get; set; }
-        public DbSet<Tag> Tags { get; set; }
+        public DbSet<Tag> Tag { get; set; }
 
         public EcommerceDbContext(DbContextOptions<EcommerceDbContext> options) : base(options) { }
         public EcommerceDbContext(DbContextOptions<EcommerceDbContext> options, IEnumerable<IEntityChangeHandler> handlers) : base(options)

@@ -11,7 +11,7 @@ namespace Hris.Data.Identity
         public EcommerceDbContext CreateDbContext(string[] args)
         {
             var builder = new DbContextOptionsBuilder<EcommerceDbContext>();
-            var connectionString = "Server=103.114.104.24;Database=BachMoc_CodeFirst_Test;Trusted_Connection=False;User Id=sa;Password=zaQ@1234";
+            var connectionString = "Server=103.114.104.24;Database=BachMoc_Furniture_Dev002;Trusted_Connection=False;User Id=sa;Password=zaQ@1234";
             builder.UseSqlServer(connectionString);
             return new EcommerceDbContext(builder.Options);
         }
