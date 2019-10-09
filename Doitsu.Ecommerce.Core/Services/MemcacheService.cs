@@ -19,7 +19,7 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<ImmutableList<ProductOverviewViewModel>> GetRandomProductAsync(int take = 10, int timeCache = 30);
         Task<ImmutableList<CategoryViewModel>> GetBuildingCategoryAsync(int timeCache = 60 * 24 * 30);
         Task<ImmutableList<SliderViewModel>> GetSlidersAsync(int timeCache = 60);
-        Task<ImmutableList<CatalogueViewModel>> GetCatalogueAsync(int timeCache = 60);
+        Task<ImmutableList<CatalogueViewModel>> GetCataloguesAsync(int timeCache = 60);
     }
 
     public class MemCacheService : IMemCacheService
@@ -31,8 +31,6 @@ namespace Doitsu.Ecommerce.Core.Services
         private readonly ISliderService sliderService;
         private readonly ICatalogueService catalogueService;
         private readonly ILogger<MemCacheService> logger;
-        private readonly ICatalogueService catalogueService;
-        private readonly ISliderService sliderService;
         private readonly IUnitOfWork unitOfWork;
         public MemCacheService(
             IUnitOfWork unitOfWork,
@@ -172,5 +170,6 @@ namespace Doitsu.Ecommerce.Core.Services
                 return ImmutableList<SliderViewModel>.Empty;
             }
         }
+
     }
 }
