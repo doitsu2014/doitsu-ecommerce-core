@@ -10,6 +10,5 @@ namespace Doitsu.Ecommerce.Core
             public const string API_JWT_AUTH_SCHEME = "api_jwt";
             public const string ADMIN_AUTH_SCHEME = "admin";
         }
-
     }
 }

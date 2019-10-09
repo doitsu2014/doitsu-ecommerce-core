@@ -97,7 +97,7 @@ namespace Doitsu.Ecommerce.Core.Services
                                     SubTotalQuantity = item.SubQuantity,
                                     SubTotalFinalPrice = item.SubTotal
                                 };
-                                if (order.OrderItems == null) order.OrderItems = new List<OrderItems>();
+                                if(order.OrderItems == null) order.OrderItems = new List<OrderItems>();
                                 order.OrderItems.Add(orderItem);
                             }
                             await this.CreateAsync(order);
@@ -133,7 +133,7 @@ namespace Doitsu.Ecommerce.Core.Services
             var brandService = this.UnitOfWork.GetService<IBrandService>();
             try
             {
-                var currentBrand = await brandService.FirstOrDefaultActiveAsync();
+                var currentBrand = await brandService.FirstOrDefaultAsync();
                 var subject = $"[{currentBrand.Name}] XÁC NHẬN ĐƠN HÀNG #{order.Code} - {DateTime.UtcNow.ToVietnamDateTime().ToShortDateString()}";
                 var destPayload = new MailPayloadInformation
                 {
@@ -162,7 +162,7 @@ namespace Doitsu.Ecommerce.Core.Services
             var brandService = this.UnitOfWork.GetService<IBrandService>();
             try
             {
-                var currentBrand = await brandService.FirstOrDefaultActiveAsync();
+                var currentBrand = await brandService.FirstOrDefaultAsync();
                 var subject = $"[{currentBrand.Name}] ĐƠN HÀNG MỚI #{order.Code} - {DateTime.UtcNow.ToVietnamDateTime().ToShortDateString()}";
                 var destPayload = new MailPayloadInformation
                 {
@@ -197,7 +197,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public async Task<ImmutableList<OrderViewModel>> GetAllOrdersByUserIdAsync(int userId)
         {
-            var result = await this.GetActiveAsNoTracking(x => x.UserId.Equals(userId))
+            var result = await this.GetAsNoTracking(x => x.UserId.Equals(userId))
                 .ProjectTo<OrderViewModel>(this.UnitOfWork.Mapper.ConfigurationProvider)
                 .OrderByDescending(x => x.CreatedDate)
                 .ToListAsync();
@@ -207,7 +207,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public async Task<OrderDetailViewModel> GetOrderDetailByCodeAsync(string orderCode)
         {
-            var result = await this.FirstOrDefaultActiveAsync<OrderDetailViewModel>(x => x.Code.Equals(orderCode));
+            var result = await this.FirstOrDefaultAsync<OrderDetailViewModel>(x => x.Code.Equals(orderCode));
             return result;
 
         }
@@ -233,7 +233,7 @@ namespace Doitsu.Ecommerce.Core.Services
                                                                                       string userPhone,
                                                                                       string orderCode)
         {
-            var query = this.GetAllActiveAsNoTracking();
+            var query = this.GetAllAsNoTracking();
 
             if(orderStatus.HasValue) {
                 query = query.Where(x => x.Status == (int) orderStatus.Value);

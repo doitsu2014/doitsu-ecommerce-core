@@ -31,7 +31,7 @@ namespace Doitsu.Ecommerce.Core.Services {
             var key = $"{Constants.CacheKey.RANDOM_BLOGS}";
             if (!memoryCache.TryGetValue (key, out ImmutableList<BlogOverviewViewModel> randomBlogs)) {
                 var rand = new Random ();
-                var blogsQuery = this.GetAllActive ();
+                var blogsQuery = this.GetAll();
                 var listShuffleOverview =
                     await blogsQuery
                     .ProjectTo<BlogOverviewViewModel> (this.UnitOfWork.Mapper.ConfigurationProvider)
@@ -48,7 +48,7 @@ namespace Doitsu.Ecommerce.Core.Services {
 
         public async Task<DoitsuPaginatedList<BlogOverviewViewModel>> GetAllDetailBlogsByCategoryWithPaging (string blogCategorySlug, int page = 0, int limit = 4) {
             var blogsQuery = this
-                .GetActive (x => x.BlogCategory.Slug == blogCategorySlug);
+                .Get(x => x.BlogCategory.Slug == blogCategorySlug);
 
             var result = blogsQuery
                 .ProjectTo<BlogOverviewViewModel> (this.UnitOfWork.Mapper.ConfigurationProvider)
@@ -60,14 +60,14 @@ namespace Doitsu.Ecommerce.Core.Services {
         }
 
         public async Task<BlogDetailViewModel> GetBlogDetailBySlugAsync (string slug) {
-            var blog = await this.FirstOrDefaultActiveAsync<BlogDetailViewModel> (x => x.Slug == slug);
+            var blog = await this.FirstOrDefaultAsync<BlogDetailViewModel> (x => x.Slug == slug);
             return blog;
         }
 
         public async Task<int> UpdateWithConstraintAsync (BlogDetailViewModel data, EcommerceIdentityUser publisher) {
             using (var transaction = await this.UnitOfWork.CreateTransactionAsync ()) {
                 try {
-                    var existBlog = await FirstOrDefaultActiveAsync (x => x.Id == data.Id);
+                    var existBlog = await FirstOrDefaultAsync (x => x.Id == data.Id);
                     existBlog = this.UnitOfWork.Mapper.Map (data, existBlog);
                     existBlog.PublisherId = publisher.Id;
                     // remove all blog tags
@@ -81,7 +81,7 @@ namespace Doitsu.Ecommerce.Core.Services {
                         bt.BlogId = existBlog.Id;
                         bt.Tag.Active = true;
                         bt.Active = true;
-                        var existTag = tagService.FirstOrDefaultActive (t => t.Slug == bt.Tag.Slug);
+                        var existTag = tagService.FirstOrDefaultAsync(t => t.Slug == bt.Tag.Slug);
                         if (existTag != null) {
                             bt.TagId = existTag.Id;
                             bt.Tag = null;
@@ -115,7 +115,7 @@ namespace Doitsu.Ecommerce.Core.Services {
                         bt.Tag.Active = true;
                         bt.Active = true;
 
-                        var existTag = tagService.FirstOrDefaultActive (t => t.Slug == bt.Tag.Slug);
+                        var existTag = tagService.FirstOrDefaultAsync(t => t.Slug == bt.Tag.Slug);
                         if (existTag != null) {
                             bt.TagId = existTag.Id;
                             bt.Tag = null;

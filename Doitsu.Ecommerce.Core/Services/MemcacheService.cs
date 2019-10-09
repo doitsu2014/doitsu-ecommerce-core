@@ -31,6 +31,8 @@ namespace Doitsu.Ecommerce.Core.Services
         private readonly ISliderService sliderService;
         private readonly ICatalogueService catalogueService;
         private readonly ILogger<MemCacheService> logger;
+        private readonly ICatalogueService catalogueService;
+        private readonly ISliderService sliderService;
         private readonly IUnitOfWork unitOfWork;
         public MemCacheService(
             IUnitOfWork unitOfWork,
@@ -134,45 +136,40 @@ namespace Doitsu.Ecommerce.Core.Services
                 return ImmutableList<ProductOverviewViewModel>.Empty;
             }
         }
+
+        public async Task<ImmutableList<CatalogueViewModel>> GetCataloguesAsync(int timeCache = 60)
+        {
+            try
+            {
+                if (!memoryCache.TryGetValue(Constants.CacheKey.CATALOGUES, out ImmutableList<CatalogueViewModel> catalogues))
+                {
+                    catalogues = (await catalogueService.GetAll().ProjectTo<CatalogueViewModel>(unitOfWork.Mapper.ConfigurationProvider).ToListAsync()).ToImmutableList();
+                    memoryCache.Set(Constants.CacheKey.CATALOGUES, catalogues, TimeSpan.FromMinutes(timeCache));
+                }
+                return catalogues;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Get Catalogues Async have a exception");
+                return ImmutableList<CatalogueViewModel>.Empty;
+            }
+        }
+
         public async Task<ImmutableList<SliderViewModel>> GetSlidersAsync(int timeCache = 60)
         {
             try
             {
                 if (!memoryCache.TryGetValue(Constants.CacheKey.SLIDERS, out ImmutableList<SliderViewModel> sliders))
                 {
-                    sliders = (await sliderService.GetAllActive()
-                        .ProjectTo<SliderViewModel>(unitOfWork.Mapper.ConfigurationProvider)
-                        .ToListAsync())
-                        .ToImmutableList();
+                    sliders = (await sliderService.GetAll().ProjectTo<SliderViewModel>(unitOfWork.Mapper.ConfigurationProvider).ToListAsync()).ToImmutableList();
                     memoryCache.Set(Constants.CacheKey.SLIDERS, sliders, TimeSpan.FromMinutes(timeCache));
                 }
                 return sliders;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, nameof(GetSlidersAsync));
+                logger.LogError(ex, "Get Sliders Async have a exception");
                 return ImmutableList<SliderViewModel>.Empty;
-            }
-        }
-
-        public async Task<ImmutableList<CatalogueViewModel>> GetCatalogueAsync(int timeCache = 60)
-        {
-            try
-            {
-                if (!memoryCache.TryGetValue(Constants.CacheKey.CATALOGUES, out ImmutableList<CatalogueViewModel> calatalogues))
-                {
-                    calatalogues = (await catalogueService.GetAllActive()
-                        .ProjectTo<CatalogueViewModel>(unitOfWork.Mapper.ConfigurationProvider)
-                        .ToListAsync())
-                        .ToImmutableList();
-                    memoryCache.Set(Constants.CacheKey.CATALOGUES, calatalogues, TimeSpan.FromMinutes(timeCache));
-                }
-                return calatalogues;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, nameof(GetCatalogueAsync));
-                return ImmutableList<CatalogueViewModel>.Empty;
             }
         }
     }

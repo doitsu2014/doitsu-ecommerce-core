@@ -35,7 +35,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public async Task<CustomerFeedbacks> CreateWithConstraintAsync(CustomerFeedbackViewModel data, int userId)
         {
-            var exist = await this.FirstOrDefaultActiveAsync(x => x.Email == data.Email);
+            var exist = await this.FirstOrDefaultAsync(x => x.Email == data.Email);
             var result = await this.CreateAsync<CustomerFeedbackViewModel>(data);
             if (userId > 0)
             {
@@ -48,7 +48,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         private async Task SendEmailToCustomer(CustomerFeedbackViewModel data) 
         {
-            var currentBrand = await brandService.FirstOrDefaultActiveAsync();
+            var currentBrand = await brandService.FirstOrDefaultAsync();
             var subject = $"[{currentBrand.Name}] Xác nhận thông tin yêu cầu liên hệ - {DateTime.Now.ToString("dd/MM/yyyy")}";
             var mailPayloadInfor = new MailPayloadInformation
             {
@@ -68,7 +68,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         private async Task SendEmailToLeader(CustomerFeedbackViewModel data) 
         {
-            var currentBrand = await brandService.FirstOrDefaultActiveAsync();
+            var currentBrand = await brandService.FirstOrDefaultAsync();
             var subject = $"[{currentBrand.Name}] Thông tin yêu cầu liên hệ mới - {data.Phone} - {DateTime.Now.ToString("dd/MM/yyyy")}";
             var mailPayloadInfor = new MailPayloadInformation
             {

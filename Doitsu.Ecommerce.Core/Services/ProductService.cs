@@ -42,7 +42,7 @@ namespace Doitsu.Ecommerce.Core.Services
         {
             var categorySerivce = this.UnitOfWork.GetService<ICategoryService>();
             var category = await categorySerivce
-                .FirstOrDefaultActiveAsync<CategoryWithProductOverviewViewModel>(cate => cateSlug == cate.Slug);
+                .FirstOrDefaultAsync<CategoryWithProductOverviewViewModel>(cate => cateSlug == cate.Slug);
 
             if (category == null)
             {
@@ -82,7 +82,7 @@ namespace Doitsu.Ecommerce.Core.Services
             foreach (var buildingCategory in buildingCategories)
             {
                 var queryBuildings = this
-                    .GetActive(x => x.Cate.Slug == buildingCategory.Slug)
+                    .Get(x => x.Cate.Slug == buildingCategory.Slug)
                     .ProjectTo<ProductOverviewViewModel>(this.UnitOfWork.Mapper.ConfigurationProvider);
 
                 var count = await queryBuildings.CountAsync();
@@ -155,7 +155,7 @@ namespace Doitsu.Ecommerce.Core.Services
             var categoryService = this.UnitOfWork.GetService<ICategoryService>();
 
             var allParentCategoriesOfProduct = (await categoryService
-                .GetActive(x => x.ParentCate != null && x.ParentCate.Slug == superParentCateSlug)
+                .Get(x => x.ParentCate != null && x.ParentCate.Slug == superParentCateSlug)
                 .ProjectTo<CategoryMenuViewModel>(this.UnitOfWork.Mapper.ConfigurationProvider)
                 .ToListAsync()).ToImmutableList();
 
@@ -169,7 +169,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
             // query products through categories ids
             var cateIds = sortedSetInverseCategoryIds.AsEnumerable();
-            var productsQuery = this.GetActive(pro => pro.CateId.HasValue);
+            var productsQuery = this.Get(pro => pro.CateId.HasValue);
             productsQuery = productsQuery
                 .Include(pro => pro.Cate)
                 .Include(pro => pro.Cate.ParentCate)

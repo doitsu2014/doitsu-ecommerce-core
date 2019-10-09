@@ -31,7 +31,7 @@ namespace Doitsu.Ecommerce.Core.Services
             var key = $"{Constants.CacheKey.TOP_TAGS}_{limit}";
             if (!memoryCache.TryGetValue(key, out ImmutableList<TagViewModel> topTags))
             {
-                var tags = this.GetAllActive().OrderByDescending(x => x.BlogTags.Count).Skip(0).Take(limit);
+                var tags = this.GetAll().OrderByDescending(x => x.BlogTags.Count).Skip(0).Take(limit);
                 var result = await tags.ProjectTo<TagViewModel>(this.UnitOfWork.Mapper.ConfigurationProvider).ToListAsync();
                 topTags = result.ToImmutableList();
                 memoryCache.Set(key, topTags, TimeSpan.FromMinutes(cachingMinutes));

@@ -22,7 +22,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public async Task<MarketingCustomers> CreateWithConstraintAsync(MarketingCustomerViewModel data, int userId)
         {
-            var exist = await this.FirstOrDefaultActiveAsync(x => x.Email == data.Email);
+            var exist = await this.FirstOrDefaultAsync(x => x.Email == data.Email);
 
             if (exist != null)
             {

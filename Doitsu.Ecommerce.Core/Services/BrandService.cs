@@ -28,7 +28,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 .Filter(x => !x.Name.IsNullOrEmpty(), "Tên công ty không được bỏ trống.")
                 .MapAsync(async x =>
                 {
-                    var exist = await FirstOrDefaultActiveAsync(comp => comp.Id == x.Id);
+                    var exist = await FirstOrDefaultAsync(comp => comp.Id == x.Id);
                     if (exist != null)
                     {
                         var result = Update<BrandViewModel>(x);
