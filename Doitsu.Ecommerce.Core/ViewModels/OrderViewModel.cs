@@ -42,7 +42,7 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public int Status { get; set; }
         public bool Active { get; set; }
         public DateTime CreatedDate { get; set; }
-        public AspNetUserViewModel User { get; set; }
+        public EcommerceIdentityUserViewModel User { get; set; }
         public ICollection<OrderItemViewModel> OrderItems { get; set; }
     }
 }

@@ -6,6 +6,8 @@ using Doitsu.Service.Core;
 using Doitsu.Ecommerce.Core.ViewModels;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -13,9 +15,11 @@ namespace Doitsu.Ecommerce.Core.Services
     {
         Task<ImmutableList<CategoryMenuViewModel>> GetProductCategoryMenuAsync(int timeCache = 30);
         Task<ImmutableList<CategoryViewModel>> GetCategoryWithParentAsync(string parentCateSlug, int timeCache = 30);
-        Task<BrandViewModel> GetBrandInformationAsync(string name, int timeCache = 30);
+        Task<BrandViewModel> GetBrandInformationAsync(int brandId, int timeCache = 30);
         Task<ImmutableList<ProductOverviewViewModel>> GetRandomProductAsync(int take = 10, int timeCache = 30);
         Task<ImmutableList<CategoryViewModel>> GetBuildingCategoryAsync(int timeCache = 60 * 24 * 30);
+        Task<ImmutableList<SliderViewModel>> GetSlidersAsync(int timeCache = 60);
+        Task<ImmutableList<CatalogueViewModel>> GetCatalogueAsync(int timeCache = 60);
     }
 
     public class MemCacheService : IMemCacheService
@@ -24,6 +28,8 @@ namespace Doitsu.Ecommerce.Core.Services
         private readonly IProductService productService;
         private readonly IMemoryCache memoryCache;
         private readonly IBrandService brandService;
+        private readonly ISliderService sliderService;
+        private readonly ICatalogueService catalogueService;
         private readonly ILogger<MemCacheService> logger;
         private readonly IUnitOfWork unitOfWork;
         public MemCacheService(
@@ -36,18 +42,17 @@ namespace Doitsu.Ecommerce.Core.Services
             this.categoryService = unitOfWork.GetService<ICategoryService>();
             this.brandService = unitOfWork.GetService<IBrandService>();
             this.productService = unitOfWork.GetService<IProductService>();
+            this.sliderService = unitOfWork.GetService<ISliderService>();
+            this.catalogueService = unitOfWork.GetService<ICatalogueService>();
             this.memoryCache = memoryCache;
-
         }
-
-        public async Task<BrandViewModel> GetBrandInformationAsync(string name, int timeCache = 30)
+        public async Task<BrandViewModel> GetBrandInformationAsync(int brandId, int timeCache = 30)
         {
             try
             {
                 if (!memoryCache.TryGetValue(Constants.CacheKey.BRAND_INFORMATION, out BrandViewModel brand))
                 {
-                    var nameTrimUpper = name.Trim().ToUpper();
-                    var brandE = await brandService.FirstOrDefaultAsync(x => x.Name.Trim().ToUpper().Equals(nameTrimUpper));
+                    var brandE = await brandService.FindByKeysAsync(brandId);
                     brand = unitOfWork.Mapper.Map<BrandViewModel>(brandE);
                     memoryCache.Set(Constants.CacheKey.BRAND_INFORMATION, brand, TimeSpan.FromMinutes(timeCache));
                 }
@@ -127,6 +132,47 @@ namespace Doitsu.Ecommerce.Core.Services
             {
                 logger.LogError(ex, "Get Random Product Async have a exception");
                 return ImmutableList<ProductOverviewViewModel>.Empty;
+            }
+        }
+        public async Task<ImmutableList<SliderViewModel>> GetSlidersAsync(int timeCache = 60)
+        {
+            try
+            {
+                if (!memoryCache.TryGetValue(Constants.CacheKey.SLIDERS, out ImmutableList<SliderViewModel> sliders))
+                {
+                    sliders = (await sliderService.GetAllActive()
+                        .ProjectTo<SliderViewModel>(unitOfWork.Mapper.ConfigurationProvider)
+                        .ToListAsync())
+                        .ToImmutableList();
+                    memoryCache.Set(Constants.CacheKey.SLIDERS, sliders, TimeSpan.FromMinutes(timeCache));
+                }
+                return sliders;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, nameof(GetSlidersAsync));
+                return ImmutableList<SliderViewModel>.Empty;
+            }
+        }
+
+        public async Task<ImmutableList<CatalogueViewModel>> GetCatalogueAsync(int timeCache = 60)
+        {
+            try
+            {
+                if (!memoryCache.TryGetValue(Constants.CacheKey.CATALOGUES, out ImmutableList<CatalogueViewModel> calatalogues))
+                {
+                    calatalogues = (await catalogueService.GetAllActive()
+                        .ProjectTo<CatalogueViewModel>(unitOfWork.Mapper.ConfigurationProvider)
+                        .ToListAsync())
+                        .ToImmutableList();
+                    memoryCache.Set(Constants.CacheKey.CATALOGUES, calatalogues, TimeSpan.FromMinutes(timeCache));
+                }
+                return calatalogues;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, nameof(GetCatalogueAsync));
+                return ImmutableList<CatalogueViewModel>.Empty;
             }
         }
     }

@@ -52,6 +52,7 @@ namespace Doitsu.Ecommerce.Core.Services
             this.emailService = emailService;
             this.leaderMailOption = leaderMailOption.CurrentValue;
         }
+
         private string GenerateOrderCode()
         {
             var currentDate = DateTime.Now;
@@ -64,6 +65,7 @@ namespace Doitsu.Ecommerce.Core.Services
             var result = $"{orderCodeFirstPart}{yearFirstPart}{orderCodeSecondPart}{yearSecondPart}";
             return result;
         }
+
         public async Task<Option<string, string>> CheckoutCartAsync(CheckoutCartViewModel data, EcommerceIdentityUser user)
         {
             return await new { data, user }
@@ -95,6 +97,7 @@ namespace Doitsu.Ecommerce.Core.Services
                                     SubTotalQuantity = item.SubQuantity,
                                     SubTotalFinalPrice = item.SubTotal
                                 };
+                                if (order.OrderItems == null) order.OrderItems = new List<OrderItems>();
                                 order.OrderItems.Add(orderItem);
                             }
                             await this.CreateAsync(order);

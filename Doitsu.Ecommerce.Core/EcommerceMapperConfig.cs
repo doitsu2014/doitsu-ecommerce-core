@@ -22,11 +22,11 @@ namespace Doitsu.Ecommerce.Core
                     {
                         desc.UserName = src.PhoneNumber;
                     });
-                cfg.CreateMap<EcommerceIdentityUser, AspNetUserViewModel>();
-                cfg.CreateMap<AspNetUserViewModel, EcommerceIdentityUser>();
+                cfg.CreateMap<EcommerceIdentityUser, EcommerceIdentityUserViewModel>();
+                cfg.CreateMap<EcommerceIdentityUserViewModel, EcommerceIdentityUser>();
+                cfg.CreateMap<EcommerceIdentityRole, EcommerceIdentityRoleViewModel>();
                 //cfg.CreateMap<AspNetUsers, AspNetUserViewModel>();
                 //cfg.CreateMap<AspNetUserViewModel, AspNetUsers>();
-                //cfg.CreateMap<DoitsuRoleInt, RoleViewModel>();
                 //cfg.CreateMap<AspNetUserRoles, UserRolesViewModel>();
                 #endregion
 
@@ -88,6 +88,11 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<CustomerFeedbacks, CustomerFeedbackOverviewViewModel>();
                 cfg.CreateMap<CustomerFeedbackViewModel, CustomerFeedbacks>();
 
+                cfg.CreateMap<SliderViewModel, Sliders>();
+                cfg.CreateMap<Sliders, SliderViewModel>();
+
+                cfg.CreateMap<CatalogueViewModel, Catalogues>();
+                cfg.CreateMap<Catalogues, CatalogueViewModel>();
             });
 
             IMapper mapper = autoMapperConfig.CreateMapper();

@@ -23,8 +23,8 @@ namespace Doitsu.Ecommerce.Core
             services.AddScoped(typeof(ICustomerFeedbackService), typeof(CustomerFeedbackService));
             services.AddScoped(typeof(IBlogCategoryService), typeof(BlogCategoryService));
             services.AddScoped(typeof(IEmailService), typeof(EmailService));
-            services.AddScoped(typeof(IAspNetUserRoleService), typeof(AspNetUserRoleService));
-            services.AddScoped(typeof(IAspNetUserService), typeof(AspNetUserService));
+            services.AddScoped(typeof(ISliderService), typeof(SliderService));
+            services.AddScoped(typeof(ICatalogueService), typeof(CatalogueService));
             services.AddHttpContextAccessor();
             return services;
         }

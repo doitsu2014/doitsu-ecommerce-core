@@ -14,36 +14,30 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Doitsu.Ecommerce.Core.IdentitiesExtension
 {
-    public class EcommerceRoleIntManager<T> : RoleManager<T>
-        where T : EcommerceIdentityRole
-    {
-            public EcommerceRoleIntManager(IRoleStore<T> store, IEnumerable<IRoleValidator<T>> roleValidators, ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, ILogger<RoleManager<T>> logger) : base(store, roleValidators, keyNormalizer, errors, logger) { }
-        }
-
     public class EcommerceIdentityUserManager<T> : UserManager<T>
         where T : EcommerceIdentityUser
+    {
+
+        public EcommerceIdentityUserManager(IUserStore<T> store, IOptions<IdentityOptions> optionsAccessor, IPasswordHasher<T> passwordHasher, IEnumerable<IUserValidator<T>> userValidators, IEnumerable<IPasswordValidator<T>> passwordValidators, ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, IServiceProvider services, ILogger<UserManager<T>> logger) : base(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
         {
+        }
 
-            public EcommerceIdentityUserManager(IUserStore<T> store, IOptions<IdentityOptions> optionsAccessor, IPasswordHasher<T> passwordHasher, IEnumerable<IUserValidator<T>> userValidators, IEnumerable<IPasswordValidator<T>> passwordValidators, ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, IServiceProvider services, ILogger<UserManager<T>> logger) : base(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger) 
-            { 
-            }
+        /// <summary>
+        /// As no tracking and find use by phone number
+        /// </summary>
+        /// <param name="phone"></param>
+        /// <returns></returns>
+        public async Task<EcommerceIdentityUser> FindByPhoneAsNoTrackingAsync(string phone)
+        {
+            var user = await this.Users.AsNoTracking().FirstOrDefaultAsync(x => x.PhoneNumber == phone);
+            return user;
+        }
 
-            /// <summary>
-            /// As no tracking and find use by phone number
-            /// </summary>
-            /// <param name="phone"></param>
-            /// <returns></returns>
-            public async Task<EcommerceIdentityUser> FindByPhoneAsNoTrackingAsync(string phone)
-            {
-                var user = await this.Users.AsNoTracking().FirstOrDefaultAsync(x => x.PhoneNumber == phone);
-                return user;
-            }
+        public async Task<TokenAuthorizeModel> GetJwtAuthorizeModelAsync(T user, int expireDays = 7)
+        {
+            var userRoles = (await this.GetRolesAsync(user));
 
-            public async Task<TokenAuthorizeModel> GetJwtAuthorizeModelAsync(T user, int expireDays = 7)
-            {
-                var userRoles = (await this.GetRolesAsync(user));
-
-                var claims = new List<Claim>
+            var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, user.UserName),
                     new Claim(ClaimTypes.Email, user.Email),
@@ -51,35 +45,35 @@ namespace Doitsu.Ecommerce.Core.IdentitiesExtension
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 };
 
-                foreach (var userRole in userRoles)
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, userRole));
-                }
-
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.Default.GetBytes(DoitsuJWTValidators.SecretKey);
-                var issuer = DoitsuJWTValidators.Issuer;
-                var audience = DoitsuJWTValidators.Audience;
-
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Issuer = issuer,
-                    Audience = audience,
-                    Subject = new ClaimsIdentity(claims),
-                    Expires = DateTime.UtcNow.ToVietnamDateTime().AddDays(expireDays),
-                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-                };
-
-                var token = tokenHandler.CreateToken(tokenDescriptor);
-                var tokenString = tokenHandler.WriteToken(token);
-
-                // return basic user info (without password) and token to store client side
-                return new TokenAuthorizeModel
-                {
-                    Token = tokenString,
-                    ValidTo = token.ValidTo,
-                    ValidFrom = token.ValidFrom
-                };
+            foreach (var userRole in userRoles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, userRole));
             }
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.Default.GetBytes(DoitsuJWTValidators.SecretKey);
+            var issuer = DoitsuJWTValidators.Issuer;
+            var audience = DoitsuJWTValidators.Audience;
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Issuer = issuer,
+                Audience = audience,
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.ToVietnamDateTime().AddDays(expireDays),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            // return basic user info (without password) and token to store client side
+            return new TokenAuthorizeModel
+            {
+                Token = tokenString,
+                ValidTo = token.ValidTo,
+                ValidFrom = token.ValidFrom
+            };
         }
+    }
 }

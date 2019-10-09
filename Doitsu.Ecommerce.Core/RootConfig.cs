@@ -2,6 +2,7 @@ using Doitsu.Ecommerce.Core.AuthorizeBuilder;
 using Doitsu.Ecommerce.Core.Data;
 using Doitsu.Ecommerce.Core.Data.Identities;
 using Doitsu.Ecommerce.Core.IdentitiesExtension;
+using Doitsu.Ecommerce.Core.IdentityManagers;
 using Doitsu.Service.Core;
 using Doitsu.Service.Core.Extensions;
 using Doitsu.Service.Core.Services.EmailService;
@@ -59,7 +60,7 @@ namespace Doitsu.Ecommerce.Core
             // Config identity db config
             services.AddDbContext<EcommerceDbContext>(options =>
                     options
-                    .UseSqlServer(configuration.GetConnectionString("Ecommerce.DBConStr"))
+                    .UseSqlServer(configuration.GetConnectionString(nameof(EcommerceDbContext)))
                     .UseLoggerFactory(loggerFactory)
                     .EnableSensitiveDataLogging())
                 .AddIdentity<EcommerceIdentityUser, EcommerceIdentityRole>()

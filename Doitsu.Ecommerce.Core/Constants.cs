@@ -2,6 +2,11 @@ namespace Doitsu.Ecommerce.Core
 {
     public class Constants
     {
+        public static class BrandInformation
+        {
+            public const int Id = 1;
+        }
+
         /// <summary>
         /// This constant is a mapping meta data of slug value on Super Fixed Cateogories Data Range.
         /// </summary>
@@ -19,6 +24,8 @@ namespace Doitsu.Ecommerce.Core
             public const string BRAND_INFORMATION = "BRAND_INFORMATION";
             public const string TOP_TAGS = "TOP_TAGS";
             public const string RANDOM_BLOGS = "RANDOM_BLOGS";
+            public const string SLIDERS = "SLIDERS";
+            public const string CATALOGUES = "CATALOGUES";
         }
 
         public static class UserRoles

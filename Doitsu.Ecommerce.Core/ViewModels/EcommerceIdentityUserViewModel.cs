@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Doitsu.Ecommerce.Core.ViewModels
 {
-    public class AspNetUserViewModel
+    public class EcommerceIdentityUserViewModel
     {
         [JsonProperty("id")]
         public int Id { get; set; }
@@ -29,6 +29,6 @@ namespace Doitsu.Ecommerce.Core.ViewModels
             set;
         }
         [JsonProperty("roleName")]
-        public List<UserRolesViewModel> AspNetUserRoles { get; set; }
+        public List<EcommerceIdentityRoleViewModel> EcommerceIdentityRoles { get; set; }
     }
 }
