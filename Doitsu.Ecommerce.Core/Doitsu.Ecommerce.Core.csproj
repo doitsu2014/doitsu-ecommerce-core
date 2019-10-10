@@ -13,8 +13,6 @@
     <PackageReference Include="SixLabors.ImageSharp.Web" Version="1.0.0-beta0007" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Doitsu.Technology.Core\Doitsu.Service.Core\Doitsu.Service.Core.csproj" />
+    <PackageReference Include="Doitsu.Service.Core" Version="3.0.30" />
   </ItemGroup>
 </Project>
