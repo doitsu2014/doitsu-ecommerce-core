@@ -2,6 +2,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
+      <PackageVersion>3.0.0.1</PackageVersion>
+      <Title>Doitsu.Ecommerce.Core</Title>
+      <PackageId>Doitsu.Ecommerce.Core</PackageId>
+      <Authors>Doitsu Technology</Authors>
+      <Owners>Doitsu Technology</Owners>
+      <Copyright>2019</Copyright>
+      <DevelopmentDependency>true</DevelopmentDependency>
+      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+      <SynchReleaseVersion>false</SynchReleaseVersion>
+      <NeutralLanguage>en</NeutralLanguage>
+      <Summary>Core of doitsu api website service</Summary>
+      <PackageTags>Code First Database, Ecommerce Services</PackageTags>
+      <Description>Doitsu.Ecommerce.Core is a library implement business logic and code first database for a Ecommerce Platform by AspNetCore. It is using Doitsu.Service.Core library as a helper library to implement abstraction.</Description>
+      <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+      <RepositoryUrl>https://doitsutechnology@dev.azure.com/doitsutechnology/Doitsu.Technology.Core/_git/Doitsu.Ecommerce.Core</RepositoryUrl>
+      <PackageProjectUrl>https://dev.azure.com/doitsutechnology/Doitsu.Technology.Core</PackageProjectUrl>
+      <RepositoryType>Azure Repos</RepositoryType>
+      <PackageReleaseNotes>Release 10/10/2019</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.0.0" />
