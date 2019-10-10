@@ -1,3 +1,5 @@
+using Doitsu.Ecommerce.Core.Abstraction;
+using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.AuthorizeBuilder;
 using Doitsu.Ecommerce.Core.Data;
 using Doitsu.Ecommerce.Core.Data.Identities;
@@ -62,13 +64,13 @@ namespace Doitsu.Ecommerce.Core
                     options
                     .UseSqlServer(configuration.GetConnectionString(nameof(EcommerceDbContext)))
                     .UseLoggerFactory(loggerFactory)
-                    .EnableSensitiveDataLogging())
+                    .EnableSensitiveDataLogging(),
+                    ServiceLifetime.Transient)
                 .AddIdentity<EcommerceIdentityUser, EcommerceIdentityRole>()
                 .AddEntityFrameworkStores<EcommerceDbContext>()
                 .AddDefaultTokenProviders();
             services.RegisterDefaultEntityChangesHandlers();
-            services.AddScoped(typeof(DbContext), typeof(EcommerceDbContext));
-            services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
+            services.AddTransient(typeof(IUnitOfWork), typeof(UnitOfWork));
             // Inject Identity Manager
             services.AddScoped(typeof(EcommerceIdentityUserManager<EcommerceIdentityUser>));
             services.AddScoped(typeof(EcommerceRoleIntManager<EcommerceIdentityRole>));

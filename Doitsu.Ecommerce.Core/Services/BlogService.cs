@@ -11,7 +11,8 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Ecommerce.Core.Data.Identities;
-
+using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
+using Doitsu.Ecommerce.Core.Abstraction;
 namespace Doitsu.Ecommerce.Core.Services {
     public interface IBlogService : IBaseService<Blogs> {
         Task<DoitsuPaginatedList<BlogOverviewViewModel>> GetAllDetailBlogsByCategoryWithPaging (string blogCategorySlug, int page = 0, int limit = 4);

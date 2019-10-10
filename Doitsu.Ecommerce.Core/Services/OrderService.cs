@@ -19,7 +19,8 @@ using Optional;
 using Optional.Async;
 using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Ecommerce.Core.Data.Identities;
-
+using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
+using Doitsu.Ecommerce.Core.Abstraction;
 namespace Doitsu.Ecommerce.Core.Services
 {
     public interface IOrderService : IBaseService<Orders>

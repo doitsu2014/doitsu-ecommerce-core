@@ -9,7 +9,8 @@ using Microsoft.Extensions.Options;
 
 using Optional;
 using Optional.Async;
-
+using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
+using Doitsu.Ecommerce.Core.Abstraction;
 namespace Doitsu.Ecommerce.Core.Services
 {
     public interface IEmailService

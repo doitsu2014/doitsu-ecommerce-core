@@ -8,7 +8,8 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-
+using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
+using Doitsu.Ecommerce.Core.Abstraction;
 namespace Doitsu.Ecommerce.Core.Services
 {
     public interface IMemCacheService
