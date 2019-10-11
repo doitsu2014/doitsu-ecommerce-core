@@ -11,5 +11,6 @@ namespace Doitsu.Ecommerce.Core.Abstraction
         public BaseService(IUnitOfWork<EcommerceDbContext> unitOfWork, ILogger<BaseService<TEntity, EcommerceDbContext>> logger) : base(unitOfWork, logger)
         {
         }
+
     }
 }
