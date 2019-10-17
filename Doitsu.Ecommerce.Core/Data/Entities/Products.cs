@@ -23,5 +23,6 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public virtual Categories Cate { get; set; }
         public virtual ICollection<OrderItems> OrderItems { get; set; }
         public virtual ICollection<ProductTag> ProductTag { get; set; }
+        public virtual ICollection<ProductCollectionMappings> ProductCollectionMappings { get; set; }
     }
 }
