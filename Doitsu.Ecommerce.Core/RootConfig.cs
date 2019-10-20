@@ -139,11 +139,9 @@ namespace Doitsu.Ecommerce.Core
             services.AddLocalization(o => { o.ResourcesPath = "Resources"; });
             services.Configure<RequestLocalizationOptions>(options =>
             {
-                
                 options.DefaultRequestCulture = LocalizationOptions.DefaultRequestCulture;
                 options.SupportedCultures = LocalizationOptions.SupportedCultures;
                 options.SupportedUICultures = LocalizationOptions.SupportedUICultures;
-
             });
             #endregion
         }

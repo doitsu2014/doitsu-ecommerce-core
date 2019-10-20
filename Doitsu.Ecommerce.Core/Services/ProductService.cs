@@ -164,8 +164,14 @@ namespace Doitsu.Ecommerce.Core.Services
             foreach (var parentCategory in allParentCategoriesOfProduct)
             {
                 var inverseCategoryIds = parentCategory.InverseParentCate.Select(ic => ic.Id).ToImmutableSortedSet();
-                foreach (var inverseCategoryId in inverseCategoryIds)
-                    sortedSetInverseCategoryIds.Add(inverseCategoryId);
+                if(inverseCategoryIds.Count > 0) {
+                    foreach (var inverseCategoryId in inverseCategoryIds)
+                        sortedSetInverseCategoryIds.Add(inverseCategoryId);
+                }
+                else 
+                {
+                    sortedSetInverseCategoryIds.Add(parentCategory.Id);
+                }
             }
 
             // query products through categories ids

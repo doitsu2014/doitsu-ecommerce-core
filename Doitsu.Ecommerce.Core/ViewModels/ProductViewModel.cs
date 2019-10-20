@@ -20,6 +20,7 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string ImageThumbUrl { get; set; }
         public string ImageUrls { get; set; }
         public decimal Price { get; set; }
+        public string Property { get; set; }
         public string Slug { get; set; }
     }
 
@@ -62,6 +63,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         [JsonProperty("imageUrls")]
         public string ImageUrls { get; set; }
 
+        [JsonProperty("property")]
+        public string Property { get; set; }
         [Required]
         [JsonProperty("cateId")]
         public int? CateId { get; set; }

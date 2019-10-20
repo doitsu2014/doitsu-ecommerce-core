@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Doitsu.Ecommerce.Core.Resources.General {
+namespace Doitsu.Ecommerce.Core.Resources {
     using System;
     using System.Reflection;
     
@@ -16,21 +16,21 @@ namespace Doitsu.Ecommerce.Core.Resources.General {
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class GeneralResource {
+    internal class GeneralResource_en_US {
         
         private static System.Resources.ResourceManager resourceMan;
         
         private static System.Globalization.CultureInfo resourceCulture;
         
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal GeneralResource() {
+        internal GeneralResource_en_US() {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         internal static System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.Equals(null, resourceMan)) {
-                    System.Resources.ResourceManager temp = new System.Resources.ResourceManager("Doitsu.Ecommerce.Core.Resources.General.GeneralResource", typeof(GeneralResource).Assembly);
+                    System.Resources.ResourceManager temp = new System.Resources.ResourceManager("Doitsu.Ecommerce.Core.Resources.GeneralResource.en-US", typeof(GeneralResource_en_US).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
