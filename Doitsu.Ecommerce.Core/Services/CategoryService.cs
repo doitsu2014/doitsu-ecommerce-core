@@ -28,7 +28,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public class CategoryService : BaseService<Categories>, ICategoryService
     {
-        public CategoryService(IUnitOfWork unitOfWork, ILogger<BaseService<Categories>> logger) : base(unitOfWork, logger)
+        public CategoryService(IEcommerceUnitOfWork unitOfWork, ILogger<BaseService<Categories>> logger) : base(unitOfWork, logger)
         {
 
         }

@@ -11,7 +11,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public class OrderItemService : BaseService<OrderItems>, IOrderItemService
     {
-        public OrderItemService(IUnitOfWork unitOfWork, ILogger<BaseService<OrderItems>> logger) : base(unitOfWork, logger)
+        public OrderItemService(IEcommerceUnitOfWork unitOfWork, ILogger<BaseService<OrderItems>> logger) : base(unitOfWork, logger)
         {
 
         }

@@ -12,7 +12,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public class BlogCategoryService : BaseService<BlogCategories>, IBlogCategoryService
     {
-        public BlogCategoryService(IUnitOfWork unitOfWork, ILogger<BaseService<BlogCategories>> logger) : base(unitOfWork, logger)
+        public BlogCategoryService(IEcommerceUnitOfWork unitOfWork, ILogger<BaseService<BlogCategories>> logger) : base(unitOfWork, logger)
         {
 
         }

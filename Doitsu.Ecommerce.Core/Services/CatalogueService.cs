@@ -11,7 +11,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public class CatalogueService : BaseService<Catalogues>, ICatalogueService
     {
-        public CatalogueService(IUnitOfWork unitOfWork, ILogger<BaseService<Catalogues>> logger) : base(unitOfWork, logger)
+        public CatalogueService(IEcommerceUnitOfWork unitOfWork, ILogger<BaseService<Catalogues>> logger) : base(unitOfWork, logger)
         {
         }
     }

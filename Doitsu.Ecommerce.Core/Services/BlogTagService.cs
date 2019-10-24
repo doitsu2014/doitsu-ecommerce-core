@@ -6,17 +6,31 @@ using Microsoft.Extensions.Logging;
 using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
+using Doitsu.Ecommerce.Core.Data;
+using System.Collections.Immutable;
+using System.Collections.Generic;
+
 namespace Doitsu.Ecommerce.Core.Services
 {
     public interface IBlogTagService : IBaseService<BlogTags>
     {
         Task DeleteAllByBlogIdAsync(int blogId);
+        Task AddBlogTagFromTagTitles(int blogId, List<int> tagIds);
     }
 
     public class BlogTagService : BaseService<BlogTags>, IBlogTagService
     {
-        public BlogTagService(IUnitOfWork unitOfWork, ILogger<BaseService<BlogTags>> logger) : base(unitOfWork, logger)
+        public BlogTagService(IEcommerceUnitOfWork unitOfWork, ILogger<BaseService<BlogTags, EcommerceDbContext, IEcommerceUnitOfWork>> logger) : base(unitOfWork, logger)
         {
+        }
+
+        public async Task AddBlogTagFromTagTitles(int blogId, List<int> tagIds)
+        {
+            var blogTags = tagIds.Select(x => new BlogTags() {
+                BlogId = blogId,
+                TagId = x
+            });
+            await this.CreateAsync(blogTags);
         }
 
         public async Task DeleteAllByBlogIdAsync(int blogId)
@@ -26,7 +40,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 .Select(x => x.Id)
                 .ToListAsync();
 
-            await this.HardDeleteByRangeKeysAsync<int>(allBlogTags);
+            await this.DeleteAsync<int>(allBlogTags);
         }
     }
 }

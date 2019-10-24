@@ -5,12 +5,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Doitsu.Ecommerce.Core.Abstraction
 {
-    public class BaseService<TEntity> : BaseService<TEntity, EcommerceDbContext>, IBaseService<TEntity>
+    public class BaseService<TEntity> : BaseService<TEntity, EcommerceDbContext, IEcommerceUnitOfWork>, IBaseService<TEntity>
         where TEntity : class, new()
     {
-        public BaseService(IUnitOfWork<EcommerceDbContext> unitOfWork, ILogger<BaseService<TEntity, EcommerceDbContext>> logger) : base(unitOfWork, logger)
+        public BaseService(IEcommerceUnitOfWork unitOfWork, ILogger<BaseService<TEntity, EcommerceDbContext, IEcommerceUnitOfWork>> logger) : base(unitOfWork, logger)
         {
         }
-
     }
 }

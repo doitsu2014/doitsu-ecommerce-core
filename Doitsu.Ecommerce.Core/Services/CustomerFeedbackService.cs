@@ -23,7 +23,7 @@ namespace Doitsu.Ecommerce.Core.Services
         private readonly IBrandService brandService;
         private readonly LeaderMail leaderMail;
 
-        public CustomerFeedbackService(IUnitOfWork unitOfWork, 
+        public CustomerFeedbackService(IEcommerceUnitOfWork unitOfWork, 
         ILogger<BaseService<CustomerFeedbacks>> logger, 
         IEmailService emailService, 
         IBrandService brandService,

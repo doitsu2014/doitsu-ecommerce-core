@@ -99,7 +99,7 @@ namespace Doitsu.Ecommerce.Core
                 .AddEntityFrameworkStores<EcommerceDbContext>()
                 .AddDefaultTokenProviders();
             services.RegisterDefaultEntityChangesHandlers();
-            services.AddTransient(typeof(IUnitOfWork), typeof(UnitOfWork));
+            services.AddTransient(typeof(IEcommerceUnitOfWork), typeof(EcommerceUnitOfWork));
             // Inject Identity Manager
             services.AddScoped(typeof(EcommerceIdentityUserManager<EcommerceIdentityUser>));
             services.AddScoped(typeof(EcommerceRoleIntManager<EcommerceIdentityRole>));

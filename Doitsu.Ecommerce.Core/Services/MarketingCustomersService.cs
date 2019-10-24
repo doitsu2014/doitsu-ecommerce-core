@@ -16,7 +16,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public class MarketingCustomerService : BaseService<MarketingCustomers>, IMarketingCustomerService
     {
-        public MarketingCustomerService(IUnitOfWork unitOfWork, ILogger<BaseService<MarketingCustomers>> logger) : base(unitOfWork, logger)
+        public MarketingCustomerService(IEcommerceUnitOfWork unitOfWork, ILogger<BaseService<MarketingCustomers>> logger) : base(unitOfWork, logger)
         {
 
         }

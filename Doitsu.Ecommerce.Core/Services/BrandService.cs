@@ -17,7 +17,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public class BrandService : BaseService<Brand>, IBrandService
     {
-        public BrandService(IUnitOfWork unitOfWork, ILogger<BaseService<Brand>> logger) : base(unitOfWork, logger)
+        public BrandService(IEcommerceUnitOfWork unitOfWork, ILogger<BaseService<Brand>> logger) : base(unitOfWork, logger)
         {
         }
 

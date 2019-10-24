@@ -34,7 +34,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public class ProductService : BaseService<Products>, IProductService
     {
-        public ProductService(IUnitOfWork unitOfWork, ILogger<BaseService<Products>> logger) : base(unitOfWork, logger)
+        public ProductService(IEcommerceUnitOfWork unitOfWork, ILogger<BaseService<Products>> logger) : base(unitOfWork, logger)
         {
 
         }

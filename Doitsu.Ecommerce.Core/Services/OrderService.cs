@@ -43,7 +43,7 @@ namespace Doitsu.Ecommerce.Core.Services
         private readonly LeaderMail leaderMailOption;
 
         public OrderService(
-            IUnitOfWork unitOfWork,
+            IEcommerceUnitOfWork unitOfWork,
             ILogger<BaseService<Orders>> logger,
             IHttpContextAccessor httpContextAccessor,
             IEmailService emailService,

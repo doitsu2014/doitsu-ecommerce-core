@@ -32,16 +32,9 @@
     <PackageReference Include="SixLabors.ImageSharp.Web" Version="1.0.0-beta0007" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0" />
-    <PackageReference Include="Doitsu.Service.Core" Version="3.0.30"></PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Resources\GeneralResource.vn" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Resources\GeneralResource %28copy%29.vn.Designer.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Resources\GeneralResource.vn.resx">
@@ -67,5 +60,8 @@
     <Compile Update="Resources\GeneralResource.en-US.Designer.cs">
       <DependentUpon>GeneralResource.en-US.resx</DependentUpon>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Doitsu.Technology.Core\Doitsu.Service.Core\Doitsu.Service.Core.csproj" />
   </ItemGroup>
 </Project>

@@ -1,9 +1,11 @@
-﻿using Doitsu.Ecommerce.Core.Data;
+﻿using System.Threading.Tasks;
+using Doitsu.Ecommerce.Core.Data;
 using Doitsu.Service.Core;
 
 namespace Doitsu.Ecommerce.Core.Abstraction.Interfaces
 {
-    public interface IUnitOfWork : IUnitOfWork<EcommerceDbContext>
+    public interface IEcommerceUnitOfWork : IUnitOfWork<EcommerceDbContext>
     {
+        Task<int> CommitWithoutBeforeSavingAsync();
     }
 }

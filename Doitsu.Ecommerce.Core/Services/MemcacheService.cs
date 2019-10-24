@@ -32,9 +32,9 @@ namespace Doitsu.Ecommerce.Core.Services
         private readonly ISliderService sliderService;
         private readonly ICatalogueService catalogueService;
         private readonly ILogger<MemCacheService> logger;
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IEcommerceUnitOfWork unitOfWork;
         public MemCacheService(
-            IUnitOfWork unitOfWork,
+            IEcommerceUnitOfWork unitOfWork,
             IMemoryCache memoryCache,
             ILogger<MemCacheService> logger)
         {

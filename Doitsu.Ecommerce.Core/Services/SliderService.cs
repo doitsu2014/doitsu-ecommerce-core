@@ -11,7 +11,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public class SliderService : BaseService<Sliders>, ISliderService
     {
-        public SliderService(IUnitOfWork unitOfWork, ILogger<BaseService<Sliders>> logger) : base(unitOfWork, logger)
+        public SliderService(IEcommerceUnitOfWork unitOfWork, ILogger<BaseService<Sliders>> logger) : base(unitOfWork, logger)
         {
         }
     }

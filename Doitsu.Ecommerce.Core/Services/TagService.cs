@@ -11,20 +11,34 @@ using Microsoft.Extensions.Logging;
 using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
+using System.Collections.Generic;
+
 namespace Doitsu.Ecommerce.Core.Services
 {
     public interface ITagService : IBaseService<Tag>
     {
         Task<ImmutableList<TagViewModel>> GetTopTagsAsync(int limit, int cachingMinutes = 30);
+        Task<ImmutableList<TagViewModel>> ExceptNotExistName(List<string> titles);
+
     }
 
     public class TagService : BaseService<Tag>, ITagService
     {
         private readonly IMemoryCache memoryCache;
 
-        public TagService(IUnitOfWork unitOfWork, ILogger<BaseService<Tag>> logger, IMemoryCache memoryCache) : base(unitOfWork, logger)
+        public TagService(IEcommerceUnitOfWork unitOfWork, ILogger<BaseService<Tag>> logger, IMemoryCache memoryCache) : base(unitOfWork, logger)
         {
             this.memoryCache = memoryCache;
+        }
+
+        public async Task<ImmutableList<TagViewModel>> ExceptNotExistName(List<string> titles)
+        {  
+            var allExistTag = await this
+                .Get(x => titles.Contains(x.Title))
+                .ProjectTo<TagViewModel>(this.UnitOfWork.Mapper.ConfigurationProvider)
+                .ToListAsync();
+
+            return allExistTag.ToImmutableList();
         }
 
         public async Task<ImmutableList<TagViewModel>> GetTopTagsAsync(int limit, int cachingMinutes)
