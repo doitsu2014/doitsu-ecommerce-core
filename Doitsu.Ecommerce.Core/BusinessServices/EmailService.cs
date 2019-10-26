@@ -11,12 +11,18 @@ using Optional;
 using Optional.Async;
 using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
+using Doitsu.Ecommerce.Core.Data.Identities;
+using Doitsu.Ecommerce.Core.Data.Entities;
+using Microsoft.AspNetCore.Http;
+
 namespace Doitsu.Ecommerce.Core.Services
 {
     public interface IEmailService
     {
         Option<bool, string> SendEmailWithBachMocWrapper(string subject, string content, MailPayloadInformation destEmail);
         Task<Option<bool, string>> SendEmailWithBachMocWrapperAsync(List<MessagePayload> messagePayloads);
+         Task<MessagePayload> PrepareLeaderOrderMailConfirmAsync(EcommerceIdentityUser user, Orders order);
+         Task<MessagePayload> PrepareCustomerOrderMailConfirm(EcommerceIdentityUser user, Orders order);
     }
 
     public class EmailService : IEmailService
@@ -24,22 +30,34 @@ namespace Doitsu.Ecommerce.Core.Services
         private readonly IOptionsMonitor<SmtpMailServerOptions> smtpMailServerOptionsMonitor;
         private readonly ISmtpEmailServerHandler smtpEmailServerHandler;
         private readonly ILogger<EmailService> logger;
+        private readonly IBrandService brandService;
+        private readonly LeaderMail leaderMailOption;
+        private readonly IHttpContextAccessor httpContextAccessor;
 
-        public EmailService(IOptionsMonitor<SmtpMailServerOptions> smtpMailServerOptionsMonitor, ILogger<EmailService> logger, ISmtpEmailServerHandler smtpEmailServerHandler)
+
+        public EmailService(IOptionsMonitor<SmtpMailServerOptions> smtpMailServerOptionsMonitor,
+                            ILogger<EmailService> logger,
+                            ISmtpEmailServerHandler smtpEmailServerHandler,
+                            IBrandService brandService,
+                            IOptionsMonitor<LeaderMail> leaderMailOption,
+                            IHttpContextAccessor httpContextAccessor)
         {
             this.smtpMailServerOptionsMonitor = smtpMailServerOptionsMonitor;
             this.logger = logger;
             this.smtpEmailServerHandler = smtpEmailServerHandler;
+            this.brandService = brandService;
+            this.leaderMailOption = leaderMailOption.CurrentValue;
+            this.httpContextAccessor = httpContextAccessor;
         }
 
         public Option<bool, string> SendEmailWithBachMocWrapper(string subject, string content, MailPayloadInformation destEmail)
         {
             return new
-                {
-                    subject,
-                    content,
-                    destEmail
-                }
+            {
+                subject,
+                content,
+                destEmail
+            }
                 .SomeNotNull()
                 .WithException(string.Empty)
                 .Filter(d => d.destEmail != null, "Không rõ địa chỉ người cần gửi mail.")
@@ -106,5 +124,72 @@ namespace Doitsu.Ecommerce.Core.Services
                     }
                 });
         }
+
+        public async Task<MessagePayload> PrepareCustomerOrderMailConfirm(EcommerceIdentityUser user, Orders order)
+        {
+            try
+            {
+                var currentBrand = await brandService.FirstOrDefaultAsync();
+                var subject = $"[{currentBrand.Name}] XÁC NHẬN ĐƠN HÀNG #{order.Code} - {DateTime.UtcNow.ToVietnamDateTime().ToShortDateString()}";
+                var destPayload = new MailPayloadInformation
+                {
+                    Mail = user.Email,
+                    Name = user.Fullname
+                };
+
+                var body = $"<p>Bạn đã đặt thành công đơn hàng có mã đơn: <a href='{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}/nguoi-dung/thong-tin-tai-khoan'>#{order.Code}</a></p>";
+                body += $"<p>Để có thể xem chi tiết đơn hàng, mong quý khách nhấp vào đường dẫn phía trên.</p><br/>";
+
+                var messagePayload = new MessagePayload();
+                messagePayload.Subject = subject;
+                messagePayload.Body = body;
+                messagePayload.DestEmail = destPayload;
+                return messagePayload;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Cannot send email to confirm Order Code {order.Code} of {user.Fullname} with id {user.Id}");
+                return null;
+            }
+        }
+
+        public async Task<MessagePayload> PrepareLeaderOrderMailConfirmAsync(EcommerceIdentityUser user, Orders order)
+        {
+            try
+            {
+                var currentBrand = await brandService.FirstOrDefaultAsync();
+                var subject = $"[{currentBrand.Name}] ĐƠN HÀNG MỚI #{order.Code} - {DateTime.UtcNow.ToVietnamDateTime().ToShortDateString()}";
+                var destPayload = new MailPayloadInformation
+                {
+                    Mail = leaderMailOption.Mail,
+                    Name = leaderMailOption.Name
+                };
+                var body = "<p>";
+                body += "Có đơn đặt hàng vào hệ thống. Thông tin chi tiết:<br/>";
+                body += $"Người đặt: {user.Fullname}<br/>";
+                body += $"Email: {user.Email}<br/>";
+                body += $"Số điện thoại: {user.PhoneNumber}<br/>";
+                body += $"Địa chỉ: {user.Address}<br/>";
+                body += $"Mã đơn: #{order.Code}<br/>";
+                body += $"Ngày đặt: {DateTime.UtcNow.ToVietnamDateTime().ToShortDateString()}<br/>";
+                body += $"Tổng tiền: {order.FinalPrice}";
+                body += "</p>";
+                body += $"<p>Hãy vào trang quản lý để xem thông tin chi tiết: <a href='{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}/Admin'>Trang Quản Lý</a></p><br/>";
+
+                var messagePayload = new MessagePayload();
+                messagePayload.Subject = subject;
+                messagePayload.Body = body;
+                messagePayload.DestEmail = destPayload;
+
+                return messagePayload;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Cannot send email to confirm Order Code {order.Code} of {user.Fullname} with id {user.Id}");
+                return null;
+            }
+        }
+
+
     }
 }

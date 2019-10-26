@@ -3,6 +3,9 @@ using Doitsu.Service.Core;
 using Microsoft.Extensions.Logging;
 using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
+using AutoMapper;
+using Doitsu.Ecommerce.Core.Data;
+
 namespace Doitsu.Ecommerce.Core.Services
 {
     public interface IBlogCategoryService : IBaseService<BlogCategories>
@@ -12,10 +15,8 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public class BlogCategoryService : BaseService<BlogCategories>, IBlogCategoryService
     {
-        public BlogCategoryService(IEcommerceUnitOfWork unitOfWork, ILogger<BaseService<BlogCategories>> logger) : base(unitOfWork, logger)
+        public BlogCategoryService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<BlogCategories, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
         {
-
         }
-
     }
 }

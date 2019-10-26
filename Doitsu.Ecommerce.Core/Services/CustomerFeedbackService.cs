@@ -10,6 +10,9 @@ using Microsoft.Extensions.Options;
 using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
+using AutoMapper;
+using Doitsu.Ecommerce.Core.Data;
+
 namespace Doitsu.Ecommerce.Core.Services
 {
     public interface ICustomerFeedbackService : IBaseService<CustomerFeedbacks>
@@ -23,11 +26,12 @@ namespace Doitsu.Ecommerce.Core.Services
         private readonly IBrandService brandService;
         private readonly LeaderMail leaderMail;
 
-        public CustomerFeedbackService(IEcommerceUnitOfWork unitOfWork, 
+        public CustomerFeedbackService(EcommerceDbContext dbContext, 
+        IMapper mapper,
         ILogger<BaseService<CustomerFeedbacks>> logger, 
         IEmailService emailService, 
         IBrandService brandService,
-        IOptionsMonitor<LeaderMail> leaderMail) : base(unitOfWork, logger)
+        IOptionsMonitor<LeaderMail> leaderMail) : base(dbContext, mapper, logger)
         {
             this.emailService = emailService;
             this.brandService = brandService;
@@ -42,7 +46,7 @@ namespace Doitsu.Ecommerce.Core.Services
             {
                 result.UserId = userId;
             }
-            await this.UnitOfWork.CommitAsync();
+            await CommitAsync();
             await Task.WhenAll(SendEmailToCustomer(data), SendEmailToLeader(data));
             return result;
         }

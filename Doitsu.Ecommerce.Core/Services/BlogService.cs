@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Doitsu.Ecommerce.Core.Abstraction;
 using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
@@ -12,7 +14,6 @@ using Doitsu.Ecommerce.Core.ViewModels;
 using Doitsu.Service.Core;
 using Doitsu.Service.Core.Abstraction;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -20,49 +21,36 @@ namespace Doitsu.Ecommerce.Core.Services
     {
         Task<DoitsuPaginatedList<BlogOverviewViewModel>> GetAllDetailBlogsByCategoryWithPaging(string blogCategorySlug, int page = 0, int limit = 4);
         Task<BlogDetailViewModel> GetBlogDetailBySlugAsync(string slug);
-        Task<ImmutableList<BlogOverviewViewModel>> GetRandomOverviewAsync(int take = 5, int cachingMinutes = 30);
+        Task<ImmutableList<BlogOverviewViewModel>> GetRandomOverviewAsync(int take = 5);
         Task<int> UpdateWithConstraintAsync(BlogDetailViewModel data, EcommerceIdentityUser publisher);
         Task<int> CreateWithConstraintAsync(BlogDetailViewModel data, EcommerceIdentityUser publisher, EcommerceIdentityUser creater);
     }
 
     public class BlogService : BaseService<Blogs>, IBlogService
     {
-        private readonly IMemoryCache memoryCache;
+
         private readonly IBlogTagService blogTagService;
-        private readonly ITagService tagService;
 
-
-
-        public BlogService(IEcommerceUnitOfWork unitOfWork,
-                           ILogger<BlogService> logger,
-                           IMemoryCache memoryCache,
-                           IBlogTagService blogTagService,
-                           ITagService tagService) : base(unitOfWork, logger)
+        public BlogService(EcommerceDbContext dbContext,
+                           IMapper mapper,
+                           ILogger<BaseService<Blogs, EcommerceDbContext>> logger,
+                           IBlogTagService blogTagService) : base(dbContext, mapper, logger)
         {
-            this.memoryCache = memoryCache;
             this.blogTagService = blogTagService;
-            this.tagService = tagService;
         }
 
-        public async Task<ImmutableList<BlogOverviewViewModel>> GetRandomOverviewAsync(int take, int cachingMinutes = 30)
+        public async Task<ImmutableList<BlogOverviewViewModel>> GetRandomOverviewAsync(int take)
         {
-            var key = $"{Constants.CacheKey.RANDOM_BLOGS}";
-            if (!memoryCache.TryGetValue(key, out ImmutableList<BlogOverviewViewModel> randomBlogs))
-            {
-                var rand = new Random();
-                var blogsQuery = this.GetAll();
-                var listShuffleOverview =
-                    await blogsQuery
-                    .ProjectTo<BlogOverviewViewModel>(this.UnitOfWork.Mapper.ConfigurationProvider)
-                    .OrderByDescending(x => Guid.NewGuid())
-                    .Skip(0)
-                    .Take(take)
-                    .ToListAsync();
-
-                randomBlogs = listShuffleOverview.ToImmutableList();
-                memoryCache.Set(key, randomBlogs, TimeSpan.FromMinutes(cachingMinutes));
-            }
-            return randomBlogs;
+            var rand = new Random();
+            var blogsQuery = this.GetAll();
+            var listShuffleOverview =
+                await blogsQuery
+                .ProjectTo<BlogOverviewViewModel>(Mapper.ConfigurationProvider)
+                .OrderByDescending(x => Guid.NewGuid())
+                .Skip(0)
+                .Take(take)
+                .ToListAsync();
+            return listShuffleOverview.ToImmutableList();
         }
 
         public async Task<DoitsuPaginatedList<BlogOverviewViewModel>> GetAllDetailBlogsByCategoryWithPaging(string blogCategorySlug, int page = 0, int limit = 4)
@@ -71,7 +59,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 .Get(x => x.BlogCategory.Slug == blogCategorySlug);
 
             var result = blogsQuery
-                .ProjectTo<BlogOverviewViewModel>(this.UnitOfWork.Mapper.ConfigurationProvider)
+                .ProjectTo<BlogOverviewViewModel>(Mapper.ConfigurationProvider)
                 .OrderByDescending(x => x.PublishedTime);
 
             var pagingWrapper = await DoitsuPaginatedList<BlogOverviewViewModel>.CreateAsync(result, page, limit);
@@ -87,74 +75,67 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public async Task<int> UpdateWithConstraintAsync(BlogDetailViewModel data, EcommerceIdentityUser publisher)
         {
-            // using (var transaction = await this.UnitOfWork.CreateTransactionAsync())
-            // {
-            // remove all blog tags
-            await blogTagService.DeleteAllByBlogIdAsync(data.Id);
-            await this.UnitOfWork.CommitWithoutBeforeSavingAsync();
-
-            var blogEnt = await FirstOrDefaultAsync(x => x.Id == data.Id);
-            blogEnt = this.UnitOfWork.Mapper.Map(data, blogEnt);
-            blogEnt.PublisherId = publisher.Id;
-            this.Update(blogEnt);
-            await this.UnitOfWork.CommitAsync();
-
-            // update blog tags with exist tags and these is added to this blog
-            var requestTags = data.BlogTags.Select(x => x.TagTitle).ToList();
-            var existTags = await tagService.ExceptNotExistName(requestTags);
-
-            var existTagsTitle = await tagService.ExceptNotExistName(requestTags);
-            await blogTagService.AddBlogTagFromTagTitles(blogEnt.Id, existTags.Select(x => x.Id).ToList());
-
-            var notExistTags = requestTags.Except(existTags.Select(x => x.Title).AsEnumerable()).Select(x => new Tag()
+            using (var transaction = await this.CreateTransactionAsync())
             {
-                Title = x
-            }).AsEnumerable();
-            await tagService.CreateAsync(notExistTags);
-            await this.UnitOfWork.CommitAsync();
-            await blogTagService.AddBlogTagFromTagTitles(blogEnt.Id, notExistTags.Select(x => x.Id).ToList());
-            await this.UnitOfWork.CommitAsync();
+                // remove all blog tags
+                await blogTagService.DeleteAllByBlogIdAsync(data.Id);
+                await CommitWithoutBeforeSavingAsync();
 
-            // transaction.Commit();
-            return blogEnt.Id;
-            // }
+                var blogEntity = await FirstOrDefaultAsync(x => x.Id == data.Id);
+                blogEntity = Mapper.Map(data, blogEntity);
+                blogEntity.PublisherId = publisher.Id;
+                await AddUiBlogTagToBlogEntity(blogEntity, data.BlogTags);
+
+                this.Update(blogEntity);
+                await CommitAsync();
+
+                transaction.Commit();
+                return blogEntity.Id;
+            }
         }
 
         public async Task<int> CreateWithConstraintAsync(BlogDetailViewModel data, EcommerceIdentityUser publisher, EcommerceIdentityUser creater)
         {
-            using (var transaction = await this.UnitOfWork.CreateTransactionAsync())
+            using (var transaction = await CreateTransactionAsync())
             {
-                try
+                var blogEntity = Mapper.Map<Blogs>(data);
+                blogEntity.PublisherId = publisher.Id;
+                blogEntity.CreaterId = publisher.Id;
+                blogEntity.PublishedTime = DateTime.Now;
+                await AddUiBlogTagToBlogEntity(blogEntity, data.BlogTags);
+
+                await CreateAsync(blogEntity);
+                await CommitAsync();
+                transaction.Commit();
+                return blogEntity.Id;
+            }
+        }
+
+        private async Task AddUiBlogTagToBlogEntity(Blogs blog, ICollection<BlogTagViewModel> blogTags)
+        {
+            blog.BlogTags = new List<BlogTags>();
+            foreach (var bt in blogTags)
+            {
+                var existTag = await GetRepository<Tag>().AsNoTracking().FirstOrDefaultAsync(t => t.Slug == bt.TagSlug);
+                if (existTag != null)
                 {
-                    var blogEntity = this.UnitOfWork.Mapper.Map<Blogs>(data);
-                    blogEntity.PublisherId = publisher.Id;
-                    blogEntity.CreaterId = publisher.Id;
-                    blogEntity.PublishedTime = DateTime.Now;
-                    // update tag id and blog id
-                    blogEntity.BlogTags = blogEntity.BlogTags.Select(bt =>
+                    blog.BlogTags.Add(new BlogTags()
                     {
-                        bt.BlogId = blogEntity.Id;
-                        bt.Tag.Active = true;
-                        bt.Active = true;
-
-                        var existTag = tagService.FirstOrDefaultAsync(t => t.Slug == bt.Tag.Slug);
-                        if (existTag != null)
-                        {
-                            bt.TagId = existTag.Id;
-                        }
-                        return bt;
-                    }).ToList();
-
-                    await this.CreateAsync(blogEntity);
-                    await this.UnitOfWork.CommitAsync();
-                    transaction.Commit();
-                    return blogEntity.Id;
+                        BlogId = blog.Id,
+                        TagId = existTag.Id
+                    });
                 }
-                catch (Exception ex)
+                else
                 {
-                    Logger.LogError(ex, "CreateWithConstraintAsync exception:");
-                    transaction.Dispose();
-                    throw (ex);
+                    blog.BlogTags.Add(new BlogTags()
+                    {
+                        BlogId = blog.Id,
+                        Tag = new Tag()
+                        {
+                            Title = bt.TagTitle,
+                            Slug = bt.TagSlug,
+                        }
+                    });
                 }
             }
         }

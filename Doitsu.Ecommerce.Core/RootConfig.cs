@@ -94,12 +94,12 @@ namespace Doitsu.Ecommerce.Core
                     .UseSqlServer(configuration.GetConnectionString(nameof(EcommerceDbContext)))
                     .UseLoggerFactory(loggerFactory)
                     .EnableSensitiveDataLogging(),
-                    ServiceLifetime.Transient)
+                    ServiceLifetime.Scoped)
                 .AddIdentity<EcommerceIdentityUser, EcommerceIdentityRole>()
                 .AddEntityFrameworkStores<EcommerceDbContext>()
                 .AddDefaultTokenProviders();
+                
             services.RegisterDefaultEntityChangesHandlers();
-            services.AddTransient(typeof(IEcommerceUnitOfWork), typeof(EcommerceUnitOfWork));
             // Inject Identity Manager
             services.AddScoped(typeof(EcommerceIdentityUserManager<EcommerceIdentityUser>));
             services.AddScoped(typeof(EcommerceRoleIntManager<EcommerceIdentityRole>));

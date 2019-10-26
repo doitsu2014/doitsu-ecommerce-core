@@ -9,6 +9,7 @@ using Doitsu.Ecommerce.Core.Abstraction;
 using Doitsu.Ecommerce.Core.Data;
 using System.Collections.Immutable;
 using System.Collections.Generic;
+using AutoMapper;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -20,7 +21,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public class BlogTagService : BaseService<BlogTags>, IBlogTagService
     {
-        public BlogTagService(IEcommerceUnitOfWork unitOfWork, ILogger<BaseService<BlogTags, EcommerceDbContext, IEcommerceUnitOfWork>> logger) : base(unitOfWork, logger)
+        public BlogTagService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<BlogTags, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
         {
         }
 

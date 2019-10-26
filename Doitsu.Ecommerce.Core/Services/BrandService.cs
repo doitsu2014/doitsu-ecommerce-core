@@ -7,6 +7,9 @@ using Optional.Async;
 using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
+using AutoMapper;
+using Doitsu.Ecommerce.Core.Data;
+using Doitsu.Service.Core;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -17,7 +20,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public class BrandService : BaseService<Brand>, IBrandService
     {
-        public BrandService(IEcommerceUnitOfWork unitOfWork, ILogger<BaseService<Brand>> logger) : base(unitOfWork, logger)
+        public BrandService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<Brand, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
         {
         }
 
@@ -33,13 +36,13 @@ namespace Doitsu.Ecommerce.Core.Services
                     if (exist != null)
                     {
                         var result = Update<BrandViewModel>(x);
-                        await this.UnitOfWork.CommitAsync();
+                        await CommitAsync();
                         return result;
                     }
                     else
                     {
                         var result = await CreateAsync<BrandViewModel>(data);
-                        await this.UnitOfWork.CommitAsync();
+                        await CommitAsync();
                         return result;
                     }
                 });
