@@ -6,7 +6,6 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
 {
     public class ProductCollectionMappings : Entity<int>, IConcurrencyCheckVers, IActivable
     {
-        public int Id { get; set; }
         public int ProductCollectionId { get; set; }
         public int ProductId { get; set; }
         public bool Active { get; set; }
