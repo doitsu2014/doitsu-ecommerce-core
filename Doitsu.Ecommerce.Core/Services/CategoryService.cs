@@ -12,6 +12,7 @@ using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
 using AutoMapper;
 using Doitsu.Ecommerce.Core.Data;
+using System.Linq;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -27,6 +28,13 @@ namespace Doitsu.Ecommerce.Core.Services
         /// <param name="parentCateSlug"></param>
         /// <returns></returns>
         Task<ImmutableList<CategoryViewModel>> GetCategoryForParentCateSlugAsync(string parentCateSlug);
+        /// <summary>
+        /// Get category with inverse parent category
+        /// </summary>
+        /// <param name="slug">The identity value to find the category</param>
+        /// <param name="depth">The depth of list including inverse parent category</param>
+        /// <returns></returns>
+        Task<ImmutableList<CategoryWithInverseParentViewModel>> GetInverseCategory(string slug = Constants.SuperFixedCategorySlug.PRODUCT, int depth = 1);
     }
 
     public class CategoryService : BaseService<Categories>, ICategoryService
@@ -81,6 +89,21 @@ namespace Doitsu.Ecommerce.Core.Services
                 .ToListAsync();
 
             return listFixedCategory.ToImmutableList();
+        }
+
+        public async Task<ImmutableList<CategoryWithInverseParentViewModel>> GetInverseCategory(string slug = default, int depth = default)
+        {
+            var query = this.Get(cate => cate.Slug == slug)
+                .Include(cate => cate.InverseParentCate);
+            for (var i = 0; i < depth; ++i)
+            {
+                query = query.ThenInclude(cate => cate.InverseParentCate);
+            }
+
+            var result = await query.ToListAsync();
+            var listCategory = result.Select(c => Mapper.Map<CategoryWithInverseParentViewModel>(c)).ToList();
+
+            return listCategory.ToImmutableList();
         }
     }
 }

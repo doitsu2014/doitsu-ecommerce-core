@@ -91,7 +91,7 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         [JsonProperty("categoryName")]
         public string CategoryName { get; set; }
         [JsonProperty("categoryRecursive")]
-        public CategoryRecursiveViewModel Cate { get; set; }
+        public CategoryWithParentViewModel Cate { get; set; }
     }
 
 
