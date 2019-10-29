@@ -12,12 +12,17 @@ using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
 using AutoMapper;
 using Doitsu.Ecommerce.Core.Data;
+using System.Collections.Immutable;
+using System.Linq;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
     public interface ICustomerFeedbackService : IBaseService<CustomerFeedbacks>
     {
         Task<CustomerFeedbacks> CreateWithConstraintAsync(CustomerFeedbackViewModel data, int userId);
+        Task<ImmutableList<CustomerFeedbackOverviewViewModel>> GetAllByTypeAsync(CustomerFeedBackTypeEnum type);
     }
 
     public class CustomerFeedbackService : BaseService<CustomerFeedbacks>, ICustomerFeedbackService
@@ -26,10 +31,10 @@ namespace Doitsu.Ecommerce.Core.Services
         private readonly IBrandService brandService;
         private readonly LeaderMail leaderMail;
 
-        public CustomerFeedbackService(EcommerceDbContext dbContext, 
+        public CustomerFeedbackService(EcommerceDbContext dbContext,
         IMapper mapper,
-        ILogger<BaseService<CustomerFeedbacks>> logger, 
-        IEmailService emailService, 
+        ILogger<BaseService<CustomerFeedbacks>> logger,
+        IEmailService emailService,
         IBrandService brandService,
         IOptionsMonitor<LeaderMail> leaderMail) : base(dbContext, mapper, logger)
         {
@@ -51,7 +56,7 @@ namespace Doitsu.Ecommerce.Core.Services
             return result;
         }
 
-        private async Task SendEmailToCustomer(CustomerFeedbackViewModel data) 
+        private async Task SendEmailToCustomer(CustomerFeedbackViewModel data)
         {
             var currentBrand = await brandService.FirstOrDefaultAsync();
             var subject = $"[{currentBrand.Name}] Xác nhận thông tin yêu cầu liên hệ - {DateTime.Now.ToString("dd/MM/yyyy")}";
@@ -60,7 +65,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 Mail = data.Email,
                 Name = data.CustomerName
             };
-            
+
             var body = "<p>";
             body += "Thông tin yêu cầu liên hệ của bạn:<br/>";
             body += $"Số điện thoại: {data.Phone}<br/>";
@@ -71,7 +76,7 @@ namespace Doitsu.Ecommerce.Core.Services
             emailService.SendEmailWithBachMocWrapper(subject, body, mailPayloadInfor);
         }
 
-        private async Task SendEmailToLeader(CustomerFeedbackViewModel data) 
+        private async Task SendEmailToLeader(CustomerFeedbackViewModel data)
         {
             var currentBrand = await brandService.FirstOrDefaultAsync();
             var subject = $"[{currentBrand.Name}] Thông tin yêu cầu liên hệ mới - {data.Phone} - {DateTime.Now.ToString("dd/MM/yyyy")}";
@@ -87,6 +92,18 @@ namespace Doitsu.Ecommerce.Core.Services
             body += $"{data.Content.Replace("\n", "<br/>")}<br/>";
             body += "</p>";
             emailService.SendEmailWithBachMocWrapper(subject, body, mailPayloadInfor);
+        }
+
+        public async Task<ImmutableList<CustomerFeedbackOverviewViewModel>> GetAllByTypeAsync(CustomerFeedBackTypeEnum type)
+        {
+            var typeInteger = (int)type;
+            var result = await this
+                  .Get(x => x.Type == typeInteger)
+                  .OrderByDescending(cf => cf.CreatedDate)
+                  .ProjectTo<CustomerFeedbackOverviewViewModel>(Mapper.ConfigurationProvider)
+                  .ToListAsync();
+
+            return result.ToImmutableList();
         }
     }
 }
