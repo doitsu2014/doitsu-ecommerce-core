@@ -14,6 +14,7 @@ using Doitsu.Ecommerce.Core.Abstraction;
 using Doitsu.Ecommerce.Core.Data.Identities;
 using Doitsu.Ecommerce.Core.Data.Entities;
 using Microsoft.AspNetCore.Http;
+using Doitsu.Ecommerce.Core.ViewModels;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -21,8 +22,10 @@ namespace Doitsu.Ecommerce.Core.Services
     {
         Option<bool, string> SendEmailWithBachMocWrapper(string subject, string content, MailPayloadInformation destEmail);
         Task<Option<bool, string>> SendEmailWithBachMocWrapperAsync(List<MessagePayload> messagePayloads);
-         Task<MessagePayload> PrepareLeaderOrderMailConfirmAsync(EcommerceIdentityUser user, Orders order);
-         Task<MessagePayload> PrepareCustomerOrderMailConfirm(EcommerceIdentityUser user, Orders order);
+        Task<MessagePayload> PrepareLeaderOrderMailConfirmAsync(EcommerceIdentityUser user, Orders order);
+        Task<MessagePayload> PrepareCustomerOrderMailConfirm(EcommerceIdentityUser user, Orders order);
+        Task<MessagePayload> PrepareCustomerFeedback(CustomerFeedbackViewModel data);
+        Task<MessagePayload> PrepareLeaderCustomerFeedback(CustomerFeedbackViewModel data);
     }
 
     public class EmailService : IEmailService
@@ -84,12 +87,11 @@ namespace Doitsu.Ecommerce.Core.Services
                     }
                     catch (Exception ex)
                     {
-                        logger.LogError($"{nameof(EmailService)} exception: ", ex);
+                        logger.LogError("Email service exception: {ex}", ex);
                         return false;
                     }
                 });
         }
-
         public async Task<Option<bool, string>> SendEmailWithBachMocWrapperAsync(List<MessagePayload> messagePayloads)
         {
             return await messagePayloads
@@ -124,7 +126,6 @@ namespace Doitsu.Ecommerce.Core.Services
                     }
                 });
         }
-
         public async Task<MessagePayload> PrepareCustomerOrderMailConfirm(EcommerceIdentityUser user, Orders order)
         {
             try
@@ -152,7 +153,6 @@ namespace Doitsu.Ecommerce.Core.Services
                 return null;
             }
         }
-
         public async Task<MessagePayload> PrepareLeaderOrderMailConfirmAsync(EcommerceIdentityUser user, Orders order)
         {
             try
@@ -189,7 +189,67 @@ namespace Doitsu.Ecommerce.Core.Services
                 return null;
             }
         }
+        public async Task<MessagePayload> PrepareCustomerFeedback(CustomerFeedbackViewModel data)
+        {
+            try
+            {
+                var currentBrand = await brandService.FirstOrDefaultAsync();
+                var subject = $"[{currentBrand.Name}] Xác nhận thông tin yêu cầu liên hệ - {DateTime.Now.ToString("dd/MM/yyyy")}";
+                var mailPayloadInfor = new MailPayloadInformation
+                {
+                    Mail = data.Email,
+                    Name = data.CustomerName
+                };
 
+                var body = "<p>";
+                body += "Thông tin yêu cầu liên hệ của bạn:<br/>";
+                body += $"Số điện thoại: {data.Phone}<br/>";
+                body += $"Địa chỉ email: {data.Email}<br/>";
+                body += $"{data.Content.Replace("\n", "<br/>")}<br/>";
+                body += "Chúng tôi sẽ xử lý yêu cầu và liên lạc với quý khách.<br/>";
+                body += "</p>";
+                var messagePayload = new MessagePayload();
+                messagePayload.Subject = subject;
+                messagePayload.Body = body;
+                messagePayload.DestEmail = mailPayloadInfor;
 
+                return messagePayload;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Cannot send email to confirm Customer Feedback");
+                return null;
+            }
+        }
+        public async Task<MessagePayload> PrepareLeaderCustomerFeedback(CustomerFeedbackViewModel data)
+        {
+            try
+            {
+                var currentBrand = await brandService.FirstOrDefaultAsync();
+                var subject = $"[{currentBrand.Name}] Thông tin yêu cầu liên hệ mới - {data.Phone} - {DateTime.Now.ToString("dd/MM/yyyy")}";
+                var mailPayloadInfor = new MailPayloadInformation
+                {
+                    Mail = leaderMailOption.Mail,
+                    Name = leaderMailOption.Name
+                };
+
+                var body = "<p>";
+                body += $"Có 1 thông tin yêu cầu liên hệ mới.<br/>Thông tin yêu cầu liên hệ của số điện thoại {data.Phone} có nội dung:<br/>";
+                body += $"Địa chỉ email: {data.Email}<br/>";
+                body += $"{data.Content.Replace("\n", "<br/>")}<br/>";
+                body += "</p>";
+
+                var messagePayload = new MessagePayload();
+                messagePayload.Subject = subject;
+                messagePayload.Body = body;
+                messagePayload.DestEmail = mailPayloadInfor;
+                return messagePayload;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Cannot send email to confirm Customer Feedback");
+                return null;
+            }
+        }
     }
 }
