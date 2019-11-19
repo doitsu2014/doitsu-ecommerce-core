@@ -2,10 +2,22 @@
 
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
-    public partial class InitAttributesToOrder : Migration
+    public partial class InitOrderDynamicAndActiveProductOptionVariant : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<bool>(
+                name: "Active",
+                table: "ProductVariantOptionValues",
+                nullable: false,
+                defaultValue: true);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "Active",
+                table: "ProductOptionValues",
+                nullable: false,
+                defaultValue: true);
+
             migrationBuilder.AddColumn<string>(
                 name: "Dynamic01",
                 table: "Orders",
@@ -39,6 +51,14 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "Active",
+                table: "ProductVariantOptionValues");
+
+            migrationBuilder.DropColumn(
+                name: "Active",
+                table: "ProductOptionValues");
+
             migrationBuilder.DropColumn(
                 name: "Dynamic01",
                 table: "Orders");

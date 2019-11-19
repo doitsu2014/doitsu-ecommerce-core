@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using Optional;
+using Doitsu.Ecommerce.Core.Data;
 
 namespace Doitsu.Ecommerce.Core.Tests.Helpers
 {
@@ -40,13 +41,15 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
 
         public static void KillConnections(string connectionString, string databaseName)
         {
-            ExecuteNonQuery(connectionString, @$"
+            var query = string.Format(@"
                 DECLARE @killConnections varchar(8000) = '';  
                 SELECT @killConnections = @killConnections + 'kill ' + CONVERT(varchar(5), session_id) + ';'
                 FROM sys.dm_exec_sessions
-                WHERE database_id  = db_id('{databaseName}');
+                WHERE database_id  = db_id('{0}');
                 EXEC(@killConnections);
-            ");
+            ", databaseName);
+
+            ExecuteNonQuery(connectionString, query);
         }
 
         public static string GeneratePoolKeyConnectionString(string connectionStringValue, string poolKey = "")
@@ -81,7 +84,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
 
         public static void TruncateAllTable(IWebHost host, string poolKey)
         {
-            var connectionString = host.Services.GetService<IConfiguration>().GetConnectionString(Constants.UnitTestDatabase);
+            var connectionString = host.Services.GetService<IConfiguration>().GetConnectionString(nameof(EcommerceDbContext));
             var generated = GeneratePoolKeyConnectionString(connectionString, poolKey);
 
             ExecuteNonQuery(generated, @"

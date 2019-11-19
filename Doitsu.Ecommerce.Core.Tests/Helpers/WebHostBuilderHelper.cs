@@ -32,7 +32,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
             return parts.Aggregate((x, y) => $"{x};{y}");
         }
 
-   
+
         private static DbContextOptionsBuilder<T> GenerateOptions<T>(string connectionString, IServiceProvider serviceProvider, string assemblyName) where T : DbContext
         {
             var builder = new DbContextOptionsBuilder<T>();
@@ -43,35 +43,21 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
         }
 
         [Obsolete]
-        public static IWebHostBuilder StandardBuilderDb()
-        {
-            return StandardWebHostBuilderInternal()
-                .ConfigureServices(services => services.AddSingleton<IDatabaseConfigurer, TestDatabaseConfigurer>())
-                .ConfigureServices((context, services) =>
-                {
-                    var connectionString = GenerateRandomConnectionString(context, Constants.UnitTestDatabase);
-                    services.AddScoped(serviceProvider => connectionString
-                        .Map(cs => GenerateOptions<EcommerceDbContext>(cs, serviceProvider, typeof(EcommerceDbContext).Assembly.GetName().Name).Options)
-                        .Map(opts => new EcommerceDbContext(opts, serviceProvider.GetService<IEnumerable<IEntityChangeHandler>>())));
-                    RootConfig.Service(services, context.Configuration, false);
-                });
-        }
-
-        [Obsolete]
         public static IWebHostBuilder PoolBuilderDb(string poolKey)
         {
             return StandardWebHostBuilderInternal()
                 .ConfigureServices(services => services.AddSingleton<IDatabaseConfigurer, TestDatabaseConfigurer>())
+                .UseStartup<Startup>()
                 .ConfigureServices((context, services) =>
                 {
-                    var connectionString = context.Configuration.GetConnectionString(Constants.UnitTestDatabase);
+                    var connectionString = context.Configuration.GetConnectionString(nameof(EcommerceDbContext));
                     var generatedPoolKeyConnStr = DatabaseHelper.GeneratePoolKeyConnectionString(connectionString, poolKey);
-
-                    services.AddScoped(serviceProvider => generatedPoolKeyConnStr.Some()
-                        .Map(cs => GenerateOptions<EcommerceDbContext>(cs, serviceProvider, typeof(EcommerceDbContext).Assembly.GetName().Name).Options)
-                        .Map(opts => new EcommerceDbContext(opts, serviceProvider.GetService<IEnumerable<IEntityChangeHandler>>()))
-                        .ValueOr(new EcommerceDbContext(null)));
-                    RootConfig.Service(services, context.Configuration, false);
+                    services.AddScoped(serviceProvider => {
+                        var connectionString = generatedPoolKeyConnStr;
+                        var opts = GenerateOptions<EcommerceDbContext>(connectionString, serviceProvider, typeof(EcommerceDbContext).Assembly.GetName().Name).Options;
+                        var dbContext = new EcommerceDbContext(opts, serviceProvider.GetService<IEnumerable<IEntityChangeHandler>>());
+                        return dbContext;
+                    });
                 });
         }
 
@@ -80,15 +66,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
         {
             return StandardWebHostBuilderInternal()
                 .ConfigureServices(services => services.AddSingleton<IDatabaseConfigurer, InMemorySqliteConfigurer>())
-                 .ConfigureServices((context, services) =>
-                {
-                    var connectionString = context.Configuration.GetConnectionString(Constants.UnitTestDatabase);
-                    services.AddScoped(serviceProvider => connectionString.Some()
-                        .Map(cs => GenerateOptions<EcommerceDbContext>(cs, serviceProvider, typeof(EcommerceDbContext).Assembly.GetName().Name).Options)
-                        .Map(opts => new EcommerceDbContext(opts, serviceProvider.GetService<IEnumerable<IEntityChangeHandler>>()))
-                        .ValueOr(new EcommerceDbContext(null)));
-                    RootConfig.Service(services, context.Configuration, false);
-                });
+                .UseStartup<Startup>();
         }
 
         private static IWebHostBuilder StandardWebHostBuilderInternal()

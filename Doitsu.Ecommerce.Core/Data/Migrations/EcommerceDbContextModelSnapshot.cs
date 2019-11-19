@@ -828,6 +828,11 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<bool>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<int>("ProductOptionId")
                         .HasColumnType("int");
 
@@ -922,6 +927,11 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
 
                     b.Property<int>("ProductVariantId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<int>("ProductOptionValueId")
                         .HasColumnType("int");

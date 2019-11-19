@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20191118143332_InitAttributesToOrder")]
-    partial class InitAttributesToOrder
+    [Migration("20191119112441_InitOrderDynamicAndActiveProductOptionVariant")]
+    partial class InitOrderDynamicAndActiveProductOptionVariant
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -830,6 +830,11 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<bool>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<int>("ProductOptionId")
                         .HasColumnType("int");
 
@@ -924,6 +929,11 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
 
                     b.Property<int>("ProductVariantId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<int>("ProductOptionValueId")
                         .HasColumnType("int");
