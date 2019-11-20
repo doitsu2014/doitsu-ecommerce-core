@@ -13,7 +13,8 @@ using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
 using AutoMapper;
 using Doitsu.Ecommerce.Core.Data;
-
+using Optional;
+using Optional.Async;
 namespace Doitsu.Ecommerce.Core.Services
 {
 
@@ -33,6 +34,11 @@ namespace Doitsu.Ecommerce.Core.Services
         /// <param name="productName"></param>
         /// <returns></returns>
         Task<ImmutableList<ProductOverviewViewModel>> GetProductsFromSuperParentCateId(string superParentCateSlug, string productName = "", string productCode = "");
+
+        Task<Option<int, string>> CreateProductWithOption(CreateProductViewModel data, bool isAutoGenerateVariants = true);
+        Task<Option<int, string>> UpdateProductWithOption(CreateProductViewModel data);
+        Task<Option<int, string>> CreateProductVariants(ProductVariantViewModel data);
+        Task<Option<int, string>> UpdateProductVariants(ProductVariantViewModel data);
     }
 
     public class ProductService : BaseService<Products>, IProductService
@@ -43,8 +49,8 @@ namespace Doitsu.Ecommerce.Core.Services
         {
         }
 
-        private async Task<CategoryWithProductOverviewViewModel> GetFirstCategoryWithProductByCateSlug(string slug) 
-            =>  await DbContext.Set<Categories>().Where(c => c.Slug == slug).ProjectTo<CategoryWithProductOverviewViewModel>(Mapper.ConfigurationProvider).FirstOrDefaultAsync();
+        private async Task<CategoryWithProductOverviewViewModel> GetFirstCategoryWithProductByCateSlug(string slug)
+            => await DbContext.Set<Categories>().Where(c => c.Slug == slug).ProjectTo<CategoryWithProductOverviewViewModel>(Mapper.ConfigurationProvider).FirstOrDefaultAsync();
 
         public async Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsByCateIdAsync(string cateSlug)
         {
@@ -185,6 +191,58 @@ namespace Doitsu.Ecommerce.Core.Services
                 .Where(pro => cateIds.Contains(pro.CateId.Value));
 
             return productsQuery;
+        }
+
+        private ImmutableList<ProductVariantViewModel> BuildListProductVariant(BaseEditProductViewModel products)
+        {
+            if (products.ProductOptions == null || products.ProductOptions.Count == 0)
+            {
+                return ImmutableList<ProductVariantViewModel>.Empty;
+            }
+
+            var listProductOptionValues = products.ProductOptions.Select(po => po.ProductOptionValues).ToImmutableList();
+            var abc = listProductOptionValues.CartesianProduct();
+
+            var listListProductOptionValues = new List<List<BaseEditProductViewModel>>();
+
+            var data = products.ProductOptions.Select(po => new ProductVariantViewModel()
+            {
+                AnotherPrice = 0,
+                AnotherDiscount = 0,
+                InventoryQuantity = 0,
+            });
+
+
+            return ImmutableList<ProductVariantViewModel>.Empty;
+        }
+
+        public async Task<Option<int, string>> CreateProductWithOption(CreateProductViewModel data, bool isAutoGenerateVariants = true)
+        {
+            return await data.SomeNotNull()
+                .WithException("Dữ liệu truyền vào bị rỗng")
+                .MapAsync(async data =>
+                {
+                    var productEnt = this.Mapper.Map<Products>(data);
+                    this.DbContext.Add(productEnt);
+                    await this.DbContext.SaveChangesAsync();
+                    var b = this.BuildListProductVariant(data);
+                    return productEnt.Id;
+                });
+        }
+
+        Task<Option<int, string>> IProductService.UpdateProductWithOption(CreateProductViewModel data)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Option<int, string>> IProductService.CreateProductVariants(ProductVariantViewModel data)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Option<int, string>> IProductService.UpdateProductVariants(ProductVariantViewModel data)
+        {
+            throw new NotImplementedException();
         }
     }
 }

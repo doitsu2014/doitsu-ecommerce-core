@@ -26,37 +26,68 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<EcommerceIdentityUserViewModel, EcommerceIdentityUser>();
                 cfg.CreateMap<EcommerceIdentityRole, EcommerceIdentityRoleViewModel>();
                 #endregion
-
+                #region Categories
                 cfg.CreateMap<Categories, CategoryMenuViewModel>();
                 cfg.CreateMap<Categories, CategoryViewModel>();
                 cfg.CreateMap<Categories, CategoryWithProductOverviewViewModel>();
                 cfg.CreateMap<Categories, CategoryWithParentViewModel>().MaxDepth(3);
                 cfg.CreateMap<Categories, CategoryWithInverseParentViewModel>().MaxDepth(5);
 
+                cfg.CreateMap<CategoryMenuViewModel, Categories>();
+                cfg.CreateMap<CategoryViewModel, Categories>();
+                cfg.CreateMap<CategoryWithProductOverviewViewModel, Categories>();
+                cfg.CreateMap<CategoryWithParentViewModel, Categories>().MaxDepth(3);
+                cfg.CreateMap<CategoryWithInverseParentViewModel, Categories>().MaxDepth(5);
+                #endregion
+                #region Products
                 cfg.CreateMap<Products, ProductViewModel>();
                 cfg.CreateMap<Products, ProductOverviewViewModel>()
                     .ForMember(dest => dest.CategorySlug, opt => opt.MapFrom(x => x.Cate.Slug))
                     .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(x => x.Cate.Name));
-
                 cfg.CreateMap<Products, ProductDetailViewModel>()
                     .ForMember(dest => dest.CategorySlug, opt => opt.MapFrom(x => x.Cate.Slug))
                     .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(x => x.Cate.Name));
-
                 cfg.CreateMap<ProductDetailViewModel, Products>();
 
+                cfg.CreateMap<BaseEditProductViewModel, Products>();
+                cfg.CreateMap<CreateProductViewModel, Products>();
+                cfg.CreateMap<UpdateProductViewModel, Products>();
+                cfg.CreateMap<Products, BaseEditProductViewModel>();
+                cfg.CreateMap<Products, CreateProductViewModel>();
+                cfg.CreateMap<Products, UpdateProductViewModel>();
+
+                cfg.CreateMap<ProductOptionValues, BaseEditProductOptionValueViewModel>();
+                cfg.CreateMap<ProductOptions, BaseEditProductOptionViewModel>();
+                cfg.CreateMap<BaseEditProductOptionValueViewModel, ProductOptionValues>();
+                cfg.CreateMap<BaseEditProductOptionViewModel, ProductOptions>();
+
+                cfg.CreateMap<ProductVariants, ProductVariantViewModel>();
+                cfg.CreateMap<ProductVariantOptionValues, ProductVariantOptionValueViewModel>();
+                cfg.CreateMap<ProductVariantViewModel, ProductVariants>();
+                cfg.CreateMap<ProductVariantOptionValueViewModel, ProductVariantOptionValues>();
+                #endregion
+                #region Catalogues
+                cfg.CreateMap<CatalogueViewModel, Catalogues>();
+                cfg.CreateMap<Catalogues, CatalogueViewModel>();
+                #endregion
+                #region Brands
                 cfg.CreateMap<BrandViewModel, Brand>();
                 cfg.CreateMap<Brand, BrandViewModel>();
-
+                #endregion
+                #region Orders
                 cfg.CreateMap<OrderViewModel, Orders>();
                 cfg.CreateMap<Orders, OrderViewModel>();
                 cfg.CreateMap<Orders, OrderDetailViewModel>();
 
                 cfg.CreateMap<OrderItems, OrderItemViewModel>().ReverseMap();
                 cfg.CreateMap<OrderItemViewModel, OrderItems>();
+                #endregion
+
+
+
 
                 cfg.CreateMap<Blogs, BlogDetailViewModel>();
                 cfg.CreateMap<Blogs, BlogOverviewViewModel>();
-
                 cfg.CreateMap<BlogDetailViewModel, Blogs>()
                     .ForMember(d => d.BlogCategory, opt => opt.Ignore())
                     .ForMember(d => d.PublisherId, opt => opt.Ignore())
@@ -89,8 +120,6 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<SliderViewModel, Sliders>();
                 cfg.CreateMap<Sliders, SliderViewModel>();
 
-                cfg.CreateMap<CatalogueViewModel, Catalogues>();
-                cfg.CreateMap<Catalogues, CatalogueViewModel>();
             });
 
             IMapper mapper = autoMapperConfig.CreateMapper();

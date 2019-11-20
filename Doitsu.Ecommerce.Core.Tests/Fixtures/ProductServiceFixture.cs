@@ -3,24 +3,25 @@ using Xunit;
 using Doitsu.Ecommerce.Core.Data.Entities;
 using System.Collections.Generic;
 using Doitsu.Ecommerce.Core.Data;
+using Doitsu.Ecommerce.Core.ViewModels;
 
 namespace Doitsu.Ecommerce.Core.Tests.Helpers
 {
     public class ProductServiceFixture : IDisposable
     {
         public string ServicePoolKey { get; set; }
-        public ICollection<Categories> CategoryData { get; }
-        public ICollection<Products> ProductData { get; }
-        public ICollection<ProductOptions> Product1ProductOptionsData { get; }
-        public ICollection<ProductOptions> Product2ProductOptionsData { get; }
-        public ICollection<ProductOptions> Product3ProductOptionsData { get; }
+        public ICollection<CategoryViewModel> CategoryData { get; }
+        public ICollection<CreateProductViewModel> ProductData { get; }
+        public ICollection<BaseEditProductOptionViewModel> Product1ProductOptionsData { get; }
+        public ICollection<BaseEditProductOptionViewModel> Product2ProductOptionsData { get; }
+        public ICollection<BaseEditProductOptionViewModel> Product3ProductOptionsData { get; }
 
         public ProductServiceFixture()
         {
             ServicePoolKey = "ProductService";
-            CategoryData = new List<Categories>()
+            CategoryData = new List<CategoryViewModel>()
             {
-                new Categories()
+                new CategoryViewModel()
                 {
                     Name = "Phone Card SMS",
                     IsFixed = false,
@@ -30,48 +31,48 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
             };
 
             
-            Product1ProductOptionsData = new List<ProductOptions>()
+            Product1ProductOptionsData = new List<BaseEditProductOptionViewModel>()
             {
-                new ProductOptions()
+                new BaseEditProductOptionViewModel()
                 {
                     Name = "Nhà Mạng",
-                    ProductOptionValues = new List<ProductOptionValues>()
+                    ProductOptionValues = new List<BaseEditProductOptionValueViewModel>()
                     {
-                        new ProductOptionValues()
+                        new BaseEditProductOptionValueViewModel()
                         {
                             Value = "Vinaphone"
                         },
-                        new ProductOptionValues()
+                        new BaseEditProductOptionValueViewModel()
                         {
                             Value = "Viettel"
                         }
                     }
                 },
-                new ProductOptions()
+                new BaseEditProductOptionViewModel()
                 {
                     Name = "Ưu tiên",
-                    ProductOptionValues = new List<ProductOptionValues>()
+                    ProductOptionValues = new List<BaseEditProductOptionValueViewModel>()
                     {
-                        new ProductOptionValues()
+                        new BaseEditProductOptionValueViewModel()
                         {
                             Value = "1%"
                         },
-                        new ProductOptionValues()
+                        new BaseEditProductOptionValueViewModel()
                         {
                             Value = "2%"
                         }
                     }
                 },
-                new ProductOptions()
+                new BaseEditProductOptionViewModel()
                 {
                     Name = "Loại tài khoản",
-                    ProductOptionValues = new List<ProductOptionValues>()
+                    ProductOptionValues = new List<BaseEditProductOptionValueViewModel>()
                     {
-                        new ProductOptionValues()
+                        new BaseEditProductOptionValueViewModel()
                         {
                             Value = "Trả trước"
                         },
-                        new ProductOptionValues()
+                        new BaseEditProductOptionValueViewModel()
                         {
                             Value = "Trả sau"
                         }
@@ -79,7 +80,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 }
             };
 
-            var product1 = new Products()
+            var product1 = new CreateProductViewModel()
             {
                 Code = "PRODUCT01",
                 Name = "NẠP TRẢ TRƯỚC & TRẢ SAU",
@@ -90,7 +91,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 ProductOptions = Product1ProductOptionsData
             };
 
-            var product2 = new Products()
+            var product2 = new CreateProductViewModel()
             {
                 Code = "PRODUCT02",
                 Name = "NẠP TIỀN NHANH",
@@ -100,7 +101,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
             };
 
-            var product3 = new Products()
+            var product3 = new CreateProductViewModel()
             {
                 Code = "PRODUCT03",
                 Name = "NẠP GAME SMS",
@@ -110,12 +111,12 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
             };
 
-            ProductData = new List<Products>()
+            ProductData = new List<CreateProductViewModel>()
             {
                 product1, product2, product3
             };
 
-
+        
         }
 
         public void Dispose()
