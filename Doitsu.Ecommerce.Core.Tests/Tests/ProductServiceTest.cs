@@ -42,8 +42,6 @@ namespace Doitsu.Ecommerce.Core.Tests
                 await productService.CreateProductWithOption(createData.FirstOrDefault());
                 await dbContext.SaveChangesAsync();
 
-                await dbContext.SaveChangesAsync();
-
                 Assert.True(true);
             }
         }
