@@ -26,6 +26,11 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__OrderItem__Produ__0F624AF8");
+
+            builder.HasOne(d => d.ProductVariant)
+                .WithMany(p => p.OrderItems)
+                .HasForeignKey(d => d.ProductVariantId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         }
     }
 }

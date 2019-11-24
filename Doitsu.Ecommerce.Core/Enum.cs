@@ -10,6 +10,18 @@ namespace Doitsu.Ecommerce.Core
         Cancel = 3
     }
 
+    public enum ProductOptionValueStatusEnum
+    {
+        Unavailable = 0,
+        Available = 1
+    }
+
+    public enum ProductVariantStatusEnum
+    {
+        Unavailable = 0,
+        Available = 1
+    }
+
     public enum GenderEnum
     {
         [Display(Name = "Không rõ")]

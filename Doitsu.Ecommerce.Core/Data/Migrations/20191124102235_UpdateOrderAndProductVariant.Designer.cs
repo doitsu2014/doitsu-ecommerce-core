@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20191119112441_InitOrderDynamicAndActiveProductOptionVariant")]
-    partial class InitOrderDynamicAndActiveProductOptionVariant
+    [Migration("20191124102235_UpdateOrderAndProductVariant")]
+    partial class UpdateOrderAndProductVariant
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -625,6 +625,9 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ProductVariantId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("SubTotalFinalPrice")
                         .HasColumnType("money");
 
@@ -645,6 +648,8 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductVariantId");
 
                     b.ToTable("OrderItems");
                 });
@@ -838,6 +843,11 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<int>("ProductOptionId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
@@ -960,6 +970,11 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<bool>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<float>("AnotherDiscount")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("real")
@@ -982,6 +997,11 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<byte[]>("Vers")
                         .IsConcurrencyToken()
@@ -1045,9 +1065,6 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
 
                     b.Property<string>("Property")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("Sku")
-                        .HasColumnType("int");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -1486,6 +1503,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasForeignKey("ProductId")
                         .HasConstraintName("FK__OrderItem__Produ__0F624AF8")
                         .IsRequired();
+
+                    b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.ProductVariants", "ProductVariant")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("ProductVariantId");
                 });
 
             modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.Orders", b =>

@@ -9,6 +9,9 @@ using Xunit;
 using Xunit.Abstractions;
 using Doitsu.Ecommerce.Core.Services;
 using Doitsu.Ecommerce.Core.ViewModels;
+using Doitsu.Service.Core.Extensions;
+using Optional;
+using Optional.Async;
 
 namespace Doitsu.Ecommerce.Core.Tests
 {
@@ -24,27 +27,41 @@ namespace Doitsu.Ecommerce.Core.Tests
 
         [System.Obsolete]
         [Fact]
-        private async Task CreateProduct()
+        private async Task IntegrationProductManagement()
         {
             using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
             {
                 var dbContext = webhost.Services.GetService<EcommerceDbContext>();
+                await dbContext.Database.MigrateAsync();
+                DatabaseHelper.TruncateAllTable(webhost, _poolKey);
+
                 var categoryService = webhost.Services.GetService<ICategoryService>();
                 var productService = webhost.Services.GetService<IProductService>();
-                await dbContext.Database.MigrateAsync();
 
-                DatabaseHelper.TruncateAllTable(webhost, _poolKey);
                 await categoryService.CreateAsync<CategoryViewModel>(_fixture.CategoryData);
                 await dbContext.SaveChangesAsync();
-                var firstCategory = await dbContext.Set<Categories>().FirstOrDefaultAsync();
 
+                var firstCategory = await dbContext.Set<Categories>().AsNoTracking().FirstOrDefaultAsync();
                 var createData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; });
-                await productService.CreateProductWithOption(createData.FirstOrDefault());
-                await dbContext.SaveChangesAsync();
+                var firstProduct = createData.First();
+                var result = await productService.CreateProductWithOptionAsync(firstProduct);
+                Assert.True(true);
+            }
 
+            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            {
+                var productService = webhost.Services.GetService<IProductService>();
+                var firstProductData = _fixture.ProductData.First();
+                var updatedProduct = await productService.FirstOrDefaultAsync<UpdateProductViewModel>(x => x.Code == firstProductData.Code);
+                updatedProduct.ProductOptions.First().ProductOptionValues.First().Status = ProductOptionValueStatusEnum.Unavailable;
+                updatedProduct.ProductOptions.Last().ProductOptionValues.First().Value = "Changed";
+                updatedProduct.ProductOptions.Last().ProductOptionValues.Add(new ProductOptionValueViewModel()
+                {
+                    Value = "Trả ông nội mày"
+                });
+                await productService.UpdateProductWithOptionAsync(updatedProduct);
                 Assert.True(true);
             }
         }
-
     }
 }

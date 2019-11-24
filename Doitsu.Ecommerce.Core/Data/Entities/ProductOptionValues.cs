@@ -10,6 +10,7 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public string Value { get; set; }
         public byte[] Vers { get; set; }
         public bool Active  { get; set; }
+        public ProductOptionValueStatusEnum Status { get; set; }
 
         public virtual ProductOptions ProductOption { get; set; }
         public virtual ICollection<ProductVariantOptionValues> ProductVariantOptionValues { get; set; }

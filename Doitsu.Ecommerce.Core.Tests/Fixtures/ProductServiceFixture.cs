@@ -12,9 +12,9 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
         public string ServicePoolKey { get; set; }
         public ICollection<CategoryViewModel> CategoryData { get; }
         public ICollection<CreateProductViewModel> ProductData { get; }
-        public ICollection<BaseEditProductOptionViewModel> Product1ProductOptionsData { get; }
-        public ICollection<BaseEditProductOptionViewModel> Product2ProductOptionsData { get; }
-        public ICollection<BaseEditProductOptionViewModel> Product3ProductOptionsData { get; }
+        public ICollection<ProductOptionViewModel> Product1ProductOptionsData { get; }
+        public ICollection<ProductOptionViewModel> Product2ProductOptionsData { get; }
+        public ICollection<ProductOptionViewModel> Product3ProductOptionsData { get; }
 
         public ProductServiceFixture()
         {
@@ -30,49 +30,49 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 }
             };
 
-            
-            Product1ProductOptionsData = new List<BaseEditProductOptionViewModel>()
+
+            Product1ProductOptionsData = new List<ProductOptionViewModel>()
             {
-                new BaseEditProductOptionViewModel()
+                new ProductOptionViewModel()
                 {
                     Name = "Nhà Mạng",
-                    ProductOptionValues = new List<BaseEditProductOptionValueViewModel>()
+                    ProductOptionValues = new List<ProductOptionValueViewModel>()
                     {
-                        new BaseEditProductOptionValueViewModel()
+                        new  ProductOptionValueViewModel()
                         {
                             Value = "Vinaphone"
                         },
-                        new BaseEditProductOptionValueViewModel()
+                        new  ProductOptionValueViewModel()
                         {
                             Value = "Viettel"
                         }
                     }
                 },
-                new BaseEditProductOptionViewModel()
+                new ProductOptionViewModel()
                 {
                     Name = "Ưu tiên",
-                    ProductOptionValues = new List<BaseEditProductOptionValueViewModel>()
+                    ProductOptionValues = new List<ProductOptionValueViewModel>()
                     {
-                        new BaseEditProductOptionValueViewModel()
+                        new  ProductOptionValueViewModel()
                         {
                             Value = "1%"
                         },
-                        new BaseEditProductOptionValueViewModel()
+                        new  ProductOptionValueViewModel()
                         {
                             Value = "2%"
                         }
                     }
                 },
-                new BaseEditProductOptionViewModel()
+                new ProductOptionViewModel()
                 {
                     Name = "Loại tài khoản",
-                    ProductOptionValues = new List<BaseEditProductOptionValueViewModel>()
+                    ProductOptionValues = new List<ProductOptionValueViewModel>()
                     {
-                        new BaseEditProductOptionValueViewModel()
+                        new  ProductOptionValueViewModel()
                         {
                             Value = "Trả trước"
                         },
-                        new BaseEditProductOptionValueViewModel()
+                        new  ProductOptionValueViewModel()
                         {
                             Value = "Trả sau"
                         }
@@ -86,7 +86,6 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 Name = "NẠP TRẢ TRƯỚC & TRẢ SAU",
                 Slug = "nap-the-tra-truoc-va-tra-sau",
                 Price = 0,
-                Sku = 0,
                 Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
                 ProductOptions = Product1ProductOptionsData
             };
@@ -97,7 +96,6 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 Name = "NẠP TIỀN NHANH",
                 Slug = "nap-tien-nhanh",
                 Price = 0,
-                Sku = 0,
                 Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
             };
 
@@ -107,7 +105,6 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 Name = "NẠP GAME SMS",
                 Slug = "nap-game-sms",
                 Price = 0,
-                Sku = 0,
                 Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
             };
 
@@ -116,7 +113,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 product1, product2, product3
             };
 
-        
+
         }
 
         public void Dispose()

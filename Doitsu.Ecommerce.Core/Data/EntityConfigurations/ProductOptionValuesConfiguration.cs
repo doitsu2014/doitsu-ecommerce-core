@@ -18,6 +18,7 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
                 .HasForeignKey(x => x.ProductOptionId);
 
             builder.Property(x => x.Value).HasMaxLength(256);
+            builder.Property(x => x.Status).HasDefaultValue(ProductOptionValueStatusEnum.Available);
         }
     }
 }

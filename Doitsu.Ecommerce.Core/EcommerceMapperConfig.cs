@@ -32,7 +32,6 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<Categories, CategoryWithProductOverviewViewModel>();
                 cfg.CreateMap<Categories, CategoryWithParentViewModel>().MaxDepth(3);
                 cfg.CreateMap<Categories, CategoryWithInverseParentViewModel>().MaxDepth(5);
-
                 cfg.CreateMap<CategoryMenuViewModel, Categories>();
                 cfg.CreateMap<CategoryViewModel, Categories>();
                 cfg.CreateMap<CategoryWithProductOverviewViewModel, Categories>();
@@ -44,22 +43,20 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<Products, ProductOverviewViewModel>()
                     .ForMember(dest => dest.CategorySlug, opt => opt.MapFrom(x => x.Cate.Slug))
                     .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(x => x.Cate.Name));
+
+                cfg.CreateMap<ProductDetailViewModel, Products>();
                 cfg.CreateMap<Products, ProductDetailViewModel>()
                     .ForMember(dest => dest.CategorySlug, opt => opt.MapFrom(x => x.Cate.Slug))
                     .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(x => x.Cate.Name));
-                cfg.CreateMap<ProductDetailViewModel, Products>();
 
-                cfg.CreateMap<BaseEditProductViewModel, Products>();
                 cfg.CreateMap<CreateProductViewModel, Products>();
                 cfg.CreateMap<UpdateProductViewModel, Products>();
-                cfg.CreateMap<Products, BaseEditProductViewModel>();
                 cfg.CreateMap<Products, CreateProductViewModel>();
                 cfg.CreateMap<Products, UpdateProductViewModel>();
-
-                cfg.CreateMap<ProductOptionValues, BaseEditProductOptionValueViewModel>();
-                cfg.CreateMap<ProductOptions, BaseEditProductOptionViewModel>();
-                cfg.CreateMap<BaseEditProductOptionValueViewModel, ProductOptionValues>();
-                cfg.CreateMap<BaseEditProductOptionViewModel, ProductOptions>();
+                cfg.CreateMap<ProductOptionValues, ProductOptionValueViewModel>();
+                cfg.CreateMap<ProductOptions, ProductOptionViewModel>();
+                cfg.CreateMap<ProductOptionValueViewModel, ProductOptionValues>();
+                cfg.CreateMap<ProductOptionViewModel, ProductOptions>();
 
                 cfg.CreateMap<ProductVariants, ProductVariantViewModel>();
                 cfg.CreateMap<ProductVariantOptionValues, ProductVariantOptionValueViewModel>();
@@ -82,10 +79,6 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<OrderItems, OrderItemViewModel>().ReverseMap();
                 cfg.CreateMap<OrderItemViewModel, OrderItems>();
                 #endregion
-
-
-
-
                 cfg.CreateMap<Blogs, BlogDetailViewModel>();
                 cfg.CreateMap<Blogs, BlogOverviewViewModel>();
                 cfg.CreateMap<BlogDetailViewModel, Blogs>()
