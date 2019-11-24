@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20191124102235_UpdateOrderAndProductVariant")]
-    partial class UpdateOrderAndProductVariant
+    [Migration("20191124173642_UpdateProductVariantAndOrder")]
+    partial class UpdateProductVariantAndOrder
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -892,9 +892,6 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("rowversion");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.HasIndex("ProductId");
 

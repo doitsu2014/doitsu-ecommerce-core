@@ -27,7 +27,29 @@ namespace Doitsu.Ecommerce.Core.Tests
 
         [System.Obsolete]
         [Fact]
-        private async Task IntegrationProductManagement()
+        private async Task CreateProductManagement()
+        {
+            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            {
+                var dbContext = webhost.Services.GetService<EcommerceDbContext>();
+                await dbContext.Database.MigrateAsync();
+                DatabaseHelper.TruncateAllTable(webhost, _poolKey);
+
+                var categoryService = webhost.Services.GetService<ICategoryService>();
+                var productService = webhost.Services.GetService<IProductService>();
+                await categoryService.CreateAsync<CategoryViewModel>(_fixture.CategoryData);
+                await dbContext.SaveChangesAsync();
+
+                var firstCategory = await dbContext.Set<Categories>().AsNoTracking().FirstOrDefaultAsync();
+                var createData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; });
+                var result = await productService.CreateProductWithOptionAsync(createData.ToList());
+                Assert.True(true);
+            }
+        }
+
+        [System.Obsolete]
+        [Fact]
+        private async Task UpdateProductManagement()
         {
             using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
             {

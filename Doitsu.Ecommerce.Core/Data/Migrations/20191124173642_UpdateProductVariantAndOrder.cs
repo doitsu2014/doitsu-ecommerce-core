@@ -2,10 +2,14 @@
 
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
-    public partial class UpdateOrderAndProductVariant : Migration
+    public partial class UpdateProductVariantAndOrder : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropIndex(
+                name: "IX_ProductOptions_Name",
+                table: "ProductOptions");
+
             migrationBuilder.DropColumn(
                 name: "Sku",
                 table: "Products");
@@ -148,6 +152,12 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 table: "Products",
                 type: "int",
                 nullable: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductOptions_Name",
+                table: "ProductOptions",
+                column: "Name",
+                unique: true);
         }
     }
 }

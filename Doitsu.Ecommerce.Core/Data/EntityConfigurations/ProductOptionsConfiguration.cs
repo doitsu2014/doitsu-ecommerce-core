@@ -12,7 +12,7 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
         public override void Configure(EntityTypeBuilder<ProductOptions> builder)
         {
             base.Configure(builder);
-            builder.HasIndex(x => x.Name).IsUnique();
+
             builder.Property(x => x.Name).HasMaxLength(256).IsRequired();
 
             builder.HasOne(x => x.Product)

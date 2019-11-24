@@ -45,6 +45,10 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                         new  ProductOptionValueViewModel()
                         {
                             Value = "Viettel"
+                        },
+                        new  ProductOptionValueViewModel()
+                        {
+                            Value = "Mobiphone"
                         }
                     }
                 },
@@ -60,6 +64,18 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                         new  ProductOptionValueViewModel()
                         {
                             Value = "2%"
+                        },
+                        new  ProductOptionValueViewModel()
+                        {
+                            Value = "3%"
+                        },
+                        new  ProductOptionValueViewModel()
+                        {
+                            Value = "4%"
+                        },
+                        new  ProductOptionValueViewModel()
+                        {
+                            Value = "5%"
                         }
                     }
                 },
@@ -90,6 +106,29 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 ProductOptions = Product1ProductOptionsData
             };
 
+            Product2ProductOptionsData = new List<ProductOptionViewModel>()
+            {
+                new ProductOptionViewModel()
+                {
+                    Name = "Nhà Mạng",
+                    ProductOptionValues = new List<ProductOptionValueViewModel>()
+                    {
+                        new  ProductOptionValueViewModel()
+                        {
+                            Value = "Vinaphone"
+                        },
+                        new  ProductOptionValueViewModel()
+                        {
+                            Value = "Viettel"
+                        },
+                        new  ProductOptionValueViewModel()
+                        {
+                            Value = "Mobiphone"
+                        }
+                    }
+                }
+            };
+
             var product2 = new CreateProductViewModel()
             {
                 Code = "PRODUCT02",
@@ -97,6 +136,42 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 Slug = "nap-tien-nhanh",
                 Price = 0,
                 Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
+                ProductOptions = Product2ProductOptionsData
+            };
+
+            Product3ProductOptionsData = new List<ProductOptionViewModel>()
+            {
+                new ProductOptionViewModel()
+                {
+                    Name = "Mệnh giá",
+                    ProductOptionValues = new List<ProductOptionValueViewModel>()
+                    {
+                        new  ProductOptionValueViewModel()
+                        {
+                            Value = "DK10"
+                        },
+                        new  ProductOptionValueViewModel()
+                        {
+                            Value = "DK20"
+                        },
+                        new  ProductOptionValueViewModel()
+                        {
+                            Value = "DK50"
+                        },
+                         new  ProductOptionValueViewModel()
+                        {
+                            Value = "DK100"
+                        },
+                        new  ProductOptionValueViewModel()
+                        {
+                            Value = "DK200"
+                        },
+                        new  ProductOptionValueViewModel()
+                        {
+                            Value = "DK500"
+                        }
+                    }
+                }
             };
 
             var product3 = new CreateProductViewModel()
@@ -106,14 +181,13 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 Slug = "nap-game-sms",
                 Price = 0,
                 Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
+                ProductOptions = Product3ProductOptionsData
             };
 
             ProductData = new List<CreateProductViewModel>()
             {
                 product1, product2, product3
             };
-
-
         }
 
         public void Dispose()

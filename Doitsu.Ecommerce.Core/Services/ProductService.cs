@@ -38,6 +38,7 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<ImmutableList<ProductOverviewViewModel>> GetProductsFromSuperParentCateId(string superParentCateSlug, string productName = "", string productCode = "");
 
         Task<Option<int, string>> CreateProductWithOptionAsync(CreateProductViewModel data);
+        Task<Option<int[], string>> CreateProductWithOptionAsync(ICollection<CreateProductViewModel> data);
         Task<Option<int, string>> UpdateProductWithOptionAsync(UpdateProductViewModel data);
         Task<Option<int, string>> UpdateProductVariantsAsync(ProductVariantViewModel data);
     }
@@ -298,9 +299,9 @@ namespace Doitsu.Ecommerce.Core.Services
             {
                 return await data.SomeNotNull()
                     .WithException("Dữ liệu truyền vào bị rỗng")
-                    .MapAsync(async data =>
+                    .MapAsync(async d =>
                     {
-                        var productEnt = this.Mapper.Map<Products>(data);
+                        var productEnt = this.Mapper.Map<Products>(d);
                         var listProductVariants = this.BuildListProductVariant(productEnt);
                         productEnt.ProductVariants = listProductVariants;
 
@@ -348,7 +349,7 @@ namespace Doitsu.Ecommerce.Core.Services
                                 productEnt.ProductVariants.Add(gPv);
                             }
                         });
-                        
+
                         this.Update(productEnt);
                         await this.DbContext.SaveChangesAsync();
 
@@ -391,6 +392,31 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<Option<int, string>> IProductService.UpdateProductVariantsAsync(ProductVariantViewModel data)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<Option<int[], string>> CreateProductWithOptionAsync(ICollection<CreateProductViewModel> data)
+        {
+            using (var transaction = await this.DbContext.Database.BeginTransactionAsync())
+            {
+                return await data.SomeNotNull()
+                    .WithException("Dữ liệu truyền vào bị rỗng")
+                    .MapAsync(async d =>
+                    {
+                        var result = new List<Products>();
+                        foreach (var prodMapping in d)
+                        {
+                            var productEnt = this.Mapper.Map<Products>(prodMapping);
+                            var listProductVariants = this.BuildListProductVariant(productEnt);
+                            productEnt.ProductVariants = listProductVariants;
+                            await CreateAsync(productEnt);
+                            result.Add(productEnt);
+                        }
+                        
+                        await DbContext.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return result.Select(x => x.Id).ToArray();
+                    });
+            }
         }
     }
 }
