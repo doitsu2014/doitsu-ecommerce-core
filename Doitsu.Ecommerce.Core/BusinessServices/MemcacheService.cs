@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
 using AutoMapper;
+using Doitsu.Ecommerce.Core.Data.Entities;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -58,6 +59,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 if (!memoryCache.TryGetValue(Constants.CacheKey.BRAND_INFORMATION, out BrandViewModel brand))
                 {
                     var brandE = await brandService.FindByKeysAsync(brandId);
+                    if(brandE == null) brandE = new Brand();
                     brand = mapper.Map<BrandViewModel>(brandE);
                     memoryCache.Set(Constants.CacheKey.BRAND_INFORMATION, brand, TimeSpan.FromMinutes(timeCache));
                 }
