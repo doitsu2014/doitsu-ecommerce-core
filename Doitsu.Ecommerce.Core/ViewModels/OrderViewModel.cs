@@ -58,16 +58,16 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string Dynamic05 { get; set; }
     }
 
-     public class CreateOrderWithOptionViewModel : OrderViewModel
-     {
+    public class CreateOrderWithOptionViewModel : OrderViewModel
+    {
         [JsonProperty("orderItems")]
         public ICollection<CreateOrderItemWithOptionViewModel> OrderItems { get; set; }
-     }
+    }
 
 
     public class OrderDetailViewModel
     {
-     
+
         [JsonProperty("id")]
         public int Id { get; set; }
         [JsonProperty("code")]
