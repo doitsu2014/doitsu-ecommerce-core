@@ -2,7 +2,7 @@
 
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
-    public partial class UpdateProductVariantAndOrder : Migration
+    public partial class UpdateProductAndOrder : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -74,6 +74,18 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 maxLength: 1000,
                 nullable: true);
 
+            migrationBuilder.AddColumn<string>(
+                name: "Note",
+                table: "Orders",
+                maxLength: 500,
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "Note",
+                table: "OrderItems",
+                maxLength: 500,
+                nullable: true);
+
             migrationBuilder.AddColumn<int>(
                 name: "ProductVariantId",
                 table: "OrderItems",
@@ -142,6 +154,14 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "Dynamic05",
                 table: "Orders");
+
+            migrationBuilder.DropColumn(
+                name: "Note",
+                table: "Orders");
+
+            migrationBuilder.DropColumn(
+                name: "Note",
+                table: "OrderItems");
 
             migrationBuilder.DropColumn(
                 name: "ProductVariantId",

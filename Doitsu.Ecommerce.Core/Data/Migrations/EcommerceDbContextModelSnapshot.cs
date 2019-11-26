@@ -617,6 +617,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<double?>("Discount")
                         .HasColumnType("float");
 
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(500)")
+                        .HasMaxLength(500);
+
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
@@ -715,6 +719,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
 
                     b.Property<decimal>("FinalPrice")
                         .HasColumnType("money");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(500)")
+                        .HasMaxLength(500);
 
                     b.Property<int>("Status")
                         .HasColumnType("int");

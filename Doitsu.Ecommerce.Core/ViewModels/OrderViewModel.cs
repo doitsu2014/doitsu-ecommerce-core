@@ -27,8 +27,21 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public int Status { get; set; }
         public bool Active { get; set; }
         public DateTime CreatedDate { get; set; }
-
+        public string DeliveryAddress { get; set; }
+        public string DeliveryName { get; set; }
+        public string DeliveryPhone { get; set; }
+        public string DeliveryEmail { get; set; }
+        public string Dynamic01 { get; set; }
+        public string Dynamic02 { get; set; }
+        public string Dynamic03 { get; set; }
+        public string Dynamic04 { get; set; }
+        public string Dynamic05 { get; set; }
     }
+
+     public class CreateOrderWithOptionViewModel : OrderViewModel
+     {
+         public ICollection<ProductOptionValueViewModel> ProductOptionValues {get;set;}
+     }
 
 
     public class OrderDetailViewModel

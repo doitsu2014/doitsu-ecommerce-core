@@ -14,6 +14,7 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public decimal SubTotalFinalPrice { get; set; }
         public byte[] Vers { get; set; }
         public bool Active { get; set; }
+        public string Note { get; set; }
 
         public virtual Orders Order { get; set; }
         public virtual Products Product { get; set; }
