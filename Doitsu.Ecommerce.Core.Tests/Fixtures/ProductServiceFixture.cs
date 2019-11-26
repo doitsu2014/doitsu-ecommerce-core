@@ -59,6 +59,10 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                     {
                         new  ProductOptionValueViewModel()
                         {
+                            Value = "Không ưu tiên"
+                        },
+                        new  ProductOptionValueViewModel()
+                        {
                             Value = "1%"
                         },
                         new  ProductOptionValueViewModel()
