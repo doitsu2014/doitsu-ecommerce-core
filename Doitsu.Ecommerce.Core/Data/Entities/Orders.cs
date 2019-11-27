@@ -31,5 +31,6 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
 
         public virtual EcommerceIdentityUser User { get; set; }
         public virtual ICollection<OrderItems> OrderItems { get; set; }
+        public virtual ICollection<UserTransaction> UserTransactions { get; set; }
     }
 }
