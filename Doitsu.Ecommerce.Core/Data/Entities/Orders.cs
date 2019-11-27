@@ -27,6 +27,7 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public string Dynamic04 { get; set; }
         public string Dynamic05 { get; set; }
         public string Note {get;set;}
+        public OrderPriorityEnum? Priority {get;set;}
         public byte[] Vers { get; set; }
 
         public virtual EcommerceIdentityUser User { get; set; }

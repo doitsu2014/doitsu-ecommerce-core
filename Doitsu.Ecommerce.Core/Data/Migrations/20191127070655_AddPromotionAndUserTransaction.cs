@@ -7,6 +7,11 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<int>(
+                name: "Priority",
+                table: "Orders",
+                nullable: true);
+
             migrationBuilder.AddColumn<decimal>(
                 name: "Balance",
                 table: "AspNetUsers",
@@ -91,6 +96,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserTransactions");
+
+            migrationBuilder.DropColumn(
+                name: "Priority",
+                table: "Orders");
 
             migrationBuilder.DropColumn(
                 name: "Balance",

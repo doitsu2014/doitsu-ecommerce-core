@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20191127045515_AddPromotionAndUserTransaction")]
+    [Migration("20191127070655_AddPromotionAndUserTransaction")]
     partial class AddPromotionAndUserTransaction
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -725,6 +725,9 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(500)")
                         .HasMaxLength(500);
+
+                    b.Property<int?>("Priority")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
