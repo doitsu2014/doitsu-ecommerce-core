@@ -21,6 +21,9 @@ using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Ecommerce.Core.Data.Identities;
 using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
+using AutoMapper;
+using Doitsu.Ecommerce.Core.Data;
+
 namespace Doitsu.Ecommerce.Core.Services
 {
     public interface IOrderService : IBaseService<Orders>
@@ -38,20 +41,14 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public class OrderService : BaseService<Orders>, IOrderService
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IEmailService emailService;
-        private readonly LeaderMail leaderMailOption;
 
-        public OrderService(
-            IUnitOfWork unitOfWork,
-            ILogger<BaseService<Orders>> logger,
-            IHttpContextAccessor httpContextAccessor,
-            IEmailService emailService,
-            IOptionsMonitor<LeaderMail> leaderMailOption) : base(unitOfWork, logger)
+        public OrderService(EcommerceDbContext dbContext,
+                            IMapper mapper,
+                            ILogger<BaseService<Orders, EcommerceDbContext>> logger,
+                            IEmailService emailService) : base(dbContext, mapper, logger)
         {
-            _httpContextAccessor = httpContextAccessor;
             this.emailService = emailService;
-            this.leaderMailOption = leaderMailOption.CurrentValue;
         }
 
         private string GenerateOrderCode()
@@ -74,43 +71,44 @@ namespace Doitsu.Ecommerce.Core.Services
                 .WithException(string.Empty)
                 .FlatMapAsync(async d =>
                 {
-                    using (var trans = await UnitOfWork.CreateTransactionAsync())
+                    using (var trans = await CreateTransactionAsync())
                     {
+
+                        var order = new Orders();
+                        order.Status = (int)OrderStatusEnum.New;
+                        order.Discount = 0;
+                        order.Code = GenerateOrderCode().ToUpper();
+                        order.TotalPrice = data.TotalPrice;
+                        order.FinalPrice = data.TotalPrice;
+                        order.TotalQuantity = data.TotalQuantity;
+                        order.UserId = user.Id;
+
+                        foreach (var item in data.CartItems)
+                        {
+                            var orderItem = new OrderItems
+                            {
+                                Discount = 0,
+                                ProductId = item.Id,
+                                OrderId = order.Id,
+                                SubTotalPrice = item.SubTotal,
+                                SubTotalQuantity = item.SubQuantity,
+                                SubTotalFinalPrice = item.SubTotal
+                            };
+                            if (order.OrderItems == null) order.OrderItems = new List<OrderItems>();
+                            order.OrderItems.Add(orderItem);
+                        }
+                        await CreateAsync(order);
+                        await CommitAsync();
+                        trans.Commit();
                         try
                         {
-                            var order = new Orders();
-                            order.Status = (int)OrderStatusEnum.New;
-                            order.Discount = 0;
-                            order.Code = GenerateOrderCode().ToUpper();
-                            order.TotalPrice = data.TotalPrice;
-                            order.FinalPrice = data.TotalPrice;
-                            order.TotalQuantity = data.TotalQuantity;
-                            order.UserId = user.Id;
-
-                            foreach (var item in data.CartItems)
-                            {
-                                var orderItem = new OrderItems
-                                {
-                                    Discount = 0,
-                                    ProductId = item.Id,
-                                    OrderId = order.Id,
-                                    SubTotalPrice = item.SubTotal,
-                                    SubTotalQuantity = item.SubQuantity,
-                                    SubTotalFinalPrice = item.SubTotal
-                                };
-                                if(order.OrderItems == null) order.OrderItems = new List<OrderItems>();
-                                order.OrderItems.Add(orderItem);
-                            }
-                            await this.CreateAsync(order);
-                            await this.UnitOfWork.CommitAsync();
-                            trans.Commit();
                             var messagePayloads = new List<MessagePayload>()
                             {
-                                await PrepareLeaderOrderMailConfirmAsync(user, order),
-                                await PrepareCustomerOrderMailConfirm(user, order),
+                                await emailService.PrepareLeaderOrderMailConfirmAsync(user, order),
+                                await emailService.PrepareCustomerOrderMailConfirm(user, order)
                             };
-                            var emailResult = await emailService.SendEmailWithBachMocWrapperAsync(messagePayloads);
 
+                            var emailResult = await emailService.SendEmailWithBachMocWrapperAsync(messagePayloads);
                             emailResult.MatchNone(error =>
                             {
                                 Logger.LogInformation("Send mails to confirm order code {Code} on {CreatedDate} failure: {error}", user.Id, order.Code, order.CreatedDate, error);
@@ -122,84 +120,16 @@ namespace Doitsu.Ecommerce.Core.Services
                         catch (Exception ex)
                         {
                             Logger.LogError(ex, "Process user order fail");
-                            trans.Rollback();
                             return Option.None<string, string>($"Quá trình xử lý đơn hàng bị lỗi.");
                         }
                     }
                 });
         }
 
-        private async Task<MessagePayload> PrepareCustomerOrderMailConfirm(EcommerceIdentityUser user, Orders order)
-        {
-            var brandService = this.UnitOfWork.GetService<IBrandService>();
-            try
-            {
-                var currentBrand = await brandService.FirstOrDefaultAsync();
-                var subject = $"[{currentBrand.Name}] XÁC NHẬN ĐƠN HÀNG #{order.Code} - {DateTime.UtcNow.ToVietnamDateTime().ToShortDateString()}";
-                var destPayload = new MailPayloadInformation
-                {
-                    Mail = user.Email,
-                    Name = user.Fullname
-                };
-
-                var body = $"<p>Bạn đã đặt thành công đơn hàng có mã đơn: <a href='{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/nguoi-dung/thong-tin-tai-khoan'>#{order.Code}</a></p>";
-                body += $"<p>Để có thể xem chi tiết đơn hàng, mong quý khách nhấp vào đường dẫn phía trên.</p><br/>";
-
-                var messagePayload = new MessagePayload();
-                messagePayload.Subject = subject;
-                messagePayload.Body = body;
-                messagePayload.DestEmail = destPayload;
-                return messagePayload;
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, $"Cannot send email to confirm Order Code {order.Code} of {user.Fullname} with id {user.Id}");
-                return null;
-            }
-        }
-
-        private async Task<MessagePayload> PrepareLeaderOrderMailConfirmAsync(EcommerceIdentityUser user, Orders order)
-        {
-            var brandService = this.UnitOfWork.GetService<IBrandService>();
-            try
-            {
-                var currentBrand = await brandService.FirstOrDefaultAsync();
-                var subject = $"[{currentBrand.Name}] ĐƠN HÀNG MỚI #{order.Code} - {DateTime.UtcNow.ToVietnamDateTime().ToShortDateString()}";
-                var destPayload = new MailPayloadInformation
-                {
-                    Mail = leaderMailOption.Mail,
-                    Name = leaderMailOption.Name
-                };
-                var body = "<p>";
-                body += "Có đơn đặt hàng vào hệ thống. Thông tin chi tiết:<br/>";
-                body += $"Người đặt: {user.Fullname}<br/>";
-                body += $"Email: {user.Email}<br/>";
-                body += $"Số điện thoại: {user.PhoneNumber}<br/>";
-                body += $"Địa chỉ: {user.Address}<br/>";
-                body += $"Mã đơn: #{order.Code}<br/>";
-                body += $"Ngày đặt: {DateTime.UtcNow.ToVietnamDateTime().ToShortDateString()}<br/>";
-                body += $"Tổng tiền: {order.FinalPrice}";
-                body += "</p>";
-                body += $"<p>Hãy vào trang quản lý để xem thông tin chi tiết: <a href='{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/Admin'>Trang Quản Lý</a></p><br/>";
-
-                var messagePayload = new MessagePayload();
-                messagePayload.Subject = subject;
-                messagePayload.Body = body;
-                messagePayload.DestEmail = destPayload;
-
-                return messagePayload;
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, $"Cannot send email to confirm Order Code {order.Code} of {user.Fullname} with id {user.Id}");
-                return null;
-            }
-        }
-
         public async Task<ImmutableList<OrderViewModel>> GetAllOrdersByUserIdAsync(int userId)
         {
             var result = await this.GetAsNoTracking(x => x.UserId.Equals(userId))
-                .ProjectTo<OrderViewModel>(this.UnitOfWork.Mapper.ConfigurationProvider)
+                .ProjectTo<OrderViewModel>(Mapper.ConfigurationProvider)
                 .OrderByDescending(x => x.CreatedDate)
                 .ToListAsync();
 
@@ -217,14 +147,14 @@ namespace Doitsu.Ecommerce.Core.Services
         {
             return await (orderId, statusEnum).SomeNotNull()
                 .WithException(string.Empty)
-                .FilterAsync(async d => await this.SelfDbSet.AnyAsync(x => x.Id == d.orderId), "Không thể tim thấy đơn hàng cần đổi trạng thái")
+                .FilterAsync(async d => await this.SelfRepository.AnyAsync(x => x.Id == d.orderId), "Không thể tim thấy đơn hàng cần đổi trạng thái")
                 .MapAsync(async d =>
                 {
                     var order = await this.FindByKeysAsync(d.orderId);
                     order.Status = (int)statusEnum;
                     this.Update(order);
-                    await this.UnitOfWork.CommitAsync();
-                    return this.UnitOfWork.Mapper.Map<OrderViewModel>(order);
+                    await CommitAsync();
+                    return Mapper.Map<OrderViewModel>(order);
                 });
         }
 
@@ -236,8 +166,9 @@ namespace Doitsu.Ecommerce.Core.Services
         {
             var query = this.GetAllAsNoTracking();
 
-            if(orderStatus.HasValue) {
-                query = query.Where(x => x.Status == (int) orderStatus.Value);
+            if (orderStatus.HasValue)
+            {
+                query = query.Where(x => x.Status == (int)orderStatus.Value);
             }
 
             if (!userPhone.IsNullOrEmpty())
@@ -254,16 +185,16 @@ namespace Doitsu.Ecommerce.Core.Services
                 }
             }
 
-            if(!orderCode.IsNullOrEmpty())
+            if (!orderCode.IsNullOrEmpty())
             {
                 query = query.Where(x => x.Code.Contains(orderCode));
             }
 
             var result = await query
-                .ProjectTo<OrderDetailViewModel>(this.UnitOfWork.Mapper.ConfigurationProvider)
+                .ProjectTo<OrderDetailViewModel>(Mapper.ConfigurationProvider)
                 .OrderByDescending(x => x.CreatedDate)
                 .ToListAsync();
-            
+
             return result.ToImmutableList();
         }
     }

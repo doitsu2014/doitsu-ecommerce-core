@@ -7,7 +7,7 @@ namespace Doitsu.Ecommerce.Core.ViewModels {
         public string Email { get; set; }
     }
 
-    public class MarketingMoreInformationCustomerViewModel {
+    public class MarketingCustomerMoreInformationViewModel {
         public string Email { get; set; }
         public string UserPhoneNumber { get; set; }
         public string UserFullname { get; set; }

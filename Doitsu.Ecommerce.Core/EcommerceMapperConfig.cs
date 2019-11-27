@@ -25,15 +25,13 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<EcommerceIdentityUser, EcommerceIdentityUserViewModel>();
                 cfg.CreateMap<EcommerceIdentityUserViewModel, EcommerceIdentityUser>();
                 cfg.CreateMap<EcommerceIdentityRole, EcommerceIdentityRoleViewModel>();
-                //cfg.CreateMap<AspNetUsers, AspNetUserViewModel>();
-                //cfg.CreateMap<AspNetUserViewModel, AspNetUsers>();
-                //cfg.CreateMap<AspNetUserRoles, UserRolesViewModel>();
                 #endregion
 
                 cfg.CreateMap<Categories, CategoryMenuViewModel>();
                 cfg.CreateMap<Categories, CategoryViewModel>();
                 cfg.CreateMap<Categories, CategoryWithProductOverviewViewModel>();
-                cfg.CreateMap<Categories, CategoryRecursiveViewModel>().MaxDepth(3);
+                cfg.CreateMap<Categories, CategoryWithParentViewModel>().MaxDepth(3);
+                cfg.CreateMap<Categories, CategoryWithInverseParentViewModel>().MaxDepth(5);
 
                 cfg.CreateMap<Products, ProductViewModel>();
                 cfg.CreateMap<Products, ProductOverviewViewModel>()
@@ -81,7 +79,7 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<BlogCategoryViewModel, BlogCategories>();
 
                 cfg.CreateMap<MarketingCustomers, MarketingCustomerViewModel>();
-                cfg.CreateMap<MarketingCustomers, MarketingMoreInformationCustomerViewModel>();
+                cfg.CreateMap<MarketingCustomers, MarketingCustomerMoreInformationViewModel>();
                 cfg.CreateMap<MarketingCustomerViewModel, MarketingCustomers>();
 
                 cfg.CreateMap<CustomerFeedbacks, CustomerFeedbackViewModel>();

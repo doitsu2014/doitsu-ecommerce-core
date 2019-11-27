@@ -5,6 +5,9 @@ using Microsoft.Extensions.Logging;
 using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
+using AutoMapper;
+using Doitsu.Ecommerce.Core.Data;
+
 namespace Doitsu.Ecommerce.Core.Services
 {
     public interface IMarketingCustomerService : IBaseService<MarketingCustomers>
@@ -16,9 +19,8 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public class MarketingCustomerService : BaseService<MarketingCustomers>, IMarketingCustomerService
     {
-        public MarketingCustomerService(IUnitOfWork unitOfWork, ILogger<BaseService<MarketingCustomers>> logger) : base(unitOfWork, logger)
+        public MarketingCustomerService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<MarketingCustomers, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
         {
-
         }
 
         public async Task<MarketingCustomers> CreateWithConstraintAsync(MarketingCustomerViewModel data, int userId)
@@ -32,7 +34,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     exist.UserId = userId;
                 }
                 this.Update(exist);
-                await this.UnitOfWork.CommitAsync();
+                await CommitAsync();
                 return exist;
             }
             else
@@ -42,7 +44,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 {
                     result.UserId = userId;
                 }
-                await this.UnitOfWork.CommitAsync();
+                await CommitAsync();
                 return result;
             }
         }

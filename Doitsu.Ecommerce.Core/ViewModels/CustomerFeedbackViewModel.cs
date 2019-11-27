@@ -61,5 +61,10 @@ namespace Doitsu.Ecommerce.Core.ViewModels
             get;
             set;
         }
+        public string Content
+        {
+            get;
+            set;
+        }
     }
 }

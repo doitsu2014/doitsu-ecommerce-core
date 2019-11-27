@@ -9,6 +9,7 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public string Code { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public string Property { get; set; }
         public int? CateId { get; set; }
         public int? ArtistId { get; set; }
         public int? CollectionId { get; set; }
@@ -23,5 +24,6 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public virtual Categories Cate { get; set; }
         public virtual ICollection<OrderItems> OrderItems { get; set; }
         public virtual ICollection<ProductTag> ProductTag { get; set; }
+        public virtual ICollection<ProductCollectionMappings> ProductCollectionMappings { get; set; }
     }
 }

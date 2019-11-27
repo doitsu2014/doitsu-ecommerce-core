@@ -11,6 +11,9 @@ using Microsoft.Extensions.Logging;
 using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
+using AutoMapper;
+using Doitsu.Ecommerce.Core.Data;
+
 namespace Doitsu.Ecommerce.Core.Services
 {
 
@@ -34,25 +37,24 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public class ProductService : BaseService<Products>, IProductService
     {
-        public ProductService(IUnitOfWork unitOfWork, ILogger<BaseService<Products>> logger) : base(unitOfWork, logger)
+        public ProductService(EcommerceDbContext dbContext,
+                            IMapper mapper,
+                            ILogger<BaseService<Products, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
         {
-
         }
+
+        private async Task<CategoryWithProductOverviewViewModel> GetFirstCategoryWithProductByCateSlug(string slug) 
+            =>  await DbContext.Set<Categories>().Where(c => c.Slug == slug).ProjectTo<CategoryWithProductOverviewViewModel>(Mapper.ConfigurationProvider).FirstOrDefaultAsync();
 
         public async Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsByCateIdAsync(string cateSlug)
         {
-            var categorySerivce = this.UnitOfWork.GetService<ICategoryService>();
-            var category = await categorySerivce
-                .FirstOrDefaultAsync<CategoryWithProductOverviewViewModel>(cate => cateSlug == cate.Slug);
-
+            var category = await GetFirstCategoryWithProductByCateSlug(cateSlug);
             if (category == null)
             {
                 return (new List<ProductOverviewViewModel>()).ToImmutableList();
             }
-
             var productsQuery =
                 await QueryAllOriginProductsInSuperParentCategoryAsync(Constants.SuperFixedCategorySlug.PRODUCT);
-
             if (category.InverseParentCate.Count() > 0)
             {
                 var listProducts = ImmutableList<ProductOverviewViewModel>.Empty;
@@ -61,7 +63,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     var innerProducts = (await productsQuery
                             .Where(pro => pro.CateId == childCate.Id).ToListAsync())
                         .Select(
-                            pro => this.UnitOfWork.Mapper.Map<ProductOverviewViewModel>(pro)
+                            pro => Mapper.Map<ProductOverviewViewModel>(pro)
                         );
 
                     listProducts = listProducts.AddRange(innerProducts);
@@ -84,7 +86,7 @@ namespace Doitsu.Ecommerce.Core.Services
             {
                 var queryBuildings = this
                     .Get(x => x.Cate.Slug == buildingCategory.Slug)
-                    .ProjectTo<ProductOverviewViewModel>(this.UnitOfWork.Mapper.ConfigurationProvider);
+                    .ProjectTo<ProductOverviewViewModel>(Mapper.ConfigurationProvider);
 
                 var count = await queryBuildings.CountAsync();
                 if (count != 0)
@@ -102,9 +104,9 @@ namespace Doitsu.Ecommerce.Core.Services
         public async Task<ProductDetailViewModel> GetProductDetailBySlugAsync(string productSlug)
         {
             var productDetailVM =
-                await this.SelfDbSet
+                await this.SelfRepository
                 .AsNoTracking()
-                .ProjectTo<ProductDetailViewModel>(this.UnitOfWork.Mapper.ConfigurationProvider)
+                .ProjectTo<ProductDetailViewModel>(Mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync(x => x.Slug == productSlug);
 
             return productDetailVM;
@@ -121,7 +123,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     .Skip(0)
                     .Take(take)
                     .ToListAsync())
-                .Select(x => this.UnitOfWork.Mapper.Map<ProductOverviewViewModel>(x));
+                .Select(x => Mapper.Map<ProductOverviewViewModel>(x));
 
             return listShuffleOverview.ToImmutableList();
         }
@@ -129,7 +131,7 @@ namespace Doitsu.Ecommerce.Core.Services
         public async Task<ImmutableList<ProductOverviewViewModel>> GetProductsFromSuperParentCateId(string superParentCateSlug, string productName, string productCode)
         {
             var productsQuery = await QueryAllOriginProductsInSuperParentCategoryAsync(superParentCateSlug);
-                
+
             if (!productName.IsNullOrEmpty())
             {
                 var productNameTrim = productName.Trim();
@@ -146,26 +148,32 @@ namespace Doitsu.Ecommerce.Core.Services
                 .OrderByDescending(x => x.Id)
                 .ToListAsync();
 
-            var result = productList.Select(x => this.UnitOfWork.Mapper.Map<ProductOverviewViewModel>(x));
+            var result = productList.Select(x => Mapper.Map<ProductOverviewViewModel>(x));
             return result.ToImmutableList();
         }
 
         private async Task<IQueryable<Products>> QueryAllOriginProductsInSuperParentCategoryAsync(string superParentCateSlug)
         {
             // query categories
-            var categoryService = this.UnitOfWork.GetService<ICategoryService>();
-
-            var allParentCategoriesOfProduct = (await categoryService
-                .Get(x => x.ParentCate != null && x.ParentCate.Slug == superParentCateSlug)
-                .ProjectTo<CategoryMenuViewModel>(this.UnitOfWork.Mapper.ConfigurationProvider)
-                .ToListAsync()).ToImmutableList();
+            var allParentCategoriesOfProduct = (await GetRepository<Categories>()
+                    .AsNoTracking()
+                    .Where(x => x.ParentCate != null && x.ParentCate.Slug == superParentCateSlug)
+                    .ProjectTo<CategoryMenuViewModel>(Mapper.ConfigurationProvider)
+                    .ToListAsync()).ToImmutableList();
 
             var sortedSetInverseCategoryIds = new SortedSet<int>();
             foreach (var parentCategory in allParentCategoriesOfProduct)
             {
                 var inverseCategoryIds = parentCategory.InverseParentCate.Select(ic => ic.Id).ToImmutableSortedSet();
-                foreach (var inverseCategoryId in inverseCategoryIds)
-                    sortedSetInverseCategoryIds.Add(inverseCategoryId);
+                if (inverseCategoryIds.Count > 0)
+                {
+                    foreach (var inverseCategoryId in inverseCategoryIds)
+                        sortedSetInverseCategoryIds.Add(inverseCategoryId);
+                }
+                else
+                {
+                    sortedSetInverseCategoryIds.Add(parentCategory.Id);
+                }
             }
 
             // query products through categories ids

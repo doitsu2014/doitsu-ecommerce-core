@@ -14,6 +14,10 @@ namespace Doitsu.Ecommerce.Core
         {
             public const string PRODUCT = "san-pham";
             public const string BUILDING = "cong-trinh";
+            public const string ARTIST = "nghe-si";
+            public const string CATEGORY = "danh-muc";
+            public const string EVENT = "su-kien";
+            public const string GALLERY = "thu-vien";
         }
 
         public static class CacheKey

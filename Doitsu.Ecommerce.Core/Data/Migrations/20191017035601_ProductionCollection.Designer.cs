@@ -4,14 +4,16 @@ using Doitsu.Ecommerce.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    partial class EcommerceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191017035601_ProductionCollection")]
+    partial class ProductionCollection
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -875,9 +877,6 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
 
                     b.Property<decimal>("Price")
                         .HasColumnType("money");
-
-                    b.Property<string>("Property")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("Sku")
                         .HasColumnType("int");

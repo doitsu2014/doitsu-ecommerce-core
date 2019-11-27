@@ -33,6 +33,18 @@ namespace Doitsu.Ecommerce.Core.IdentitiesExtension
             return user;
         }
 
+        /// <summary>
+        /// As no tracking and find use by phone number
+        /// </summary>
+        /// <param name="phone"></param>
+        /// <returns></returns>
+        public async Task<EcommerceIdentityUser> FindByIdentityInformationAsync(string identityInformation)
+        {
+            identityInformation = identityInformation?.Trim().ToLower();
+            var user = await this.Users.AsNoTracking().FirstOrDefaultAsync(x => x.PhoneNumber == identityInformation || x.Email == identityInformation);
+            return user;
+        }
+
         public async Task<TokenAuthorizeModel> GetJwtAuthorizeModelAsync(T user, int expireDays = 7)
         {
             var userRoles = (await this.GetRolesAsync(user));

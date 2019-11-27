@@ -28,6 +28,7 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public string YoutubeUrl { get; set; }
         public int? OpenDayOfWeek { get; set; }
         public int? CloseDayOfWeek { get; set; }
+        public string FaviconUrl { get; set; }
         public bool Active { get; set; }
         public byte[] Vers { get; set; }
     }
