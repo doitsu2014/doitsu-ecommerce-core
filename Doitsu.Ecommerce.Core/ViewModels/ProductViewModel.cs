@@ -163,6 +163,11 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public virtual ICollection<ProductVariantOptionValueViewModel> ProductVariantOptionValues { get; set; }
     }
 
+    public class ProductVariantDetailViewModel : ProductVariantViewModel
+    {
+        public virtual ICollection<PromotionDetailViewModel> PromotionDetails { get; set; }
+    }
+
     public class ProductVariantOptionValueViewModel
     {
         public int Id { get; set; }

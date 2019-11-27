@@ -13,6 +13,6 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public bool Active { get; set; }
         public byte[] Vers { get; set; }
         
-        public ProductVariants ProductVariant { get; set; }
+        public virtual ProductVariants ProductVariant { get; set; }
     }
 }

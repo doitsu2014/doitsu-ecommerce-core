@@ -115,6 +115,9 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<SliderViewModel, Sliders>();
                 cfg.CreateMap<Sliders, SliderViewModel>();
 
+                cfg.CreateMap<PromotionDetail, PromotionDetailViewModel>();
+                cfg.CreateMap<PromotionDetailViewModel, PromotionDetail>();
+
             });
 
             IMapper mapper = autoMapperConfig.CreateMapper();

@@ -41,6 +41,7 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<Option<int[], string>> CreateProductWithOptionAsync(ICollection<CreateProductViewModel> data);
         Task<Option<int, string>> UpdateProductWithOptionAsync(UpdateProductViewModel data);
         Task<Option<int, string>> UpdateProductVariantsAsync(ProductVariantViewModel data);
+        Task<ProductVariantDetailViewModel> FindProductVariantFromOptionsAsync(ICollection<ProductOptionValueViewModel> listProductOptions);
     }
 
     public class ProductService : BaseService<Products>, IProductService
@@ -417,6 +418,29 @@ namespace Doitsu.Ecommerce.Core.Services
                         return result.Select(x => x.Id).ToArray();
                     });
             }
+        }
+
+        public async Task<ProductVariantDetailViewModel> FindProductVariantFromOptionsAsync(ICollection<ProductOptionValueViewModel> listProductOptions)
+        {
+            var poIds = listProductOptions.Select(po => po.Id);
+            var totalIds = poIds.Count();
+            var productVariantOptionValues = (await this.DbContext
+                .ProductVariantOptionValues
+                .Include(pvov => pvov.ProductVariant)
+                    .ThenInclude(pv => pv.PromotionDetails)
+                .AsNoTracking()
+                .Where(pvov => poIds.Contains(pvov.ProductOptionValueId))
+                .OrderBy(pvov => pvov.ProductVariantId)
+                .ToListAsync())
+                .GroupBy(pvov => pvov.ProductVariantId)
+                .Where(gb => gb.Count() == totalIds)
+                .FirstOrDefault();
+                
+            if(productVariantOptionValues.Count() > 0) {
+                var productVariant = productVariantOptionValues.First().ProductVariant;
+                return this.Mapper.Map<ProductVariantDetailViewModel>(productVariant);
+            }
+            return null;
         }
     }
 }
