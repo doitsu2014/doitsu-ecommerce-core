@@ -12,8 +12,8 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
             base.Configure(builder);
 
             builder.Property(e => e.SubTotalFinalPrice).HasColumnType("money");
-
             builder.Property(e => e.SubTotalPrice).HasColumnType("money");
+            builder.Property(e => e.Note).HasMaxLength(500);
 
             builder.HasOne(d => d.Order)
                 .WithMany(p => p.OrderItems)
@@ -26,6 +26,11 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__OrderItem__Produ__0F624AF8");
+
+            builder.HasOne(d => d.ProductVariant)
+                .WithMany(p => p.OrderItems)
+                .HasForeignKey(d => d.ProductVariantId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         }
     }
 }

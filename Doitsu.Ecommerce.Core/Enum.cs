@@ -2,6 +2,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Doitsu.Ecommerce.Core
 {
+    public enum UserTransactionTypeEnum 
+    {
+        Income = 0,
+        Expense = 1,
+        Rollback = 2
+    }
+    
     public enum OrderStatusEnum
     {
         New = 0,
@@ -10,12 +17,24 @@ namespace Doitsu.Ecommerce.Core
         Cancel = 3
     }
 
+    public enum ProductOptionValueStatusEnum
+    {
+        Unavailable = 0,
+        Available = 1
+    }
+
+    public enum ProductVariantStatusEnum
+    {
+        Unavailable = 0,
+        Available = 1
+    }
+
     public enum GenderEnum
     {
         [Display(Name = "Không rõ")]
         Unknown = 0, [Display(Name = "Nam")]
         Male = 1, [Display(Name = "Nữ")]
-        Female = 2,
+        Female = 2
     }
 
     public enum DayOfWeek
