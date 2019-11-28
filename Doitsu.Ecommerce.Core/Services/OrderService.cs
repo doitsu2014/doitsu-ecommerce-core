@@ -215,9 +215,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 .MapAsync(async d =>
                 {
                     var productVariant = await productService.FindProductVariantFromOptionsAsync(request.ProductOptionValues);
-
                     
-
                     return d.ProductName;
                 });
         }
