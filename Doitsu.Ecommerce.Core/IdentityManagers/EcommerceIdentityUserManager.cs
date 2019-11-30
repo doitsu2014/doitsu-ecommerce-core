@@ -73,7 +73,7 @@ namespace Doitsu.Ecommerce.Core.IdentitiesExtension
                 });
         }
 
-        public async Task<Option<T, string>> FindUserByPhoneAndPasswordAsync(LoginViewModel loginData)
+        public async Task<Option<T, string>> FindUserByPhoneAndPasswordAsync(LoginByPhoneViewModel loginData)
         {
             return await loginData.SomeNotNull()
                 .WithException("Dữ liệu login không được để trống")

@@ -7,29 +7,24 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
 {
-    public class ProductVariantOptionValuesConfiguration : BaseEntityConfiguration<ProductVariantOptionValues>
+    public class ProductVariantOptionValuesConfiguration : BaseEntityConfiguration<ProductVariantOptionValues, int>
     {
-        public override Expression<Func<ProductVariantOptionValues, object>> KeyExpression => x => new { x.ProductOptionId, x.ProductVariantId };
-
         public override void Configure(EntityTypeBuilder<ProductVariantOptionValues> builder)
         {
             base.Configure(builder);
 
-            builder.HasOne(x => x.ProductOption)
-                .WithMany(x => x.ProductVariantOptionValues)
-                .HasForeignKey(x => x.ProductOptionId)
-                .OnDelete(DeleteBehavior.ClientSetNull);
-
             builder.HasOne(x => x.ProductVariant)
                 .WithMany(x => x.ProductVariantOptionValues)
                 .HasForeignKey(x => x.ProductVariantId)
-                .OnDelete(DeleteBehavior.ClientSetNull);
+                .IsRequired();
 
             builder.HasOne(x => x.ProductOptionValue)
                 .WithMany(x => x.ProductVariantOptionValues)
-                .HasForeignKey(x => x.ProductOptionValueId)
-                .OnDelete(DeleteBehavior.ClientSetNull);
-         
+                .HasForeignKey(x => x.ProductOptionValueId);
+
+            builder.HasOne(x => x.ProductOption)
+                .WithMany(x => x.ProductVariantOptionValues)
+                .HasForeignKey(x => x.ProductOptionId);
         }
     }
 }

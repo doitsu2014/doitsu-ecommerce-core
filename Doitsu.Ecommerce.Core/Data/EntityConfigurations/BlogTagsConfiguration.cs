@@ -14,13 +14,14 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
             builder.HasOne(d => d.Blog)
                 .WithMany(p => p.BlogTags)
                 .HasForeignKey(d => d.BlogId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__BlogTags__BlogId__07C12930");
 
             builder.HasOne(d => d.Tag)
                 .WithMany(p => p.BlogTags)
                 .HasForeignKey(d => d.TagId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__BlogTags__TagId__08B54D69");
         }
     }

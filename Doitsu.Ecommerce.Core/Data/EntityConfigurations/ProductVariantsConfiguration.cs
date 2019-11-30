@@ -15,6 +15,7 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
 
             builder.HasOne(x => x.Product)
                 .WithMany(x => x.ProductVariants)
+                .IsRequired()
                 .HasForeignKey(x => x.ProductId);
 
             builder.HasIndex(x => x.Sku).IsUnique();

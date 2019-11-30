@@ -249,7 +249,7 @@ namespace Doitsu.Ecommerce.Core.Services
                             ProductOptionId = productOption.Id,
                             ProductOptionValueId = productOptionValue.Id,
                             ProductOptionValue = productOptionValue,
-                            ProductOption = productOption,
+                            ProductOption = productOption
                         });
                     }
 
@@ -282,6 +282,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
                         productVariant.ProductVariantOptionValues = productVariant.ProductVariantOptionValues.Select(pvov =>
                         {
+                            pvov.Id = pvov.Id;
                             pvov.ProductVariantId = exist.Id;
                             return pvov;
                         }).ToImmutableList();
@@ -371,7 +372,7 @@ namespace Doitsu.Ecommerce.Core.Services
                         // Make product variant have any unavailable product option value to unavailable
                         d.ProductEntProductVariants.ToList().ForEach(pva =>
                         {
-                            var isUnavailable = pva.ProductVariantOptionValues.Any(pvov => d.ListPoUnavailable.Contains(pvov.ProductOptionValueId));
+                            var isUnavailable = pva.ProductVariantOptionValues.Any(pvov => d.ListPoUnavailable.Contains(pvov.ProductOptionValueId ?? int.MinValue));
                             if (isUnavailable)
                             {
                                 pva.Status = ProductVariantStatusEnum.Unavailable;
@@ -429,7 +430,8 @@ namespace Doitsu.Ecommerce.Core.Services
                 .Include(pvov => pvov.ProductVariant)
                     .ThenInclude(pv => pv.PromotionDetails)
                 .AsNoTracking()
-                .Where(pvov => poIds.Contains(pvov.ProductOptionValueId))
+                // Note: because is nullable so I have to use min value of int to make false in Query Contains 
+                .Where(pvov => poIds.Contains(pvov.ProductOptionValueId ?? int.MinValue))
                 .OrderBy(pvov => pvov.ProductVariantId)
                 .ToListAsync())
                 .GroupBy(pvov => pvov.ProductVariantId)

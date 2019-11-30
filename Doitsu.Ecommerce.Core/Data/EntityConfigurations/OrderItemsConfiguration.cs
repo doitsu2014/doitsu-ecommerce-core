@@ -18,13 +18,15 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
             builder.HasOne(d => d.Order)
                 .WithMany(p => p.OrderItems)
                 .HasForeignKey(d => d.OrderId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__OrderItem__Order__10566F31");
 
             builder.HasOne(d => d.Product)
                 .WithMany(p => p.OrderItems)
                 .HasForeignKey(d => d.ProductId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__OrderItem__Produ__0F624AF8");
 
             builder.HasOne(d => d.ProductVariant)
