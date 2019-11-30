@@ -14,6 +14,7 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
             base.Configure(builder);
             builder.HasIndex(e => e.Slug)
                 .HasName("IDX_BC_SLUG");
+                
             builder.Property(e => e.Slug)
                 .IsRequired()
                 .HasMaxLength(500);

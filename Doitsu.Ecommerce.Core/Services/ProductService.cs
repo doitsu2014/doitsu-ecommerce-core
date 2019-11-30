@@ -13,6 +13,9 @@ using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
 using AutoMapper;
 using Doitsu.Ecommerce.Core.Data;
+using Optional;
+using Optional.Async;
+using Doitsu.Utils;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -33,6 +36,12 @@ namespace Doitsu.Ecommerce.Core.Services
         /// <param name="productName"></param>
         /// <returns></returns>
         Task<ImmutableList<ProductOverviewViewModel>> GetProductsFromSuperParentCateId(string superParentCateSlug, string productName = "", string productCode = "");
+
+        Task<Option<int, string>> CreateProductWithOptionAsync(CreateProductViewModel data);
+        Task<Option<int[], string>> CreateProductWithOptionAsync(ICollection<CreateProductViewModel> data);
+        Task<Option<int, string>> UpdateProductWithOptionAsync(UpdateProductViewModel data);
+        Task<Option<int, string>> UpdateProductVariantsAsync(ProductVariantViewModel data);
+        Task<ProductVariantDetailViewModel> FindProductVariantFromOptionsAsync(ICollection<ProductOptionValueViewModel> listProductOptions);
     }
 
     public class ProductService : BaseService<Products>, IProductService
@@ -43,8 +52,8 @@ namespace Doitsu.Ecommerce.Core.Services
         {
         }
 
-        private async Task<CategoryWithProductOverviewViewModel> GetFirstCategoryWithProductByCateSlug(string slug) 
-            =>  await DbContext.Set<Categories>().Where(c => c.Slug == slug).ProjectTo<CategoryWithProductOverviewViewModel>(Mapper.ConfigurationProvider).FirstOrDefaultAsync();
+        private async Task<CategoryWithProductOverviewViewModel> GetFirstCategoryWithProductByCateSlug(string slug)
+            => await DbContext.Set<Categories>().Where(c => c.Slug == slug).ProjectTo<CategoryWithProductOverviewViewModel>(Mapper.ConfigurationProvider).FirstOrDefaultAsync();
 
         public async Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsByCateIdAsync(string cateSlug)
         {
@@ -185,6 +194,255 @@ namespace Doitsu.Ecommerce.Core.Services
                 .Where(pro => cateIds.Contains(pro.CateId.Value));
 
             return productsQuery;
+        }
+
+        private string GetSkuAttributeString(string value, int length = 0)
+        {
+            if (value.IsNullOrEmpty())
+            {
+                return string.Empty;
+            }
+
+            var noWhiteSpace = value.Replace(" ", "_").ToUpper();
+
+            if (noWhiteSpace.Length <= length || length == 0)
+            {
+                return noWhiteSpace;
+            }
+            else
+            {
+                noWhiteSpace = noWhiteSpace.Substring(0, length);
+                return noWhiteSpace;
+            }
+        }
+
+        private ImmutableList<ProductVariants> BuildListProductVariant(Products product)
+        {
+            if (product.ProductOptions == null || product.ProductOptions.Count == 0)
+            {
+                return ImmutableList<ProductVariants>.Empty;
+            }
+
+            var productVariants = product.ProductOptions
+                .Select(po => po.ProductOptionValues)
+                .CartesianProduct()
+                // Mapping cartesian to product variant
+                .Select(listProductOptionValues =>
+                {
+                    var productVariant = new ProductVariants()
+                    {
+                        ProductId = product.Id,
+                        AnotherPrice = 0,
+                        AnotherDiscount = 0,
+                        InventoryQuantity = 0,
+                        Sku = $"{product.Code}",
+                        Product = product,
+                        ProductVariantOptionValues = new List<ProductVariantOptionValues>()
+                    };
+
+                    foreach (var productOptionValue in listProductOptionValues)
+                    {
+                        var productOption = product.ProductOptions.FirstOrDefault(po => po.ProductOptionValues.Any(pov => pov.Value == productOptionValue.Value));
+                        productVariant.Sku = string.Join('/', new string[] { productVariant.Sku, GetSkuAttributeString(productOptionValue.Value) });
+                        productVariant.ProductVariantOptionValues.Add(new ProductVariantOptionValues()
+                        {
+                            ProductOptionId = productOption.Id,
+                            ProductOptionValueId = productOptionValue.Id,
+                            ProductOptionValue = productOptionValue,
+                            ProductOption = productOption
+                        });
+                    }
+
+                    return productVariant;
+                })
+                .Select(productVariant =>
+                {
+                    var listDbProductVariants = product.ProductVariants?.ToList() ?? new List<ProductVariants>();
+                    var exist = listDbProductVariants.FirstOrDefault(dbPv =>
+                    {
+                        if (dbPv.ProductVariantOptionValues.Count != productVariant.ProductVariantOptionValues.Count)
+                        {
+                            return false;
+                        }
+                        var listDbPvovIds = dbPv.ProductVariantOptionValues.Select(dbPvov => dbPvov.ProductOptionValueId);
+                        var listCurrentPvovIds = productVariant.ProductVariantOptionValues.Select(dbPvov => dbPvov.ProductOptionValueId);
+                        if (listDbPvovIds.Except(listCurrentPvovIds).Count() > 0)
+                        {
+                            return false;
+                        }
+                        return true;
+                    });
+
+                    if (exist != null)
+                    {
+                        productVariant.Id = exist.Id;
+                        productVariant.AnotherPrice = exist.AnotherPrice;
+                        productVariant.AnotherDiscount = exist.AnotherDiscount;
+                        productVariant.InventoryQuantity = exist.InventoryQuantity;
+
+                        productVariant.ProductVariantOptionValues = productVariant.ProductVariantOptionValues.Select(pvov =>
+                        {
+                            pvov.Id = pvov.Id;
+                            pvov.ProductVariantId = exist.Id;
+                            return pvov;
+                        }).ToImmutableList();
+                    }
+
+                    return productVariant;
+                })
+                .ToImmutableList();
+
+            return productVariants;
+        }
+
+        public async Task<Option<int, string>> CreateProductWithOptionAsync(CreateProductViewModel data)
+        {
+            using (var transaction = await this.DbContext.Database.BeginTransactionAsync())
+            {
+                return await data.SomeNotNull()
+                    .WithException("Dữ liệu truyền vào bị rỗng")
+                    .MapAsync(async d =>
+                    {
+                        var productEnt = this.Mapper.Map<Products>(d);
+                        var listProductVariants = this.BuildListProductVariant(productEnt);
+                        productEnt.ProductVariants = listProductVariants;
+
+                        await CreateAsync(productEnt);
+                        await DbContext.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return productEnt.Id;
+                    });
+            }
+        }
+
+        public async Task<Option<int, string>> UpdateProductWithOptionAsync(UpdateProductViewModel data)
+        {
+            using (var transaction = await this.DbContext.Database.BeginTransactionAsync())
+            {
+                return await data.SomeNotNull()
+                    .WithException("Dữ liệu truyền vào bị rỗng")
+                    .MapAsync(async d =>
+                    {
+                        var currentProduct = await this.GetAsNoTracking(prod => prod.Id == d.Id)
+                            .Include(prod => prod.ProductTag)
+                            .Include(prod => prod.ProductOptions)
+                                .ThenInclude(po => po.ProductOptionValues)
+                            .Include(prod => prod.ProductVariants)
+                                .ThenInclude(pv => pv.ProductVariantOptionValues)
+                                .FirstOrDefaultAsync();
+                        this.Mapper.Map(d, currentProduct);
+
+                        return currentProduct;
+                    })
+                    .MapAsync(async productEnt =>
+                    {
+                        var listGeneratedProductVariants = this.BuildListProductVariant(productEnt);
+                        listGeneratedProductVariants.ForEach(gPv =>
+                        {
+                            var modified = productEnt.ProductVariants.FirstOrDefault(pv => pv.Id == gPv.Id && pv.Id > 0);
+                            if (modified != null)
+                            {
+                                // is modified some fields 
+                                modified.Sku = gPv.Sku;
+                            }
+                            else
+                            {
+                                // is add new
+                                productEnt.ProductVariants.Add(gPv);
+                            }
+                        });
+
+                        this.Update(productEnt);
+                        await this.DbContext.SaveChangesAsync();
+
+                        return (
+                            ProductEntId: productEnt.Id,
+                            ProductEntProductVariants: productEnt.ProductVariants,
+                            ListPoUnavailable: productEnt
+                                .ProductOptions
+                                .SelectMany(po => po.ProductOptionValues)
+                                .Where(pov => pov.Status == ProductOptionValueStatusEnum.Unavailable)
+                                .Select(x => x.Id)
+                                .Distinct()
+                                .ToImmutableList()
+                            );
+                    })
+                    .MapAsync(async d =>
+                    {
+                        // Make product variant have any unavailable product option value to unavailable
+                        d.ProductEntProductVariants.ToList().ForEach(pva =>
+                        {
+                            var isUnavailable = pva.ProductVariantOptionValues.Any(pvov => d.ListPoUnavailable.Contains(pvov.ProductOptionValueId ?? int.MinValue));
+                            if (isUnavailable)
+                            {
+                                pva.Status = ProductVariantStatusEnum.Unavailable;
+                            }
+                            else
+                            {
+                                pva.Status = ProductVariantStatusEnum.Available;
+                            }
+                            this.DbContext.Entry(pva).State = EntityState.Modified;
+                        });
+
+                        await this.DbContext.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return d.ProductEntId;
+                    });
+            }
+        }
+
+        Task<Option<int, string>> IProductService.UpdateProductVariantsAsync(ProductVariantViewModel data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<Option<int[], string>> CreateProductWithOptionAsync(ICollection<CreateProductViewModel> data)
+        {
+            using (var transaction = await this.DbContext.Database.BeginTransactionAsync())
+            {
+                return await data.SomeNotNull()
+                    .WithException("Dữ liệu truyền vào bị rỗng")
+                    .MapAsync(async d =>
+                    {
+                        var result = new List<Products>();
+                        foreach (var prodMapping in d)
+                        {
+                            var productEnt = this.Mapper.Map<Products>(prodMapping);
+                            var listProductVariants = this.BuildListProductVariant(productEnt);
+                            productEnt.ProductVariants = listProductVariants;
+                            await CreateAsync(productEnt);
+                            result.Add(productEnt);
+                        }
+                        
+                        await DbContext.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return result.Select(x => x.Id).ToArray();
+                    });
+            }
+        }
+
+        public async Task<ProductVariantDetailViewModel> FindProductVariantFromOptionsAsync(ICollection<ProductOptionValueViewModel> listProductOptions)
+        {
+            var poIds = listProductOptions.Select(po => po.Id);
+            var totalIds = poIds.Count();
+            var productVariantOptionValues = (await this.DbContext
+                .ProductVariantOptionValues
+                .Include(pvov => pvov.ProductVariant)
+                    .ThenInclude(pv => pv.PromotionDetails)
+                .AsNoTracking()
+                // Note: because is nullable so I have to use min value of int to make false in Query Contains 
+                .Where(pvov => poIds.Contains(pvov.ProductOptionValueId ?? int.MinValue))
+                .OrderBy(pvov => pvov.ProductVariantId)
+                .ToListAsync())
+                .GroupBy(pvov => pvov.ProductVariantId)
+                .Where(gb => gb.Count() == totalIds)
+                .FirstOrDefault();
+                
+            if(productVariantOptionValues.Count() > 0) {
+                var productVariant = productVariantOptionValues.First().ProductVariant;
+                return this.Mapper.Map<ProductVariantDetailViewModel>(productVariant);
+            }
+            return null;
         }
     }
 }

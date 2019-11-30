@@ -35,6 +35,12 @@ namespace Doitsu.Ecommerce.Core.Data
         public DbSet<ProductTag> ProductTags { get; set; }
         public DbSet<Sliders> Sliders { get; set; }
         public DbSet<Tag> Tag { get; set; }
+        public DbSet<ProductVariants> ProductVariants { get; set; }
+        public DbSet<ProductVariantOptionValues> ProductVariantOptionValues { get; set; }
+        public DbSet<ProductOptions> ProductOptions { get; set; }
+        public DbSet<ProductOptionValues> ProductOptionValues { get; set; }
+        public DbSet<PromotionDetail> PromotionDetails { get; set; }
+        public DbSet<UserTransaction> UserTransactions { get; set; }
 
         public EcommerceDbContext(DbContextOptions<EcommerceDbContext> options) : base(options) { }
         public EcommerceDbContext(DbContextOptions<EcommerceDbContext> options, IEnumerable<IEntityChangeHandler> handlers) : base(options)
@@ -61,42 +67,6 @@ namespace Doitsu.Ecommerce.Core.Data
 
         public async Task<int> SaveChangesWithBeforeSavingAsync() => await SaveChangesWithBeforeSavingAsync(true);
 
-        // public override int SaveChanges(bool acceptAllChangesOnSuccess)
-        // {
-        //     OnBeforeSaving();
-        //     return base.SaveChanges(acceptAllChangesOnSuccess);
-        // }
-
-        // public override int SaveChanges() => SaveChanges(true);
-
-        // public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
-        //    => await SaveChangesAsync(true, cancellationToken);
-
-        // public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
-        // {
-        //     OnBeforeSaving();
-        //     return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-        // }
-
-        // public virtual Option<int, ImmutableList<ValidationResult>> SaveChangesWithValidation(bool acceptAllChangesOnSuccess)
-        // {
-        //     var validationResult = ExecuteValidation();
-        //     return validationResult.Any() ?
-        //         Option.None<int, ImmutableList<ValidationResult>>(validationResult) :
-        //         Option.Some<int, ImmutableList<ValidationResult>>(SaveChanges(acceptAllChangesOnSuccess));
-        // }
-
-        // public virtual Option<int, ImmutableList<ValidationResult>> SaveChangesWithValidation()
-        //     => SaveChangesWithValidation(true);
-
-        // public virtual async Task<Option<int, ImmutableList<ValidationResult>>> SaveChangesWithValidationAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
-        // {
-        //     var validationResult = ExecuteValidation();
-
-        //     return validationResult.Any() ?
-        //         Option.None<int, ImmutableList<ValidationResult>>(validationResult) :
-        //         Option.Some<int, ImmutableList<ValidationResult>>(await SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken));
-        // }
 
         public Option<object[], string> GetPrimaryKey<T>(T entity) where T : class
         {

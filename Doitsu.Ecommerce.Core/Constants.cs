@@ -2,6 +2,11 @@ namespace Doitsu.Ecommerce.Core
 {
     public class Constants
     {
+        public static class ClaimTypeConstants
+        {
+            public const string USER_ID = "UserId";
+        }
+
         public static class BrandInformation
         {
             public const int Id = 1;

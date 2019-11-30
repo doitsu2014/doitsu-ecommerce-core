@@ -10,11 +10,8 @@ using Doitsu.Service.Core;
 using Doitsu.Service.Core.Services.EmailService;
 using Doitsu.Utils;
 using Doitsu.Ecommerce.Core.ViewModels;
-
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Optional;
 using Optional.Async;
 using Doitsu.Ecommerce.Core.Data.Entities;
@@ -28,6 +25,13 @@ namespace Doitsu.Ecommerce.Core.Services
 {
     public interface IOrderService : IBaseService<Orders>
     {
+        /// <summary>
+        /// Version on Bach Moc Website
+        /// Should be update
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
         Task<Option<string, string>> CheckoutCartAsync(CheckoutCartViewModel data, EcommerceIdentityUser user);
         Task<ImmutableList<OrderViewModel>> GetAllOrdersByUserIdAsync(int userId);
         Task<OrderDetailViewModel> GetOrderDetailByCodeAsync(string orderCode);
@@ -37,18 +41,22 @@ namespace Doitsu.Ecommerce.Core.Services
                                                                          string userPhone,
                                                                          string orderCode);
         Task<Option<OrderViewModel, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum);
+        Task<Option<string, string>> CreateOrderWithOptionAsync(CreateOrderItemWithOptionViewModel request);
     }
 
     public class OrderService : BaseService<Orders>, IOrderService
     {
         private readonly IEmailService emailService;
+        private readonly IProductService productService;
 
         public OrderService(EcommerceDbContext dbContext,
                             IMapper mapper,
                             ILogger<BaseService<Orders, EcommerceDbContext>> logger,
-                            IEmailService emailService) : base(dbContext, mapper, logger)
+                            IEmailService emailService,
+                            IProductService productService) : base(dbContext, mapper, logger)
         {
             this.emailService = emailService;
+            this.productService = productService;
         }
 
         private string GenerateOrderCode()
@@ -63,6 +71,8 @@ namespace Doitsu.Ecommerce.Core.Services
             var result = $"{orderCodeFirstPart}{yearFirstPart}{orderCodeSecondPart}{yearSecondPart}";
             return result;
         }
+
+
 
         public async Task<Option<string, string>> CheckoutCartAsync(CheckoutCartViewModel data, EcommerceIdentityUser user)
         {
@@ -196,6 +206,18 @@ namespace Doitsu.Ecommerce.Core.Services
                 .ToListAsync();
 
             return result.ToImmutableList();
+        }
+
+        public async Task<Option<string, string>> CreateOrderWithOptionAsync(CreateOrderItemWithOptionViewModel request)
+        {
+            return await request.SomeNotNull()
+                .WithException("Dữ liệu truyền lên rỗng")
+                .MapAsync(async d =>
+                {
+                    var productVariant = await productService.FindProductVariantFromOptionsAsync(request.ProductOptionValues);
+                    
+                    return d.ProductName;
+                });
         }
     }
 }

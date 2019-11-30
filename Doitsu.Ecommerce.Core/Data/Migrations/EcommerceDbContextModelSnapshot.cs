@@ -617,10 +617,17 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<double?>("Discount")
                         .HasColumnType("float");
 
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(500)")
+                        .HasMaxLength(500);
+
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
                     b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProductVariantId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("SubTotalFinalPrice")
@@ -643,6 +650,8 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductVariantId");
 
                     b.ToTable("OrderItems");
                 });
@@ -688,8 +697,35 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<double>("Discount")
                         .HasColumnType("float");
 
+                    b.Property<string>("Dynamic01")
+                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(255);
+
+                    b.Property<string>("Dynamic02")
+                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(255);
+
+                    b.Property<string>("Dynamic03")
+                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(255);
+
+                    b.Property<string>("Dynamic04")
+                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(255);
+
+                    b.Property<string>("Dynamic05")
+                        .HasColumnType("nvarchar(1000)")
+                        .HasMaxLength(1000);
+
                     b.Property<decimal>("FinalPrice")
                         .HasColumnType("money");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(500)")
+                        .HasMaxLength(500);
+
+                    b.Property<int?>("Priority")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -801,6 +837,76 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.ToTable("ProductCollections");
                 });
 
+            modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.ProductOptionValues", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("ProductOptionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(256)")
+                        .HasMaxLength(256);
+
+                    b.Property<byte[]>("Vers")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductOptionId");
+
+                    b.ToTable("ProductOptionValues");
+                });
+
+            modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.ProductOptions", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(256)")
+                        .HasMaxLength(256);
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("Vers")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductOptions");
+                });
+
             modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.ProductTag", b =>
                 {
                     b.Property<int>("Id")
@@ -830,6 +936,100 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.HasIndex("TagId");
 
                     b.ToTable("ProductTags");
+                });
+
+            modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.ProductVariantOptionValues", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<int?>("ProductOptionId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProductOptionValueId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductVariantId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("Vers")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductOptionId");
+
+                    b.HasIndex("ProductOptionValueId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("ProductVariantOptionValues");
+                });
+
+            modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.ProductVariants", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<float>("AnotherDiscount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("real")
+                        .HasDefaultValue(0f);
+
+                    b.Property<decimal>("AnotherPrice")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<long>("InventoryQuantity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(-1L);
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Sku")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(256)")
+                        .HasMaxLength(256);
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<byte[]>("Vers")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("Sku")
+                        .IsUnique();
+
+                    b.ToTable("ProductVariants");
                 });
 
             modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.Products", b =>
@@ -879,9 +1079,6 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<string>("Property")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Sku")
-                        .HasColumnType("int");
-
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasColumnType("nvarchar(255)")
@@ -908,6 +1105,43 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasName("NonClusteredIndex-20190831-223149");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.PromotionDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<float>("DiscountPercent")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("real")
+                        .HasDefaultValue(0f);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(255);
+
+                    b.Property<int>("ProductVariantId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("Vers")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("PromotionDetails");
                 });
 
             modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.Sliders", b =>
@@ -993,6 +1227,58 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.ToTable("Tag");
                 });
 
+            modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.UserTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<decimal>("Amount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<DateTime>("CreatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getutcdate())");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(500)")
+                        .HasMaxLength(500);
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("Vers")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserTransactions");
+                });
+
             modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Identities.EcommerceIdentityRole", b =>
                 {
                     b.Property<int>("Id")
@@ -1040,6 +1326,9 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(350)")
                         .HasMaxLength(350);
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -1228,12 +1517,14 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .WithMany("BlogTags")
                         .HasForeignKey("BlogId")
                         .HasConstraintName("FK__BlogTags__BlogId__07C12930")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.Tag", "Tag")
                         .WithMany("BlogTags")
                         .HasForeignKey("TagId")
                         .HasConstraintName("FK__BlogTags__TagId__08B54D69")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -1312,13 +1603,19 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
                         .HasConstraintName("FK__OrderItem__Order__10566F31")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.Products", "Product")
                         .WithMany("OrderItems")
                         .HasForeignKey("ProductId")
                         .HasConstraintName("FK__OrderItem__Produ__0F624AF8")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.ProductVariants", "ProductVariant")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("ProductVariantId");
                 });
 
             modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.Orders", b =>
@@ -1345,18 +1642,64 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.ProductOptionValues", b =>
+                {
+                    b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.ProductOptions", "ProductOption")
+                        .WithMany("ProductOptionValues")
+                        .HasForeignKey("ProductOptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.ProductOptions", b =>
+                {
+                    b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.Products", "Product")
+                        .WithMany("ProductOptions")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.ProductTag", b =>
                 {
                     b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.Products", "Product")
                         .WithMany("ProductTag")
                         .HasForeignKey("ProductId")
                         .HasConstraintName("FK__ProductTa__Produ__14270015")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.Tag", "Tag")
                         .WithMany("ProductTag")
                         .HasForeignKey("TagId")
                         .HasConstraintName("FK__ProductTa__TagId__1332DBDC")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.ProductVariantOptionValues", b =>
+                {
+                    b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.ProductOptions", "ProductOption")
+                        .WithMany("ProductVariantOptionValues")
+                        .HasForeignKey("ProductOptionId");
+
+                    b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.ProductOptionValues", "ProductOptionValue")
+                        .WithMany("ProductVariantOptionValues")
+                        .HasForeignKey("ProductOptionValueId");
+
+                    b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.ProductVariants", "ProductVariant")
+                        .WithMany("ProductVariantOptionValues")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.ProductVariants", b =>
+                {
+                    b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.Products", "Product")
+                        .WithMany("ProductVariants")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -1365,6 +1708,28 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.Categories", "Cate")
                         .WithMany("Products")
                         .HasForeignKey("CateId");
+                });
+
+            modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.PromotionDetail", b =>
+                {
+                    b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.ProductVariants", "ProductVariant")
+                        .WithMany("PromotionDetails")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.UserTransaction", b =>
+                {
+                    b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.Orders", "Order")
+                        .WithMany("UserTransactions")
+                        .HasForeignKey("OrderId")
+                        .IsRequired();
+
+                    b.HasOne("Doitsu.Ecommerce.Core.Data.Identities.EcommerceIdentityUser", "User")
+                        .WithMany("UserTransactions")
+                        .HasForeignKey("UserId")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

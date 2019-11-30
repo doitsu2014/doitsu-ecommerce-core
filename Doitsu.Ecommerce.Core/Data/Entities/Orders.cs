@@ -21,9 +21,17 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public string DeliveryName { get; set; }
         public string DeliveryPhone { get; set; }
         public string DeliveryEmail { get; set; }
+        public string Dynamic01 { get; set; }
+        public string Dynamic02 { get; set; }
+        public string Dynamic03 { get; set; }
+        public string Dynamic04 { get; set; }
+        public string Dynamic05 { get; set; }
+        public string Note {get;set;}
+        public OrderPriorityEnum? Priority {get;set;}
         public byte[] Vers { get; set; }
 
         public virtual EcommerceIdentityUser User { get; set; }
         public virtual ICollection<OrderItems> OrderItems { get; set; }
+        public virtual ICollection<UserTransaction> UserTransactions { get; set; }
     }
 }

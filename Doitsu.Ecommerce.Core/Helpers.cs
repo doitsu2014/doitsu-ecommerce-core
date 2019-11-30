@@ -1,9 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
-
 namespace Doitsu.Ecommerce.Core
 {
     public static class EnumHelper<T>
@@ -53,13 +53,25 @@ namespace Doitsu.Ecommerce.Core
             var fieldInfo = value.GetType().GetField(value.ToString());
 
             var descriptionAttributes = fieldInfo.GetCustomAttributes(
-                typeof(DisplayAttribute), false)as DisplayAttribute[];
+                typeof(DisplayAttribute), false) as DisplayAttribute[];
 
             if (descriptionAttributes[0].ResourceType != null)
                 return lookupResource(descriptionAttributes[0].ResourceType, descriptionAttributes[0].Name);
 
-            if (descriptionAttributes == null)return string.Empty;
+            if (descriptionAttributes == null) return string.Empty;
             return (descriptionAttributes.Length > 0) ? descriptionAttributes[0].Name : value.ToString();
         }
     }
+
+    public static class SystemHelper
+    {
+        public static TService GetService<TService>(this IServiceProvider serviceProdiver)
+                    where TService : class
+        {
+            var service = (TService)serviceProdiver.GetService(typeof(TService));
+            return service;
+        }
+    }
+
+    
 }

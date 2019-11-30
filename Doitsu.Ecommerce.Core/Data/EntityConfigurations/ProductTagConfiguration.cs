@@ -15,13 +15,15 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
                 builder.HasOne(d => d.Product)
                     .WithMany(p => p.ProductTag)
                     .HasForeignKey(d => d.ProductId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .IsRequired()
+                    .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("FK__ProductTa__Produ__14270015");
 
                 builder.HasOne(d => d.Tag)
                     .WithMany(p => p.ProductTag)
                     .HasForeignKey(d => d.TagId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .IsRequired()
+                    .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("FK__ProductTa__TagId__1332DBDC");
         }
     }

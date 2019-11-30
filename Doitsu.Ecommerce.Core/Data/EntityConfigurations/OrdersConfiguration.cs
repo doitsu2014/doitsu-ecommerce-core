@@ -33,6 +33,18 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
 
             builder.Property(e => e.TotalPrice).HasColumnType("money");
 
+            builder.Property(e => e.Dynamic01).HasMaxLength(255);
+            
+            builder.Property(e => e.Dynamic02).HasMaxLength(255);
+
+            builder.Property(e => e.Dynamic03).HasMaxLength(255);
+            
+            builder.Property(e => e.Dynamic04).HasMaxLength(255);
+            
+            builder.Property(e => e.Dynamic05).HasMaxLength(1000);
+            
+            builder.Property(e => e.Note).HasMaxLength(500);
+
             builder.HasOne(d => d.User)
                 .WithMany(p => p.Orders)
                 .HasForeignKey(d => d.UserId)

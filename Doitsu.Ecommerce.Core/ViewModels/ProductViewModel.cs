@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Service.Core.Abstraction;
@@ -8,10 +9,10 @@ namespace Doitsu.Ecommerce.Core.ViewModels
 {
     public class ProductViewModel : BaseViewModel<Products>
     {
-        public int Id { get; set; }
         public string Code { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public string Property { get; set; }
         public int? CateId { get; set; }
         public int? ArtistId { get; set; }
         public int? CollectionId { get; set; }
@@ -20,8 +21,9 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string ImageThumbUrl { get; set; }
         public string ImageUrls { get; set; }
         public decimal Price { get; set; }
-        public string Property { get; set; }
         public string Slug { get; set; }
+        public int? Sku { get; set; }
+        public ProductOptionViewModel ProductOption { get; set; }
     }
 
     public class ProductDetailWrapperViewModel
@@ -39,24 +41,28 @@ namespace Doitsu.Ecommerce.Core.ViewModels
     {
         [JsonProperty("id")]
         public int Id { get; set; }
+
         [JsonProperty("imageThumbUrl")]
         public string ImageThumbUrl { get; set; }
+
         [Required]
         [JsonProperty("name")]
         public string Name { get; set; }
+
         [Required]
         [JsonProperty("code")]
         public string Code { get; set; }
+
         [Required]
         [JsonProperty("price")]
         public decimal Price { get; set; }
-        [Required]
-        [JsonProperty("slug")]
-        public string Slug { get; set; }
+
         [JsonProperty("categorySlug")]
         public string CategorySlug { get; set; }
+
         [JsonProperty("categoryName")]
         public string CategoryName { get; set; }
+
         [JsonProperty("description")]
         public string Description { get; set; }
 
@@ -65,9 +71,17 @@ namespace Doitsu.Ecommerce.Core.ViewModels
 
         [JsonProperty("property")]
         public string Property { get; set; }
+
         [Required]
         [JsonProperty("cateId")]
         public int? CateId { get; set; }
+
+        [Required]
+        [JsonProperty("slug")]
+        public string Slug { get; set; }
+
+        [JsonProperty("productOptions")]
+        public ICollection<ProductOptionViewModel> ProductOptions { get; set; }
     }
 
 
@@ -90,6 +104,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string CategorySlug { get; set; }
         [JsonProperty("categoryName")]
         public string CategoryName { get; set; }
+        [JsonProperty("productOption")]
+        public ProductOptionViewModel ProductOption { get; set; }
         [JsonProperty("categoryRecursive")]
         public CategoryWithParentViewModel Cate { get; set; }
     }
@@ -124,5 +140,46 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         [JsonProperty("productOverviews")]
         public ImmutableList<ProductOverviewViewModel> ProductOverviews { get; set; }
     }
+
+    public class CreateProductViewModel : ProductDetailViewModel
+    {
+    }
+
+    public class UpdateProductViewModel : ProductDetailViewModel
+    {
+    }
+
+    public class ProductVariantViewModel
+    {
+        public int Id { get; set; }
+        public int ProductId { get; set; }
+        public string Sku { get; set; }
+        public decimal AnotherPrice { get; set; }
+        public float AnotherDiscount { get; set; }
+        public long InventoryQuantity { get; set; }
+        public byte[] Vers { get; set; }
+        public ProductVariantStatusEnum Status { get; set; }
+
+        public virtual ICollection<ProductVariantOptionValueViewModel> ProductVariantOptionValues { get; set; }
+    }
+
+    public class ProductVariantDetailViewModel : ProductVariantViewModel
+    {
+        public virtual ICollection<PromotionDetailViewModel> PromotionDetails { get; set; }
+    }
+
+    public class ProductVariantOptionValueViewModel
+    {
+        public int Id { get; set; }
+        public int ProductOptionId { get; set; }
+        public int ProductVariantId { get; set; }
+        public int ProductOptionValueId { get; set; }
+        public byte[] Vers { get; set; }
+        public bool Active { get; set; }
+
+        public ProductOptionViewModel ProductOption { get; set; }
+        public ProductOptionValueViewModel ProductOptionValue { get; set; }
+    }
+
 }
 
