@@ -17,7 +17,8 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
             builder.HasOne(e => e.ProductVariant)
                 .WithMany(e => e.PromotionDetails)
                 .HasForeignKey(e => e.ProductVariantId)
-                .OnDelete(DeleteBehavior.ClientSetNull);
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

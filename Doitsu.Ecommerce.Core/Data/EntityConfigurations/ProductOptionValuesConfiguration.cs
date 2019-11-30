@@ -15,6 +15,7 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
 
             builder.HasOne(x => x.ProductOption)
                 .WithMany(x => x.ProductOptionValues)
+                .IsRequired()
                 .HasForeignKey(x => x.ProductOptionId);
 
             builder.Property(x => x.Value).HasMaxLength(256);

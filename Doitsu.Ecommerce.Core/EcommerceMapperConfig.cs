@@ -59,6 +59,7 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<ProductOptionViewModel, ProductOptions>();
 
                 cfg.CreateMap<ProductVariants, ProductVariantViewModel>();
+                cfg.CreateMap<ProductVariants, ProductVariantDetailViewModel>();
                 cfg.CreateMap<ProductVariantOptionValues, ProductVariantOptionValueViewModel>();
                 cfg.CreateMap<ProductVariantViewModel, ProductVariants>();
                 cfg.CreateMap<ProductVariantOptionValueViewModel, ProductVariantOptionValues>();
@@ -114,6 +115,9 @@ namespace Doitsu.Ecommerce.Core
 
                 cfg.CreateMap<SliderViewModel, Sliders>();
                 cfg.CreateMap<Sliders, SliderViewModel>();
+
+                cfg.CreateMap<PromotionDetail, PromotionDetailViewModel>();
+                cfg.CreateMap<PromotionDetailViewModel, PromotionDetail>();
 
             });
 

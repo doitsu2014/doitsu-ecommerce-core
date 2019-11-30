@@ -41,6 +41,7 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<Option<int[], string>> CreateProductWithOptionAsync(ICollection<CreateProductViewModel> data);
         Task<Option<int, string>> UpdateProductWithOptionAsync(UpdateProductViewModel data);
         Task<Option<int, string>> UpdateProductVariantsAsync(ProductVariantViewModel data);
+        Task<ProductVariantDetailViewModel> FindProductVariantFromOptionsAsync(ICollection<ProductOptionValueViewModel> listProductOptions);
     }
 
     public class ProductService : BaseService<Products>, IProductService
@@ -248,7 +249,7 @@ namespace Doitsu.Ecommerce.Core.Services
                             ProductOptionId = productOption.Id,
                             ProductOptionValueId = productOptionValue.Id,
                             ProductOptionValue = productOptionValue,
-                            ProductOption = productOption,
+                            ProductOption = productOption
                         });
                     }
 
@@ -281,6 +282,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
                         productVariant.ProductVariantOptionValues = productVariant.ProductVariantOptionValues.Select(pvov =>
                         {
+                            pvov.Id = pvov.Id;
                             pvov.ProductVariantId = exist.Id;
                             return pvov;
                         }).ToImmutableList();
@@ -370,7 +372,7 @@ namespace Doitsu.Ecommerce.Core.Services
                         // Make product variant have any unavailable product option value to unavailable
                         d.ProductEntProductVariants.ToList().ForEach(pva =>
                         {
-                            var isUnavailable = pva.ProductVariantOptionValues.Any(pvov => d.ListPoUnavailable.Contains(pvov.ProductOptionValueId));
+                            var isUnavailable = pva.ProductVariantOptionValues.Any(pvov => d.ListPoUnavailable.Contains(pvov.ProductOptionValueId ?? int.MinValue));
                             if (isUnavailable)
                             {
                                 pva.Status = ProductVariantStatusEnum.Unavailable;
@@ -417,6 +419,30 @@ namespace Doitsu.Ecommerce.Core.Services
                         return result.Select(x => x.Id).ToArray();
                     });
             }
+        }
+
+        public async Task<ProductVariantDetailViewModel> FindProductVariantFromOptionsAsync(ICollection<ProductOptionValueViewModel> listProductOptions)
+        {
+            var poIds = listProductOptions.Select(po => po.Id);
+            var totalIds = poIds.Count();
+            var productVariantOptionValues = (await this.DbContext
+                .ProductVariantOptionValues
+                .Include(pvov => pvov.ProductVariant)
+                    .ThenInclude(pv => pv.PromotionDetails)
+                .AsNoTracking()
+                // Note: because is nullable so I have to use min value of int to make false in Query Contains 
+                .Where(pvov => poIds.Contains(pvov.ProductOptionValueId ?? int.MinValue))
+                .OrderBy(pvov => pvov.ProductVariantId)
+                .ToListAsync())
+                .GroupBy(pvov => pvov.ProductVariantId)
+                .Where(gb => gb.Count() == totalIds)
+                .FirstOrDefault();
+                
+            if(productVariantOptionValues.Count() > 0) {
+                var productVariant = productVariantOptionValues.First().ProductVariant;
+                return this.Mapper.Map<ProductVariantDetailViewModel>(productVariant);
+            }
+            return null;
         }
     }
 }

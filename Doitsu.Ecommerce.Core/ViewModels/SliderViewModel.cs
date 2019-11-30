@@ -2,7 +2,7 @@ namespace Doitsu.Ecommerce.Core.ViewModels
 {
     public class SliderViewModel
     {
-      public int Id { get; set; }
+        public int Id { get; set; }
         public string Title { get; set; }
         public string Slogan { get; set; }
         public string ReferenceUrl { get; set; }

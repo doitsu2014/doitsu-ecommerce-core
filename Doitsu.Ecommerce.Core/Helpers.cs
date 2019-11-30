@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
-
 namespace Doitsu.Ecommerce.Core
 {
     public static class EnumHelper<T>
@@ -64,20 +63,6 @@ namespace Doitsu.Ecommerce.Core
         }
     }
 
-    // public static class LinqHelper
-    // {
-    //     public static IEnumerable<IEnumerable<T>> CartesianProduct<T>(this IEnumerable<IEnumerable<T>> sequences)
-    //     {
-    //         IEnumerable<IEnumerable<T>> emptyProduct = new[] { Enumerable.Empty<T>() };
-    //         return sequences.Aggregate(
-    //           emptyProduct,
-    //           (accumulator, sequence) =>
-    //             from accseq in accumulator
-    //             from item in sequence
-    //             select accseq.Concat(new[] { item }));
-    //     }
-    // }
-
     public static class SystemHelper
     {
         public static TService GetService<TService>(this IServiceProvider serviceProdiver)
@@ -87,4 +72,6 @@ namespace Doitsu.Ecommerce.Core
             return service;
         }
     }
+
+    
 }

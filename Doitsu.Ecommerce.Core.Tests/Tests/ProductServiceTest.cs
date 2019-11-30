@@ -12,6 +12,11 @@ using Doitsu.Ecommerce.Core.ViewModels;
 using Doitsu.Service.Core.Extensions;
 using Optional;
 using Optional.Async;
+using System.Collections.Immutable;
+using System.Collections.Generic;
+using Doitsu.Ecommerce.Core.IdentitiesExtension;
+using Doitsu.Ecommerce.Core.Data.Identities;
+using Doitsu.Ecommerce.Core.IdentityManagers;
 
 namespace Doitsu.Ecommerce.Core.Tests
 {
@@ -27,29 +32,109 @@ namespace Doitsu.Ecommerce.Core.Tests
 
         [System.Obsolete]
         [Fact]
-        private async Task CreateProductManagement()
+        private async Task Test_FindProductFromOptionAsync()
         {
             using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
             {
-                var dbContext = webhost.Services.GetService<EcommerceDbContext>();
-                await dbContext.Database.MigrateAsync();
-                DatabaseHelper.TruncateAllTable(webhost, _poolKey);
-
-                var categoryService = webhost.Services.GetService<ICategoryService>();
+                // Add Products
                 var productService = webhost.Services.GetService<IProductService>();
-                await categoryService.CreateAsync<CategoryViewModel>(_fixture.CategoryData);
-                await dbContext.SaveChangesAsync();
+                var listProductOptionValues = (await productService.Get(pro => pro.Code == _fixture.ProductData.First().Name)
+                    .Include(p => p.ProductOptions)
+                        .ThenInclude(po => po.ProductOptionValues)
+                    .FirstOrDefaultAsync())
+                    .ProductOptions
+                    .Select(x => productService.Mapper.Map<ProductOptionValueViewModel>(x.ProductOptionValues.First()))
+                    .ToImmutableList();
 
-                var firstCategory = await dbContext.Set<Categories>().AsNoTracking().FirstOrDefaultAsync();
-                var createData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; });
-                var result = await productService.CreateProductWithOptionAsync(createData.ToList());
-                Assert.True(true);
+                var result = await productService.FindProductVariantFromOptionsAsync(listProductOptionValues);
+                Assert.True(result != null);
             }
         }
 
         [System.Obsolete]
         [Fact]
-        private async Task UpdateProductManagement()
+        private async Task Test_InitialData()
+        {
+            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            {
+                // Truncate data
+                var dbContext = webhost.Services.GetService<EcommerceDbContext>();
+                await dbContext.Database.MigrateAsync();
+                DatabaseHelper.TruncateAllTable(webhost, _poolKey);
+
+                // Add Brand
+                var brandService = webhost.Services.GetService<IBrandService>();
+                await brandService.CreateAsync<BrandViewModel>(_fixture.BrandData);
+
+                // Add Category
+                var categoryService = webhost.Services.GetService<ICategoryService>();
+                await categoryService.CreateAsync<CategoryViewModel>(_fixture.CategoryData);
+                await dbContext.SaveChangesAsync();
+
+                // Add Products
+                var productService = webhost.Services.GetService<IProductService>();
+                var firstCategory = await dbContext.Set<Categories>().AsNoTracking().FirstOrDefaultAsync();
+                var createData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; });
+                var result = await productService.CreateProductWithOptionAsync(createData.ToList());
+                await dbContext.SaveChangesAsync();
+                Assert.True(true);
+            }
+
+            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            {
+                // Add Products
+                var dbContext = webhost.Services.GetService<EcommerceDbContext>();
+                var productService = webhost.Services.GetService<IProductService>();
+                // Add Promotion Detail
+                var promotionDetailService = webhost.Services.GetService<IPromotionDetailService>();
+                var listProductVariantIdOfProduct01 = (await productService.Get(pro => pro.Code == "PRODUCT01")
+                    .Include(p => p.ProductVariants)
+                    .FirstOrDefaultAsync())
+                    .ProductVariants
+                    .Select(x => productService.Mapper.Map<ProductVariantViewModel>(x))
+                    .ToImmutableList();
+
+                var listPromotionDetailViewModel = listProductVariantIdOfProduct01.Select(pvId => new PromotionDetailViewModel()
+                {
+                    ProductVariantId = pvId.Id,
+                    Name = $"PRODUCT01-{pvId.Id}",
+                    DiscountPercent = 25
+                });
+
+                await promotionDetailService.CreateAsync(listPromotionDetailViewModel);
+                await dbContext.SaveChangesAsync();
+            }
+
+            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            {
+                // Add Products
+                var userManager = webhost.Services.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
+                var roleManager = webhost.Services.GetService<EcommerceRoleIntManager<EcommerceIdentityRole>>();
+                var user = new EcommerceIdentityUser()
+                {
+                    Email = "duc.tran@doitsu.tech",
+                    UserName = "doitsu2014",
+                    Fullname = "Trần Hữu Đức",
+                    Gender = (int)GenderEnum.Male
+                };
+                var roleStrs = new List<string>() { "ActiveUser", "Administrator" };
+                var roles = roleStrs.Select(r => new EcommerceIdentityRole()
+                {
+                    Name = r,
+                    NormalizedName = r
+                }).ToList();
+                foreach(var role in roles)
+                {
+                    await roleManager.CreateAsync(role);
+                }
+                await userManager.CreateAsync(user, "zaQ@1234");
+                await userManager.AddToRolesAsync(user, roleStrs);
+            }
+        }
+
+        [System.Obsolete]
+        [Fact]
+        private async Task Test_ProductManagement()
         {
             using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
             {

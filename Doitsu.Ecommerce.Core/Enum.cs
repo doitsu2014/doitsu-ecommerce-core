@@ -2,6 +2,15 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Doitsu.Ecommerce.Core
 {
+    public enum OrderPriorityEnum 
+    {
+        OnePercent = 1,
+        TwoPercent = 2,
+        ThreePercent = 3,
+        FourPercent = 4,
+        FivePercent = 5
+    }
+
     public enum UserTransactionTypeEnum 
     {
         Income = 0,

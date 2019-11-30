@@ -25,6 +25,7 @@ namespace Doitsu.Ecommerce.Core
             services.AddTransient(typeof(IEmailService), typeof(EmailService));
             services.AddTransient(typeof(ISliderService), typeof(SliderService));
             services.AddTransient(typeof(ICatalogueService), typeof(CatalogueService));
+            services.AddTransient(typeof(IPromotionDetailService), typeof(PromotionDetailService));
             services.AddHttpContextAccessor();
             return services;
         }

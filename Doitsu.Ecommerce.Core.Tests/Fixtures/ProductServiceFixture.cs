@@ -10,6 +10,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
     public class ProductServiceFixture : IDisposable
     {
         public string ServicePoolKey { get; set; }
+        public BrandViewModel BrandData { get; }
         public ICollection<CategoryViewModel> CategoryData { get; }
         public ICollection<CreateProductViewModel> ProductData { get; }
         public ICollection<ProductOptionViewModel> Product1ProductOptionsData { get; }
@@ -19,6 +20,24 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
         public ProductServiceFixture()
         {
             ServicePoolKey = "ProductService";
+
+            BrandData = new BrandViewModel()
+            {
+                Address = "Kim chỉ nam",
+                AlternativeAddress = "Kim chỉ nam khác",
+                Description = "Nội dung",
+                Fax = "0946680600",
+                HotLine = "0946680600",
+                Mail = "duc.tran@doitsu.tech",
+                LogoRectangleUrl = "",
+                LogoSquareUrl = "",
+                Name = "Phone Card",
+                OpenTime = TimeSpan.FromHours(10),
+                CloseTime = TimeSpan.FromHours(10),
+                OpenDayOfWeek = (int)DayOfWeek.Monday,
+                CloseDayOfWeek = (int)DayOfWeek.Sunday
+            };
+
             CategoryData = new List<CategoryViewModel>()
             {
                 new CategoryViewModel()
@@ -29,7 +48,6 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                     Slug = "phone-card-sms"
                 }
             };
-
 
             Product1ProductOptionsData = new List<ProductOptionViewModel>()
             {
@@ -49,37 +67,6 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                         new  ProductOptionValueViewModel()
                         {
                             Value = "Mobiphone"
-                        }
-                    }
-                },
-                new ProductOptionViewModel()
-                {
-                    Name = "Ưu tiên",
-                    ProductOptionValues = new List<ProductOptionValueViewModel>()
-                    {
-                        new  ProductOptionValueViewModel()
-                        {
-                            Value = "Không ưu tiên"
-                        },
-                        new  ProductOptionValueViewModel()
-                        {
-                            Value = "1%"
-                        },
-                        new  ProductOptionValueViewModel()
-                        {
-                            Value = "2%"
-                        },
-                        new  ProductOptionValueViewModel()
-                        {
-                            Value = "3%"
-                        },
-                        new  ProductOptionValueViewModel()
-                        {
-                            Value = "4%"
-                        },
-                        new  ProductOptionValueViewModel()
-                        {
-                            Value = "5%"
                         }
                     }
                 },
