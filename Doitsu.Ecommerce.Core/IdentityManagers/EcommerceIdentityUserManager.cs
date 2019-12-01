@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Doitsu.Ecommerce.Core.AuthorizeBuilder;
 using Doitsu.Ecommerce.Core.Data.Identities;
 using Doitsu.Ecommerce.Core.ViewModels;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -14,6 +15,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Optional;
 using Optional.Async;
+using static Doitsu.Ecommerce.Core.Constants;
 
 namespace Doitsu.Ecommerce.Core.IdentitiesExtension
 {
@@ -98,7 +100,7 @@ namespace Doitsu.Ecommerce.Core.IdentitiesExtension
                 });
         }
 
-        public async Task<ClaimsIdentity> CreateClaimIdentityAsync(T user, int expireDays = 7)
+        public async Task<ClaimsIdentity> CreateClaimIdentityAsync(T user, int expireDays = 7, string authenticationType = CookieAuthenticationDefaults.AuthenticationScheme)
         {
             var userRoles = (await this.GetRolesAsync(user));
             var claims = new List<Claim>
@@ -117,7 +119,7 @@ namespace Doitsu.Ecommerce.Core.IdentitiesExtension
                 claims.Add(new Claim(ClaimTypes.Role, userRole));
             }
 
-            return new ClaimsIdentity(claims);
+            return new ClaimsIdentity(claims, authenticationType);
         }
 
         public async Task<TokenAuthorizeModel> GetJwtAuthorizeModelAsync(T user, int expireDays = 7)
@@ -126,7 +128,7 @@ namespace Doitsu.Ecommerce.Core.IdentitiesExtension
             var key = Encoding.Default.GetBytes(DoitsuJWTValidators.SecretKey);
             var issuer = DoitsuJWTValidators.Issuer;
             var audience = DoitsuJWTValidators.Audience;
-            var claimIdentity = await CreateClaimIdentityAsync(user, expireDays);
+            var claimIdentity = await CreateClaimIdentityAsync(user, expireDays, DoitsuAuthenticationSchemes.JWT_SCHEME);
             var signingCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature);
 
             var tokenDescriptor = new SecurityTokenDescriptor

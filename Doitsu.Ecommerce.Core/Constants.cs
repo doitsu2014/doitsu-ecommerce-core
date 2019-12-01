@@ -5,6 +5,7 @@ namespace Doitsu.Ecommerce.Core
         public static class ClaimTypeConstants
         {
             public const string USER_ID = "UserId";
+            public const string FULL_NAME = "Fullname";
         }
 
         public static class BrandInformation
@@ -42,6 +43,15 @@ namespace Doitsu.Ecommerce.Core
             public const string ADMIN = "Administrator";
             public const string ACTIVE_USER = "ActiveUser";
             public const string ALL = "Administrator,ActiveUser";
+        }
+
+        public static class DoitsuAuthenticationSchemes
+        {
+            public const string JWT_SCHEME = "api_jwt";
+        }
+
+        public static class OrderInformation { 
+            public const int ORDER_CODE_LENGTH = 12;
         }
     }
 }

@@ -20,6 +20,7 @@ using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
 using AutoMapper;
 using Doitsu.Ecommerce.Core.Data;
+using Doitsu.Ecommerce.Core.IdentitiesExtension;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -41,22 +42,25 @@ namespace Doitsu.Ecommerce.Core.Services
                                                                          string userPhone,
                                                                          string orderCode);
         Task<Option<OrderViewModel, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum);
-        Task<Option<string, string>> CreateOrderWithOptionAsync(CreateOrderItemWithOptionViewModel request);
+        Task<Option<OrderViewModel, string>> CreateOrderWithOptionAsync(CreateOrderWithOptionViewModel request);
     }
 
     public class OrderService : BaseService<Orders>, IOrderService
     {
         private readonly IEmailService emailService;
         private readonly IProductService productService;
+        private readonly EcommerceIdentityUserManager<EcommerceIdentityUser> userManager;
 
         public OrderService(EcommerceDbContext dbContext,
                             IMapper mapper,
                             ILogger<BaseService<Orders, EcommerceDbContext>> logger,
                             IEmailService emailService,
-                            IProductService productService) : base(dbContext, mapper, logger)
+                            IProductService productService,
+                            EcommerceIdentityUserManager<EcommerceIdentityUser> userManager) : base(dbContext, mapper, logger)
         {
             this.emailService = emailService;
             this.productService = productService;
+            this.userManager = userManager;
         }
 
         private string GenerateOrderCode()
@@ -208,15 +212,80 @@ namespace Doitsu.Ecommerce.Core.Services
             return result.ToImmutableList();
         }
 
-        public async Task<Option<string, string>> CreateOrderWithOptionAsync(CreateOrderItemWithOptionViewModel request)
+        public async Task<Option<OrderViewModel, string>> CreateOrderWithOptionAsync(CreateOrderWithOptionViewModel request)
         {
             return await request.SomeNotNull()
-                .WithException("Dữ liệu truyền lên rỗng")
+                .WithException("Dữ liệu truyền lên rỗng.")
+                .Filter(d => d.UserId > 0, "Không tìm thấy thông tin người đặt hàng.")
+                .FlatMapAsync(async d => await MappingFromOrderWithOptionToOrder(d))
+                .MapAsync(async o =>
+                {
+                    await this.CreateAsync(o);
+                    await this.CommitAsync();
+                    return o;
+                })
+                .MapAsync(async o =>
+                {
+                    try
+                    {
+                        var user = await userManager.FindByIdAsync(o.UserId.ToString());
+                        var messagePayloads = new List<MessagePayload>()
+                        {
+                            await emailService.PrepareLeaderOrderMailConfirmAsync(user, o),
+                            await emailService.PrepareCustomerOrderMailConfirm(user, o)
+                        };
+
+                        var emailResult = await emailService.SendEmailWithBachMocWrapperAsync(messagePayloads);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError(ex, $"Process email for order {o.Code} failure.");
+                    }
+                    return this.Mapper.Map<OrderViewModel>(o);
+                });
+        }
+
+        private async Task<Option<Orders, string>> MappingFromOrderWithOptionToOrder(CreateOrderWithOptionViewModel request)
+        {
+            return await request.SomeNotNull()
+                .WithException("Thông tin đơn hàng rỗng")
                 .MapAsync(async d =>
                 {
-                    var productVariant = await productService.FindProductVariantFromOptionsAsync(request.ProductOptionValues);
-                    
-                    return d.ProductName;
+                    foreach (var orderItem in d.OrderItems)
+                    {
+                        var productVariant = await productService.FindProductVariantFromOptionsAsync(orderItem.ProductOptionValues);
+                        if (productVariant != null)
+                        {
+                            orderItem.ProductId = productVariant.ProductId;
+                            if (productVariant.PromotionDetails != null && productVariant.PromotionDetails.Count > 0)
+                            {
+                                orderItem.Discount = productVariant.PromotionDetails.OrderByDescending(x => x.Id).First().DiscountPercent;
+                            }
+                            var subTotalPrice = orderItem.SubTotalFinalPrice;
+                            var subTotalQuantity = orderItem.SubTotalQuantity;
+                            var discount = orderItem.Discount ?? 0;
+                            var price = subTotalPrice * subTotalQuantity;
+                            orderItem.SubTotalFinalPrice = price - (price * ((decimal)discount) / 100);
+                            orderItem.ProductId = productVariant.ProductId;
+                            orderItem.ProductVariantId = productVariant.Id;
+                            d.TotalPrice += price;
+                            d.TotalQuantity += orderItem.SubTotalQuantity;
+                            d.FinalPrice += orderItem.SubTotalFinalPrice;
+                        }
+                    }
+
+                    if (d.Priority.HasValue)
+                    {
+                        var originPrice = d.TotalPrice * d.TotalQuantity;
+                        var priorityValue = ((decimal)d.Priority.Value / 100);
+                        d.FinalPrice += (originPrice * priorityValue);
+                    }
+
+                    var order = this.Mapper.Map<Orders>(request);
+                    order.Code = DataUtils.GenerateOrderCode(Constants.OrderInformation.ORDER_CODE_LENGTH, new Random());
+                    order.CreatedDate = DateTime.UtcNow.ToVietnamDateTime();
+
+                    return order;
                 });
         }
     }
