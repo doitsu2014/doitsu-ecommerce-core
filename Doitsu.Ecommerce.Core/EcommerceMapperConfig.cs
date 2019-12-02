@@ -119,6 +119,8 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<PromotionDetail, PromotionDetailViewModel>();
                 cfg.CreateMap<PromotionDetailViewModel, PromotionDetail>();
 
+                cfg.CreateMap<UserTransactionViewModel, UserTransaction>();
+                cfg.CreateMap<UserTransaction, UserTransactionViewModel>();
             });
 
             IMapper mapper = autoMapperConfig.CreateMapper();

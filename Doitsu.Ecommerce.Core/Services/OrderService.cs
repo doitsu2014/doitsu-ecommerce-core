@@ -49,6 +49,7 @@ namespace Doitsu.Ecommerce.Core.Services
     {
         private readonly IEmailService emailService;
         private readonly IProductService productService;
+        private readonly IUserTransactionService userTransactionService;
         private readonly EcommerceIdentityUserManager<EcommerceIdentityUser> userManager;
 
         public OrderService(EcommerceDbContext dbContext,
@@ -56,7 +57,8 @@ namespace Doitsu.Ecommerce.Core.Services
                             ILogger<BaseService<Orders, EcommerceDbContext>> logger,
                             IEmailService emailService,
                             IProductService productService,
-                            EcommerceIdentityUserManager<EcommerceIdentityUser> userManager) : base(dbContext, mapper, logger)
+                            EcommerceIdentityUserManager<EcommerceIdentityUser> userManager,
+                            IUserTransactionService userTransactionService) : base(dbContext, mapper, logger)
         {
             this.emailService = emailService;
             this.productService = productService;
@@ -218,11 +220,20 @@ namespace Doitsu.Ecommerce.Core.Services
                 .WithException("Dữ liệu truyền lên rỗng.")
                 .Filter(d => d.UserId > 0, "Không tìm thấy thông tin người đặt hàng.")
                 .FlatMapAsync(async d => await MappingFromOrderWithOptionToOrder(d))
-                .MapAsync(async o =>
+                .FlatMapAsync(async o =>
                 {
-                    await this.CreateAsync(o);
-                    await this.CommitAsync();
-                    return o;
+                    var user = await userManager.FindByIdAsync(o.UserId.ToString());
+                    var userTransaction = this.userTransactionService.PrepareUserTransaction(o, user);
+                    var updateBalanceResult = await userTransactionService.UpdateUserBalanceAsync(userTransaction, user);
+
+                    return updateBalanceResult.Match<Option<Orders, string>>(
+                        res =>
+                        {
+                            o.User = user;
+                            return Option.Some<Orders, string>(o);
+                        },
+                        error => { return Option.None<Orders, string>(error); }
+                    );
                 })
                 .MapAsync(async o =>
                 {
@@ -230,10 +241,10 @@ namespace Doitsu.Ecommerce.Core.Services
                     {
                         var user = await userManager.FindByIdAsync(o.UserId.ToString());
                         var messagePayloads = new List<MessagePayload>()
-                        {
-                            await emailService.PrepareLeaderOrderMailConfirmAsync(user, o),
-                            await emailService.PrepareCustomerOrderMailConfirm(user, o)
-                        };
+                                {
+                                        await emailService.PrepareLeaderOrderMailConfirmAsync(o.User, o),
+                                        await emailService.PrepareCustomerOrderMailConfirm(o.User, o)
+                                };
 
                         var emailResult = await emailService.SendEmailWithBachMocWrapperAsync(messagePayloads);
                     }
@@ -241,6 +252,10 @@ namespace Doitsu.Ecommerce.Core.Services
                     {
                         Logger.LogError(ex, $"Process email for order {o.Code} failure.");
                     }
+                    
+                    await this.CreateAsync(o);
+                    await this.CommitAsync();
+
                     return this.Mapper.Map<OrderViewModel>(o);
                 });
         }
