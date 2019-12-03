@@ -110,6 +110,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                 // Add Products
                 var userManager = webhost.Services.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
                 var roleManager = webhost.Services.GetService<EcommerceRoleIntManager<EcommerceIdentityRole>>();
+                var orderService = webhost.Services.GetService<IOrderService>();
                 var user = new EcommerceIdentityUser()
                 {
                     Email = "duc.tran@doitsu.tech",
@@ -123,12 +124,23 @@ namespace Doitsu.Ecommerce.Core.Tests
                     Name = r,
                     NormalizedName = r
                 }).ToList();
-                foreach(var role in roles)
+                foreach (var role in roles)
                 {
                     await roleManager.CreateAsync(role);
                 }
                 await userManager.CreateAsync(user, "zaQ@1234");
                 await userManager.AddToRolesAsync(user, roleStrs);
+
+                var result = await orderService.CreateDepositOrderAsync(new OrderViewModel()
+                {
+                    UserId = user.Id,
+                    TotalPrice = 100000,
+                    TotalQuantity = 1,
+                    Discount = 0,
+                    Note = "Nạp tiền 100k"
+                });
+
+                Assert.True(true);
             }
         }
 

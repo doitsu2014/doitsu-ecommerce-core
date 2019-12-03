@@ -23,10 +23,13 @@ namespace Doitsu.Ecommerce.Core.Services
 {
     public interface IUserTransactionService : IBaseService<UserTransaction>
     {
-        UserTransactionViewModel PrepareUserTransaction(Orders orders, EcommerceIdentityUser user, UserTransactionTypeEnum type = UserTransactionTypeEnum.Expense);
-        Task<Option<EcommerceIdentityUser, string>> UpdateUserBalanceAsync(UserTransactionViewModel userTransaction, EcommerceIdentityUser user);
+        UserTransaction PrepareUserTransaction(Orders orders, EcommerceIdentityUser user, UserTransactionTypeEnum type = UserTransactionTypeEnum.Expense);
+        Task<Option<EcommerceIdentityUser, string>> UpdateUserBalanceAsync(UserTransaction userTransaction, EcommerceIdentityUser user);
     }
 
+    /// <summary>
+    /// should use entity on this service
+    /// </summary>
     public class UserTransactionService : BaseService<UserTransaction>, IUserTransactionService
     {
         private readonly IMemoryCache memoryCache;
@@ -42,14 +45,14 @@ namespace Doitsu.Ecommerce.Core.Services
             this.userManager = userManager;
         }
 
-        public UserTransactionViewModel PrepareUserTransaction(Orders orders, EcommerceIdentityUser user, UserTransactionTypeEnum type = UserTransactionTypeEnum.Expense)
+        public UserTransaction PrepareUserTransaction(Orders orders, EcommerceIdentityUser user, UserTransactionTypeEnum type = UserTransactionTypeEnum.Expense)
         {
-            var userTransaction = new UserTransactionViewModel()
+            var userTransaction = new UserTransaction()
             {
                 Type = type,
                 Amount = orders.FinalPrice,
                 CreatedTime = DateTime.UtcNow.ToVietnamDateTime(),
-                OrderId = orders.Id,
+                Order = orders,
                 UserId = user.Id
             };
 
@@ -71,7 +74,7 @@ namespace Doitsu.Ecommerce.Core.Services
             return userTransaction;
         }
 
-        public async Task<Option<EcommerceIdentityUser, string>> UpdateUserBalanceAsync(UserTransactionViewModel userTransaction, EcommerceIdentityUser user)
+        public async Task<Option<EcommerceIdentityUser, string>> UpdateUserBalanceAsync(UserTransaction userTransaction, EcommerceIdentityUser user)
         {
             return await (userTransaction, user).SomeNotNull()
                 .WithException(string.Empty)

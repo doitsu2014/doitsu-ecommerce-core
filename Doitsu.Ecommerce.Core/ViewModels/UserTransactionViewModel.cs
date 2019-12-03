@@ -11,7 +11,7 @@ namespace Doitsu.Ecommerce.Core.ViewModels
     public class UserTransactionViewModel
     {
         public string Description { get; set; }
-        public UserTransactionTypeEnum Type {get;set;}
+        public UserTransactionTypeEnum Type { get; set; }
         public DateTime CreatedTime { get; set; }
         public int OrderId { get; set; }
         public int UserId { get; set; }

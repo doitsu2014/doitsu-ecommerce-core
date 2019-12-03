@@ -21,6 +21,7 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
 
             builder.Property(e => e.CreatedDate).HasDefaultValueSql("(getutcdate())");
 
+
             builder.Property(e => e.DeliveryAddress).HasMaxLength(300);
 
             builder.Property(e => e.DeliveryEmail).HasMaxLength(255);
@@ -34,16 +35,18 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
             builder.Property(e => e.TotalPrice).HasColumnType("money");
 
             builder.Property(e => e.Dynamic01).HasMaxLength(255);
-            
+
             builder.Property(e => e.Dynamic02).HasMaxLength(255);
 
             builder.Property(e => e.Dynamic03).HasMaxLength(255);
-            
+
             builder.Property(e => e.Dynamic04).HasMaxLength(255);
-            
+
             builder.Property(e => e.Dynamic05).HasMaxLength(1000);
-            
+
             builder.Property(e => e.Note).HasMaxLength(500);
+            
+            builder.Property(e => e.Status).HasDefaultValue(OrderTypeEnum.Sale);
 
             builder.HasOne(d => d.User)
                 .WithMany(p => p.Orders)

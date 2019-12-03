@@ -60,6 +60,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string Note { get; set; }
         [JsonProperty("priority")]
         public OrderPriorityEnum? Priority { get; set; }
+        [JsonProperty("type")]
+        public OrderTypeEnum Type { get; set; }
     }
 
     public class CreateOrderWithOptionViewModel : OrderViewModel
