@@ -27,6 +27,20 @@ namespace Doitsu.Ecommerce.Core.IdentitiesExtension
         {
         }
 
+        public async Task<bool> AnyEmailAsync(string email)
+        {
+            if (email.IsNullOrEmpty()) return false;
+            email = email.ToLower().Trim();
+            return await this.Users.AnyAsync(u => u.Email == email);
+        }
+
+        public async Task<bool> AnyPhoneNumberAsync(string phoneNumber)
+        {
+            if (phoneNumber.IsNullOrEmpty()) return false;
+            phoneNumber = phoneNumber.ToLower().Trim();
+            return await this.Users.AnyAsync(u => u.PhoneNumber == phoneNumber);
+        }
+
         /// <summary>
         /// As no tracking and find use by phone number
         /// </summary>

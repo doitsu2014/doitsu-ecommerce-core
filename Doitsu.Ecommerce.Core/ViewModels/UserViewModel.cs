@@ -7,6 +7,50 @@ using Newtonsoft.Json;
 
 namespace Doitsu.Ecommerce.Core.ViewModels
 {
+
+    public class UserPublicInforViewModel
+    {
+
+        [JsonProperty("fullName")]
+        public string Fullname
+        {
+            get;
+            set;
+        }
+
+        [JsonProperty("phoneNumer")]
+        public string PhoneNumber
+        {
+            get;
+            set;
+        }
+
+        [JsonProperty("email")]
+        public string Email
+        {
+            get;
+            set;
+        }
+
+        [JsonProperty("address")]
+        public string Address
+        {
+            get;
+            set;
+        }
+
+        [JsonProperty("gender")]
+        public GenderEnum Gender
+        {
+            get;
+            set;
+        }
+
+        [JsonProperty("balance")]
+        public decimal Balance { get; set; }
+
+    }
+
     public class UserInforViewModel
     {
         [JsonProperty("fullName")]
