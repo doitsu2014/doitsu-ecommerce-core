@@ -60,7 +60,7 @@ namespace Doitsu.Ecommerce.Core.ViewModels
             set;
         }
 
-        [JsonProperty("phoneNumer")]
+        [JsonProperty("phoneNumber")]
         public string PhoneNumber
         {
             get;
@@ -87,6 +87,9 @@ namespace Doitsu.Ecommerce.Core.ViewModels
             get;
             set;
         }
+
+        [JsonProperty("balance")]
+        public decimal Balance { get; set; }
 
         [Required(ErrorMessage = "Không được bỏ trống")]
         [DataType(DataType.Password)]
@@ -298,5 +301,40 @@ namespace Doitsu.Ecommerce.Core.ViewModels
             get;
             set;
         }
+    }
+
+    public class ChangePasswordViewMode
+    {
+
+        [JsonProperty("currentPassword")]
+        public string CurrentPassword
+        {
+            get;
+            set;
+        }
+
+        [JsonProperty("newPassword")]
+        public string NewPassword
+        {
+            get;
+            set;
+        }
+    }
+
+    public class UpdateDetailViewModel
+    {
+        [JsonProperty("phoneNumber")]
+        public string PhoneNumber
+        {
+            get;
+            set;
+        }
+        [JsonProperty("fullName")]
+        public string Fullname
+        {
+            get;
+            set;
+        }
+
     }
 }

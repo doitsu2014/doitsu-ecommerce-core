@@ -85,6 +85,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                 // Add Products
                 var dbContext = webhost.Services.GetService<EcommerceDbContext>();
                 var productService = webhost.Services.GetService<IProductService>();
+                var productVariantService = webhost.Services.GetService<IProductVariantService>();
                 // Add Promotion Detail
                 var promotionDetailService = webhost.Services.GetService<IPromotionDetailService>();
                 var listProductVariantIdOfProduct01 = (await productService.Get(pro => pro.Code == "PRODUCT01")
@@ -100,8 +101,28 @@ namespace Doitsu.Ecommerce.Core.Tests
                     Name = $"PRODUCT01-{pvId.Id}",
                     DiscountPercent = 25
                 });
-
                 await promotionDetailService.CreateAsync(listPromotionDetailViewModel);
+
+                var listProductVariantIdOfProduct03 = (await productService.Get(pro => pro.Code == "PRODUCT03")
+                    .Include(p => p.ProductVariants)
+                        .ThenInclude(p => p.ProductVariantOptionValues)
+                            .ThenInclude(p => p.ProductOptionValue)
+                    .ToListAsync())
+                    .FirstOrDefault()
+                    .ProductVariants
+                    .Select(x => {
+                        if(x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK10") x.AnotherPrice = 10000;
+                        else if(x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK20") x.AnotherPrice = 20000;
+                        else if(x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK30") x.AnotherPrice = 30000;
+                        else if(x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK40") x.AnotherPrice = 40000;
+                        else if(x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK50") x.AnotherPrice = 50000;
+                        else if(x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK100") x.AnotherPrice = 100000;
+                        else if(x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK200") x.AnotherPrice = 200000;
+                        else if(x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK500") x.AnotherPrice = 500000;
+                        return x;
+                    })
+                    .ToImmutableList();
+                    productVariantService.UpdateRange(listProductVariantIdOfProduct03);
                 await dbContext.SaveChangesAsync();
             }
 
@@ -134,7 +155,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                 var result = await orderService.CreateDepositOrderAsync(new OrderViewModel()
                 {
                     UserId = user.Id,
-                    TotalPrice = 100000,
+                    TotalPrice = 100000000,
                     TotalQuantity = 1,
                     Discount = 0,
                     Note = "Nạp tiền 100k"
