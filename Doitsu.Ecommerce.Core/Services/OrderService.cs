@@ -260,6 +260,22 @@ namespace Doitsu.Ecommerce.Core.Services
                 });
         }
 
+        private decimal DetectSubTotalPrice(ProductVariantDetailViewModel productVariant, decimal orderItemSubTotalPrice)
+        {
+            if (productVariant.AnotherPrice > 0)
+            {
+                return productVariant.AnotherPrice;
+            }
+            else if (productVariant.ProductPrice > 0)
+            {
+                return productVariant.ProductPrice;
+            }
+            else
+            {
+                return orderItemSubTotalPrice > 0 ? orderItemSubTotalPrice : 0;
+            }
+        }
+
         private async Task<Option<Orders, string>> MappingFromOrderWithOptionToSaleOrder(CreateOrderWithOptionViewModel request)
         {
             return await request.SomeNotNull()
@@ -276,7 +292,7 @@ namespace Doitsu.Ecommerce.Core.Services
                             {
                                 orderItem.Discount = productVariant.PromotionDetails.OrderByDescending(x => x.Id).First().DiscountPercent;
                             }
-                            var subTotalPrice = orderItem.SubTotalFinalPrice;
+                            var subTotalPrice = DetectSubTotalPrice(productVariant, orderItem.SubTotalPrice);
                             var subTotalQuantity = orderItem.SubTotalQuantity;
                             var discount = orderItem.Discount ?? 0;
                             var price = subTotalPrice * subTotalQuantity;
