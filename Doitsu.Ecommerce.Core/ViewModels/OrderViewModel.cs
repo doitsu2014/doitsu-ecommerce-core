@@ -73,7 +73,6 @@ namespace Doitsu.Ecommerce.Core.ViewModels
 
     public class OrderDetailViewModel
     {
-
         [JsonProperty("id")]
         public int Id { get; set; }
         [JsonProperty("code")]
@@ -112,6 +111,12 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string Dynamic04 { get; set; }
         [JsonProperty("dynamic05")]
         public string Dynamic05 { get; set; }
+        [JsonProperty("note")]
+        public string Note { get; set; }
+        [JsonProperty("priority")]
+        public OrderPriorityEnum? Priority { get; set; }
+        [JsonProperty("type")]
+        public OrderTypeEnum Type { get; set; }
         [JsonProperty("user")]
         public EcommerceIdentityUserViewModel User { get; set; }
         [JsonProperty("orderItems")]

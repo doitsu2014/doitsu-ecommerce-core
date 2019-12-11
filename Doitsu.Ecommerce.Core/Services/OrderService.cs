@@ -34,7 +34,7 @@ namespace Doitsu.Ecommerce.Core.Services
         /// <param name="user"></param>
         /// <returns></returns>
         Task<Option<string, string>> CheckoutCartAsync(CheckoutCartViewModel data, EcommerceIdentityUser user);
-        Task<ImmutableList<OrderViewModel>> GetAllOrdersByUserIdAsync(int userId);
+        Task<ImmutableList<OrderDetailViewModel>> GetAllOrdersByUserIdAsync(int userId);
         Task<OrderDetailViewModel> GetOrderDetailByCodeAsync(string orderCode);
         Task<ImmutableList<OrderDetailViewModel>> GetOrderDetailByParams(OrderStatusEnum? orderStatus,
                                                                          DateTime? fromDate,
@@ -143,10 +143,10 @@ namespace Doitsu.Ecommerce.Core.Services
                 });
         }
 
-        public async Task<ImmutableList<OrderViewModel>> GetAllOrdersByUserIdAsync(int userId)
+        public async Task<ImmutableList<OrderDetailViewModel>> GetAllOrdersByUserIdAsync(int userId)
         {
             var result = await this.GetAsNoTracking(x => x.UserId.Equals(userId))
-                .ProjectTo<OrderViewModel>(Mapper.ConfigurationProvider)
+                .ProjectTo<OrderDetailViewModel>(Mapper.ConfigurationProvider)
                 .OrderByDescending(x => x.CreatedDate)
                 .ToListAsync();
 
