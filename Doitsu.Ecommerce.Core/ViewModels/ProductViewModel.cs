@@ -200,7 +200,9 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         [JsonProperty("active")]
         public bool Active { get; set; }
 
+        [JsonProperty("productOption")]
         public ProductOptionViewModel ProductOption { get; set; }
+        [JsonProperty("productOptionValue")]
         public ProductOptionValueViewModel ProductOptionValue { get; set; }
     }
 
