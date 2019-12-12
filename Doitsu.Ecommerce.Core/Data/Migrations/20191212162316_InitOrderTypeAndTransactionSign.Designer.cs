@@ -10,14 +10,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20191203112142_InitOrderType")]
-    partial class InitOrderType
+    [Migration("20191212162316_InitOrderTypeAndTransactionSign")]
+    partial class InitOrderTypeAndTransactionSign
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.0.0")
+                .HasAnnotation("ProductVersion", "3.1.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -1256,11 +1256,20 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("(getutcdate())");
 
+                    b.Property<decimal>("CurrentBalance")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(500)")
                         .HasMaxLength(500);
 
+                    b.Property<decimal>("DestinationBalance")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Sign")
                         .HasColumnType("int");
 
                     b.Property<int>("Type")

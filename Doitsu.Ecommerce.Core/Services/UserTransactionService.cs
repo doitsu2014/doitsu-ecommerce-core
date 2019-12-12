@@ -23,8 +23,9 @@ namespace Doitsu.Ecommerce.Core.Services
 {
     public interface IUserTransactionService : IBaseService<UserTransaction>
     {
-        UserTransaction PrepareUserTransaction(Orders orders, EcommerceIdentityUser user, UserTransactionTypeEnum type = UserTransactionTypeEnum.Expense);
+        UserTransaction PrepareUserTransaction(Orders orders, ImmutableList<ProductVariantViewModel> productVariants, EcommerceIdentityUser user, UserTransactionTypeEnum type = UserTransactionTypeEnum.Expense);
         Task<Option<EcommerceIdentityUser, string>> UpdateUserBalanceAsync(UserTransaction userTransaction, EcommerceIdentityUser user);
+        Task<ImmutableList<UserTransactionViewModel>> GetByUserIdAsync(int userId);
     }
 
     /// <summary>
@@ -45,7 +46,8 @@ namespace Doitsu.Ecommerce.Core.Services
             this.userManager = userManager;
         }
 
-        public UserTransaction PrepareUserTransaction(Orders orders, EcommerceIdentityUser user, UserTransactionTypeEnum type = UserTransactionTypeEnum.Expense)
+
+        public UserTransaction PrepareUserTransaction(Orders orders, ImmutableList<ProductVariantViewModel> productVariants, EcommerceIdentityUser user, UserTransactionTypeEnum type = UserTransactionTypeEnum.Expense)
         {
             var userTransaction = new UserTransaction()
             {
@@ -59,15 +61,23 @@ namespace Doitsu.Ecommerce.Core.Services
             switch (type)
             {
                 case UserTransactionTypeEnum.Expense:
-                    userTransaction.Description = $"THANH TOÁN đơn hàng {orders.Code}";
+                    userTransaction.Description = $"THANH TOÁN đơn hàng {orders.Code}, số diện thoại {orders.DeliveryPhone}, ";
+                    var optionNameValues = productVariants.Select(pv => {
+                       return pv.ProductVariantOptionValues.Select(
+                           pvov => $"{pvov.ProductOption.Name}: {pvov.ProductOptionValue.Value}"
+                       ).Aggregate((x,y) => $"{x}, {y}");
+                    });
+                    userTransaction.Description += optionNameValues.Aggregate((x,y) => $"{x}, {y}");
                     break;
 
                 case UserTransactionTypeEnum.Income:
-                    userTransaction.Description = $"NẠP TIỀN từ đơn hàng {orders.Code}";
+                    userTransaction.Description = $"NẠP TIỀN từ đơn hàng {orders.Code}, vào tài khoản {user.UserName}.";
                     break;
 
                 case UserTransactionTypeEnum.Rollback:
-                    userTransaction.Description = $"HOÀN TIỀN từ đơn hàng {orders.Code}, lý do {orders.Note}";
+                    userTransaction.Description = userTransaction.Description.IsNullOrEmpty() 
+                        ? $"HOÀN TIỀN từ đơn hàng {orders.Code}" 
+                        : userTransaction.Description;
                     break;
             }
 
@@ -83,25 +93,36 @@ namespace Doitsu.Ecommerce.Core.Services
                     switch (userTransaction.Type)
                     {
                         case UserTransactionTypeEnum.Expense:
+                        case UserTransactionTypeEnum.Withdrawal:
                             if (user.Balance < userTransaction.Amount)
                             {
                                 return Option.None<EcommerceIdentityUser, string>("Hiện tại số dư tài khoản của bạn không đủ để thanh toán đơn hàng này.");
                             }
+                            userTransaction.CurrentBalance = user.Balance;
                             user.Balance -= userTransaction.Amount;
+                            userTransaction.DestinationBalance = user.Balance;
+                            userTransaction.Sign = UserTransactionSignEnum.Substract;
                             break;
-
                         case UserTransactionTypeEnum.Income:
-                            user.Balance += userTransaction.Amount;
-                            break;
-
                         case UserTransactionTypeEnum.Rollback:
+                            userTransaction.CurrentBalance = user.Balance;
                             user.Balance += userTransaction.Amount;
+                            userTransaction.DestinationBalance = user.Balance;
+                            userTransaction.Sign = UserTransactionSignEnum.Plus;
                             break;
                     }
                     await this.userManager.UpdateAsync(user);
                     await this.CreateAsync(userTransaction);
                     return Option.Some<EcommerceIdentityUser, string>(user);
                 });
+        }
+
+        public async Task<ImmutableList<UserTransactionViewModel>> GetByUserIdAsync(int userId)
+        {
+            return (await this.DbContext.UserTransactions.Where(ut => ut.UserId == userId)
+                .ProjectTo<UserTransactionViewModel>(this.Mapper.ConfigurationProvider)
+                .OrderByDescending(ut => ut.CreatedTime)
+                .ToListAsync()).ToImmutableList();
         }
     }
 }

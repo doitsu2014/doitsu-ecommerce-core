@@ -5,7 +5,8 @@ namespace Doitsu.Ecommerce.Core
     public enum OrderTypeEnum
     {
         Sale = 0,
-        Desposit = 1
+        Desposit = 1,
+        Withdrawal = 2
     }
 
     public enum OrderPriorityEnum
@@ -29,7 +30,15 @@ namespace Doitsu.Ecommerce.Core
     {
         Income = 0,
         Expense = 1,
-        Rollback = 2
+        // Roll back for a order.
+        Rollback = 2,
+        Withdrawal = 3
+    }
+
+    public enum UserTransactionSignEnum
+    {
+        Plus = '+',
+        Substract = '-' 
     }
 
 

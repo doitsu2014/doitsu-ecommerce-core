@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Doitsu.Ecommerce.Core.Data;
@@ -17,6 +18,7 @@ using System.Collections.Generic;
 using Doitsu.Ecommerce.Core.IdentitiesExtension;
 using Doitsu.Ecommerce.Core.Data.Identities;
 using Doitsu.Ecommerce.Core.IdentityManagers;
+using Doitsu.Utils;
 
 namespace Doitsu.Ecommerce.Core.Tests
 {
@@ -110,19 +112,20 @@ namespace Doitsu.Ecommerce.Core.Tests
                     .ToListAsync())
                     .FirstOrDefault()
                     .ProductVariants
-                    .Select(x => {
-                        if(x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK10") x.AnotherPrice = 10000;
-                        else if(x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK20") x.AnotherPrice = 20000;
-                        else if(x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK30") x.AnotherPrice = 30000;
-                        else if(x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK40") x.AnotherPrice = 40000;
-                        else if(x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK50") x.AnotherPrice = 50000;
-                        else if(x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK100") x.AnotherPrice = 100000;
-                        else if(x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK200") x.AnotherPrice = 200000;
-                        else if(x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK500") x.AnotherPrice = 500000;
+                    .Select(x =>
+                    {
+                        if (x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK10") x.AnotherPrice = 10000;
+                        else if (x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK20") x.AnotherPrice = 20000;
+                        else if (x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK30") x.AnotherPrice = 30000;
+                        else if (x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK40") x.AnotherPrice = 40000;
+                        else if (x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK50") x.AnotherPrice = 50000;
+                        else if (x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK100") x.AnotherPrice = 100000;
+                        else if (x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK200") x.AnotherPrice = 200000;
+                        else if (x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK500") x.AnotherPrice = 500000;
                         return x;
                     })
                     .ToImmutableList();
-                    productVariantService.UpdateRange(listProductVariantIdOfProduct03);
+                productVariantService.UpdateRange(listProductVariantIdOfProduct03);
                 await dbContext.SaveChangesAsync();
             }
 

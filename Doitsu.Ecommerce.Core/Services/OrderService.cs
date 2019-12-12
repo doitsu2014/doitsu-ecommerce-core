@@ -220,21 +220,19 @@ namespace Doitsu.Ecommerce.Core.Services
             return await request.SomeNotNull()
                 .WithException("Dữ liệu truyền lên rỗng.")
                 .Filter(d => d.UserId > 0, "Không tìm thấy thông tin người đặt hàng.")
-                .FlatMapAsync(async d => await MappingFromOrderWithOptionToSaleOrder(d))
-                .FlatMapAsync(async o =>
+                .MapAsync(async d => (optionOrder: await MappingFromOrderWithOptionToSaleOrder(d), productVariants: d.OrderItems.Select(oi => oi.ProductVariant).ToImmutableList()))
+                .FlatMapAsync(async d =>
                 {
-                    var user = await userManager.FindByIdAsync(o.UserId.ToString());
-                    var userTransaction = this.userTransactionService.PrepareUserTransaction(o, user);
-                    var updateBalanceResult = await userTransactionService.UpdateUserBalanceAsync(userTransaction, user);
-
-                    return updateBalanceResult.Match<Option<Orders, string>>(
-                        res =>
-                        {
+                    return await d.optionOrder.MapAsync(async o => 
+                    {
+                        var user = await userManager.FindByIdAsync(o.UserId.ToString());
+                        var userTransaction = this.userTransactionService.PrepareUserTransaction(o, d.productVariants, user);
+                        var result = await userTransactionService.UpdateUserBalanceAsync(userTransaction, user);
+                        return result.Map(u => {
                             o.User = user;
-                            return Option.Some<Orders, string>(o);
-                        },
-                        error => { return Option.None<Orders, string>(error); }
-                    );
+                            return o;
+                        });
+                    }).FlattenAsync();
                 })
                 .MapAsync(async o =>
                 {
@@ -282,7 +280,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 .WithException("Thông tin đơn hàng rỗng")
                 .MapAsync(async d =>
                 {
-                    foreach (var orderItem in d.OrderItems)
+                    d.OrderItems = (await Task.WhenAll(d.OrderItems.Select(async orderItem =>
                     {
                         var productVariant = await productService.FindProductVariantFromOptionsAsync(orderItem.ProductOptionValues);
                         if (productVariant != null)
@@ -298,12 +296,14 @@ namespace Doitsu.Ecommerce.Core.Services
                             var price = subTotalPrice * subTotalQuantity;
                             orderItem.SubTotalFinalPrice = price - (price * ((decimal)discount) / 100);
                             orderItem.ProductId = productVariant.ProductId;
+                            orderItem.ProductVariant = productVariant;
                             orderItem.ProductVariantId = productVariant.Id;
                             d.TotalPrice += price;
                             d.TotalQuantity += orderItem.SubTotalQuantity;
                             d.FinalPrice += orderItem.SubTotalFinalPrice;
                         }
-                    }
+                        return orderItem;
+                    }))).ToImmutableList();
 
                     if (d.Priority.HasValue)
                     {
@@ -330,7 +330,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 .Map(d =>
                 {
                     var order = this.Mapper.Map<Orders>(request);
-                    order.Code = DataUtils.GenerateOrderCode(Constants.OrderInformation.ORDER_CODE_LENGTH, new Random());
+                    order.Code = DataUtils.GenerateCode(Constants.OrderInformation.ORDER_CODE_LENGTH);
                     order.CreatedDate = DateTime.UtcNow.ToVietnamDateTime();
                     order.Type = OrderTypeEnum.Desposit;
                     order.Status = (int)OrderStatusEnum.Done;
@@ -341,7 +341,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 .FlatMapAsync(async o =>
                 {
                     var user = await userManager.FindByIdAsync(o.UserId.ToString());
-                    var userTransaction = this.userTransactionService.PrepareUserTransaction(o, user, UserTransactionTypeEnum.Income);
+                    var userTransaction = this.userTransactionService.PrepareUserTransaction(o, ImmutableList<ProductVariantViewModel>.Empty, user, UserTransactionTypeEnum.Income);
                     var updateBalanceResult = await userTransactionService.UpdateUserBalanceAsync(userTransaction, user);
                     return updateBalanceResult.Match<Option<Orders, string>>(
                         res =>
