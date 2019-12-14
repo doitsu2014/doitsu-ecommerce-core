@@ -100,6 +100,25 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
             ");
         }
 
+        public static void ReseedAllTable(IWebHost host, string poolKey)
+        {
+            var connectionString = host.Services.GetService<IConfiguration>().GetConnectionString(nameof(EcommerceDbContext));
+            var generated = GeneratePoolKeyConnectionString(connectionString, poolKey);
+
+            ExecuteNonQuery(generated, @"
+                DECLARE @reseedTableQuery NVARCHAR(MAX) = '';
+                SELECT 
+                    @reseedTableQuery = CONCAT(@reseedTableQuery, 'DBCC CHECKIDENT(''[' + TABLE_NAME + ']'', RESEED, 0);')
+                FROM 
+                    INFORMATION_SCHEMA.TABLES
+                WHERE 
+                    OBJECTPROPERTY(OBJECT_ID(TABLE_NAME), 'TableHasIdentity') = 1
+                    AND TABLE_TYPE = 'BASE TABLE'
+
+                EXECUTE (@reseedTableQuery)
+            ");
+        }
+
 
         public static int ExecuteNonQuery(string connectionString, string command)
         {

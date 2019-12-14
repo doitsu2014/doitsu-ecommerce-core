@@ -63,7 +63,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                 var dbContext = webhost.Services.GetService<EcommerceDbContext>();
                 await dbContext.Database.MigrateAsync();
                 DatabaseHelper.TruncateAllTable(webhost, _poolKey);
-
+                DatabaseHelper.ReseedAllTable(webhost, _poolKey);
                 // Add Brand
                 var brandService = webhost.Services.GetService<IBrandService>();
                 await brandService.CreateAsync<BrandViewModel>(_fixture.BrandData);
@@ -140,6 +140,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                     Email = "duc.tran@doitsu.tech",
                     UserName = "doitsu2014",
                     Fullname = "Trần Hữu Đức",
+                    PhoneNumber = "0946680600",
                     Gender = (int)GenderEnum.Male
                 };
                 var roleStrs = new List<string>() { "ActiveUser", "Administrator" };

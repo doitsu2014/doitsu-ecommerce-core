@@ -21,9 +21,10 @@ namespace Doitsu.Ecommerce.Core
     public enum OrderStatusEnum
     {
         New = 0,
-        Done = 1,
-        Fail = 2,
-        Cancel = 3
+        Processing = 1,
+        Done = 2,
+        Cancel = 3,
+        Fail = 4
     }
 
     public enum UserTransactionTypeEnum
