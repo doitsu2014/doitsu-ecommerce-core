@@ -13,7 +13,6 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
             base.Configure(builder);
             builder.Property(e => e.Description).HasMaxLength(500);
             builder.Property(e => e.Amount).HasDefaultValue(0);
-            builder.Property(e => e.Type).HasDefaultValue(UserTransactionTypeEnum.Expense);
             builder.Property(e => e.CreatedTime).HasDefaultValueSql("(getutcdate())");
 
             builder.HasOne(e => e.User)

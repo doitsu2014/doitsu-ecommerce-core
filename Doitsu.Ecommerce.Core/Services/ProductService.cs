@@ -425,24 +425,12 @@ namespace Doitsu.Ecommerce.Core.Services
         {
             var poIds = listProductOptions.Select(po => po.Id);
             var totalIds = poIds.Count();
-            var productVariantOptionValues = (await this.DbContext
-                .ProductVariantOptionValues
-                .Include(pvov => pvov.ProductVariant)
-                    .ThenInclude(pv => pv.PromotionDetails)
-                .AsNoTracking()
-                // Note: because is nullable so I have to use min value of int to make false in Query Contains 
-                .Where(pvov => poIds.Contains(pvov.ProductOptionValueId ?? int.MinValue))
-                .OrderBy(pvov => pvov.ProductVariantId)
-                .ToListAsync())
-                .GroupBy(pvov => pvov.ProductVariantId)
-                .Where(gb => gb.Count() == totalIds)
-                .FirstOrDefault();
-                
-            if(productVariantOptionValues.Count() > 0) {
-                var productVariant = productVariantOptionValues.First().ProductVariant;
-                return this.Mapper.Map<ProductVariantDetailViewModel>(productVariant);
-            }
-            return null;
+
+            return await this.DbContext.ProductVariants.AsNoTracking()
+                .Where(pv => pv.ProductVariantOptionValues.Count() == totalIds && 
+                    pv.ProductVariantOptionValues.Select(pvov => pvov.ProductOptionValueId ?? int.MinValue).All(pvovPovId => poIds.Contains(pvovPovId)))
+                    .ProjectTo<ProductVariantDetailViewModel>(this.Mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync();
         }
     }
 }

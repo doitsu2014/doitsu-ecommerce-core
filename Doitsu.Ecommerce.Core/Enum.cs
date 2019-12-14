@@ -2,7 +2,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Doitsu.Ecommerce.Core
 {
-    public enum OrderPriorityEnum 
+    public enum OrderTypeEnum
+    {
+        Sale = 0,
+        Desposit = 1,
+        Withdrawal = 2
+    }
+
+    public enum OrderPriorityEnum
     {
         OnePercent = 1,
         TwoPercent = 2,
@@ -11,20 +18,30 @@ namespace Doitsu.Ecommerce.Core
         FivePercent = 5
     }
 
-    public enum UserTransactionTypeEnum 
-    {
-        Income = 0,
-        Expense = 1,
-        Rollback = 2
-    }
-    
     public enum OrderStatusEnum
     {
         New = 0,
-        Done = 1,
-        Fail = 2,
-        Cancel = 3
+        Processing = 1,
+        Done = 2,
+        Cancel = 3,
+        Fail = 4
     }
+
+    public enum UserTransactionTypeEnum
+    {
+        Income = 0,
+        Expense = 1,
+        // Roll back for a order.
+        Rollback = 2,
+        Withdrawal = 3
+    }
+
+    public enum UserTransactionSignEnum
+    {
+        Plus = '+',
+        Substract = '-' 
+    }
+
 
     public enum ProductOptionValueStatusEnum
     {

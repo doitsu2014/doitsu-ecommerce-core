@@ -35,6 +35,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public decimal SubTotalFinalPrice { get; set; }
         [JsonProperty("productName")]
         public string ProductName { get; set; }
+        [JsonProperty("productVariant")]
+        public ProductVariantViewModel ProductVariant { get; set; }
     }
     public class CreateOrderItemWithOptionViewModel : OrderItemViewModel 
     {

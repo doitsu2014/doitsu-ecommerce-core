@@ -80,7 +80,9 @@ namespace Doitsu.Ecommerce.Core
 
                 cfg.CreateMap<OrderItems, OrderItemViewModel>().ReverseMap();
                 cfg.CreateMap<OrderItemViewModel, OrderItems>();
-                cfg.CreateMap<CreateOrderItemWithOptionViewModel, OrderItems>();
+                cfg.CreateMap<CreateOrderItemWithOptionViewModel, OrderItems>()
+                    .ForMember(o => o.ProductVariant, opt => opt.Ignore())
+                    .ForMember(o => o.Product, opt => opt.Ignore());
                 #endregion
                 cfg.CreateMap<Blogs, BlogDetailViewModel>();
                 cfg.CreateMap<Blogs, BlogOverviewViewModel>();
@@ -119,6 +121,8 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<PromotionDetail, PromotionDetailViewModel>();
                 cfg.CreateMap<PromotionDetailViewModel, PromotionDetail>();
 
+                cfg.CreateMap<UserTransactionViewModel, UserTransaction>();
+                cfg.CreateMap<UserTransaction, UserTransactionViewModel>();
             });
 
             IMapper mapper = autoMapperConfig.CreateMapper();
