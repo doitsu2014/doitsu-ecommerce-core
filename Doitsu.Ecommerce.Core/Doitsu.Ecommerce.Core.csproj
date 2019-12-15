@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-      <PackageVersion>3.1.100.1</PackageVersion>
+      <PackageVersion>3.1.100.2</PackageVersion>
       <Title>Doitsu.Ecommerce.Core</Title>
       <PackageId>Doitsu.Ecommerce.Core</PackageId>
       <Authors>Doitsu Technology</Authors>

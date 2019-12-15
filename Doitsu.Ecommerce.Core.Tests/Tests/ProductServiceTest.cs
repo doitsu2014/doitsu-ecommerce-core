@@ -76,8 +76,8 @@ namespace Doitsu.Ecommerce.Core.Tests
                 // Add Products
                 var productService = webhost.Services.GetService<IProductService>();
                 var firstCategory = await dbContext.Set<Categories>().AsNoTracking().FirstOrDefaultAsync();
-                var createData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; });
-                var result = await productService.CreateProductWithOptionAsync(createData.ToList());
+                var createData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; }).ToImmutableList();
+                var result = await productService.CreateProductWithOptionAsync(createData);
                 await dbContext.SaveChangesAsync();
                 Assert.True(true);
             }
