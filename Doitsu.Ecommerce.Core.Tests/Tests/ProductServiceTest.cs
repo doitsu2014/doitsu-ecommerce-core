@@ -76,8 +76,8 @@ namespace Doitsu.Ecommerce.Core.Tests
                 // Add Products
                 var productService = webhost.Services.GetService<IProductService>();
                 var firstCategory = await dbContext.Set<Categories>().AsNoTracking().FirstOrDefaultAsync();
-                var createData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; });
-                var result = await productService.CreateProductWithOptionAsync(createData.ToList());
+                var createData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; }).ToImmutableList();
+                var result = await productService.CreateProductWithOptionAsync(createData);
                 await dbContext.SaveChangesAsync();
                 Assert.True(true);
             }
@@ -90,20 +90,33 @@ namespace Doitsu.Ecommerce.Core.Tests
                 var productVariantService = webhost.Services.GetService<IProductVariantService>();
                 // Add Promotion Detail
                 var promotionDetailService = webhost.Services.GetService<IPromotionDetailService>();
-                var listProductVariantIdOfProduct01 = (await productService.Get(pro => pro.Code == "PRODUCT01")
+                var listProductVariantIdOfProduct01Ids = (await productService.Get(pro => pro.Code == "PRODUCT01")
                     .Include(p => p.ProductVariants)
                     .FirstOrDefaultAsync())
                     .ProductVariants
-                    .Select(x => productService.Mapper.Map<ProductVariantViewModel>(x))
+                    .Select(x => x.Id)
                     .ToImmutableList();
 
-                var listPromotionDetailViewModel = listProductVariantIdOfProduct01.Select(pvId => new PromotionDetailViewModel()
+                var listPromotionDetailProduct01ViewModel = listProductVariantIdOfProduct01Ids.Select(pvId => new PromotionDetailViewModel()
                 {
-                    ProductVariantId = pvId.Id,
-                    Name = $"PRODUCT01-{pvId.Id}",
+                    ProductVariantId = pvId,
+                    Name = $"PRODUCT01-{pvId}",
                     DiscountPercent = 25
                 });
-                await promotionDetailService.CreateAsync(listPromotionDetailViewModel);
+                await promotionDetailService.CreateAsync(listPromotionDetailProduct01ViewModel);
+
+                var listProductVariantIdOfProduct02Ids = (await productService.Get(pro => pro.Code == "PRODUCT02")
+                    .Include(p => p.ProductVariants)
+                    .FirstOrDefaultAsync())
+                    .ProductVariants
+                    .Select(x => x.Id)
+                    .ToImmutableList();
+                var listPromotionDetailProduct02ViewModel = listProductVariantIdOfProduct02Ids.Select(pvId => new PromotionDetailViewModel() {
+                    ProductVariantId = pvId,
+                    Name = $"PRODUCT02-{pvId}",
+                    DiscountPercent = 25
+                });
+                await promotionDetailService.CreateAsync(listPromotionDetailProduct02ViewModel);
 
                 var listProductVariantIdOfProduct03 = (await productService.Get(pro => pro.Code == "PRODUCT03")
                     .Include(p => p.ProductVariants)
@@ -126,6 +139,14 @@ namespace Doitsu.Ecommerce.Core.Tests
                     })
                     .ToImmutableList();
                 productVariantService.UpdateRange(listProductVariantIdOfProduct03);
+
+                var listPromotionDetailProduct03ViewModel = listProductVariantIdOfProduct03.Select(pvId => new PromotionDetailViewModel() {
+                    ProductVariantId = pvId.Id,
+                    Name = $"PRODUCT03-{pvId.Id}",
+                    DiscountPercent = 25
+                });
+                await promotionDetailService.CreateAsync(listPromotionDetailProduct03ViewModel);
+                
                 await dbContext.SaveChangesAsync();
             }
 
@@ -149,6 +170,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                     Name = r,
                     NormalizedName = r
                 }).ToList();
+                
                 foreach (var role in roles)
                 {
                     await roleManager.CreateAsync(role);
