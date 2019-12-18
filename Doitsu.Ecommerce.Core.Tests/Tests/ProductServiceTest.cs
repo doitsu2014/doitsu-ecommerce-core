@@ -70,12 +70,12 @@ namespace Doitsu.Ecommerce.Core.Tests
 
                 // Add Category
                 var categoryService = webhost.Services.GetService<ICategoryService>();
-                await categoryService.CreateAsync<CategoryViewModel>(_fixture.CategoryData);
+                await categoryService.CreateAsync<CategoryWithInverseParentViewModel>(_fixture.CategoryData);
                 await dbContext.SaveChangesAsync();
 
                 // Add Products
                 var productService = webhost.Services.GetService<IProductService>();
-                var firstCategory = await dbContext.Set<Categories>().AsNoTracking().FirstOrDefaultAsync();
+                var firstCategory = await dbContext.Set<Categories>().AsNoTracking().FirstOrDefaultAsync(x => x.Slug == "hang-ban");
                 var createData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; }).ToImmutableList();
                 var result = await productService.CreateProductWithOptionAsync(createData);
                 await dbContext.SaveChangesAsync();
@@ -204,7 +204,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                 var categoryService = webhost.Services.GetService<ICategoryService>();
                 var productService = webhost.Services.GetService<IProductService>();
 
-                await categoryService.CreateAsync<CategoryViewModel>(_fixture.CategoryData);
+                await categoryService.CreateAsync<CategoryWithInverseParentViewModel>(_fixture.CategoryData);
                 await dbContext.SaveChangesAsync();
 
                 var firstCategory = await dbContext.Set<Categories>().AsNoTracking().FirstOrDefaultAsync();
