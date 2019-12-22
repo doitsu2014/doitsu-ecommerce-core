@@ -67,6 +67,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                 // Add Brand
                 var brandService = webhost.Services.GetService<IBrandService>();
                 await brandService.CreateAsync<BrandViewModel>(_fixture.BrandData);
+                await dbContext.SaveChangesAsync();
 
                 // Add Category
                 var categoryService = webhost.Services.GetService<ICategoryService>();
@@ -90,33 +91,21 @@ namespace Doitsu.Ecommerce.Core.Tests
                 var productVariantService = webhost.Services.GetService<IProductVariantService>();
                 // Add Promotion Detail
                 var promotionDetailService = webhost.Services.GetService<IPromotionDetailService>();
-                var listProductVariantIdOfProduct01Ids = (await productService.Get(pro => pro.Code == "PRODUCT01")
+                var listProductVariantOfProduct01 = (await productService.Get(pro => pro.Code == "PRODUCT01")
                     .Include(p => p.ProductVariants)
                     .FirstOrDefaultAsync())
                     .ProductVariants
-                    .Select(x => x.Id)
+                    .Select(x => { x.AnotherDiscount = 25; return x; })
                     .ToImmutableList();
+                productVariantService.UpdateRange(listProductVariantOfProduct01);
 
-                var listPromotionDetailProduct01ViewModel = listProductVariantIdOfProduct01Ids.Select(pvId => new PromotionDetailViewModel()
-                {
-                    ProductVariantId = pvId,
-                    Name = $"PRODUCT01-{pvId}",
-                    DiscountPercent = 25
-                });
-                await promotionDetailService.CreateAsync(listPromotionDetailProduct01ViewModel);
-
-                var listProductVariantIdOfProduct02Ids = (await productService.Get(pro => pro.Code == "PRODUCT02")
+                var listProductVariantOfProduct02 = (await productService.Get(pro => pro.Code == "PRODUCT02")
                     .Include(p => p.ProductVariants)
                     .FirstOrDefaultAsync())
                     .ProductVariants
-                    .Select(x => x.Id)
+                    .Select(x => { x.AnotherDiscount = 25; return x; })
                     .ToImmutableList();
-                var listPromotionDetailProduct02ViewModel = listProductVariantIdOfProduct02Ids.Select(pvId => new PromotionDetailViewModel() {
-                    ProductVariantId = pvId,
-                    Name = $"PRODUCT02-{pvId}",
-                    DiscountPercent = 25
-                });
-                await promotionDetailService.CreateAsync(listPromotionDetailProduct02ViewModel);
+                productVariantService.UpdateRange(listProductVariantOfProduct02);
 
                 var listProductVariantIdOfProduct03 = (await productService.Get(pro => pro.Code == "PRODUCT03")
                     .Include(p => p.ProductVariants)
@@ -138,15 +127,9 @@ namespace Doitsu.Ecommerce.Core.Tests
                         return x;
                     })
                     .ToImmutableList();
+
                 productVariantService.UpdateRange(listProductVariantIdOfProduct03);
 
-                var listPromotionDetailProduct03ViewModel = listProductVariantIdOfProduct03.Select(pvId => new PromotionDetailViewModel() {
-                    ProductVariantId = pvId.Id,
-                    Name = $"PRODUCT03-{pvId.Id}",
-                    DiscountPercent = 25
-                });
-                await promotionDetailService.CreateAsync(listPromotionDetailProduct03ViewModel);
-                
                 await dbContext.SaveChangesAsync();
             }
 
@@ -170,7 +153,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                     Name = r,
                     NormalizedName = r
                 }).ToList();
-                
+
                 foreach (var role in roles)
                 {
                     await roleManager.CreateAsync(role);

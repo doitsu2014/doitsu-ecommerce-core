@@ -42,14 +42,19 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<Option<int, string>> UpdateProductWithOptionAsync(UpdateProductViewModel data);
         Task<Option<int, string>> UpdateProductVariantsAsync(ProductVariantViewModel data);
         Task<ProductVariantDetailViewModel> FindProductVariantFromOptionsAsync(ICollection<ProductOptionValueViewModel> listProductOptions);
+        Task<Option<int, string>> UpdateProductVariantAnotherDiscountAsync(int productId, int productVariantId, float anotherDiscount);
+        Task<Option<int, string>> UpdateProductVariantAnotherPriceAsync(int productId, int productVariantId, decimal anotherPrice);
     }
 
     public class ProductService : BaseService<Products>, IProductService
     {
+        private readonly IProductVariantService productVariantService;
         public ProductService(EcommerceDbContext dbContext,
                             IMapper mapper,
-                            ILogger<BaseService<Products, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
+                            ILogger<BaseService<Products, EcommerceDbContext>> logger,
+                            IProductVariantService productVariantService) : base(dbContext, mapper, logger)
         {
+            this.productVariantService = productVariantService;
         }
 
         private async Task<CategoryWithProductOverviewViewModel> GetFirstCategoryWithProductByCateSlug(string slug)
@@ -413,7 +418,7 @@ namespace Doitsu.Ecommerce.Core.Services
                             await CreateAsync(productEnt);
                             result.Add(productEnt);
                         }
-                        
+
                         await DbContext.SaveChangesAsync();
                         await transaction.CommitAsync();
                         return result.Select(x => x.Id).ToArray();
@@ -427,10 +432,42 @@ namespace Doitsu.Ecommerce.Core.Services
             var totalIds = poIds.Count();
 
             return await this.DbContext.ProductVariants.AsNoTracking()
-                .Where(pv => pv.ProductVariantOptionValues.Count() == totalIds && 
+                .Where(pv => pv.ProductVariantOptionValues.Count() == totalIds &&
                     pv.ProductVariantOptionValues.Select(pvov => pvov.ProductOptionValueId ?? int.MinValue).All(pvovPovId => poIds.Contains(pvovPovId)))
                     .ProjectTo<ProductVariantDetailViewModel>(this.Mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync();
+        }
+
+        public async Task<Option<int, string>> UpdateProductVariantAnotherDiscountAsync(int productId, int productVariantId, float anotherDiscount)
+        {
+            return await (productId, productVariantId, anotherDiscount).SomeNotNull()
+                .WithException(string.Empty)
+                .FilterAsync(async req => await DbContext.Products.AnyAsync(p => p.Id == productId), "Không tồn tại sản phẩm này.")
+                .FilterAsync(async req => await DbContext.ProductVariants.AnyAsync(pv => pv.Id == productVariantId), "Không tồn tại biến thể này.")
+                .MapAsync(async req =>
+                {
+                    var productVariant = await productVariantService.FindByKeysAsync(productVariantId);
+                    productVariant.AnotherDiscount = anotherDiscount;
+                    productVariantService.Update(productVariant);
+                    await this.CommitAsync();
+                    return productVariant.Id;
+                });
+        }
+
+        public async Task<Option<int, string>> UpdateProductVariantAnotherPriceAsync(int productId, int productVariantId, decimal anotherPrice)
+        {
+            return await (productId, productVariantId, anotherPrice).SomeNotNull()
+                .WithException(string.Empty)
+                .FilterAsync(async req => await DbContext.Products.AnyAsync(p => p.Id == productId), "Không tồn tại sản phẩm này.")
+                .FilterAsync(async req => await DbContext.ProductVariants.AnyAsync(pv => pv.Id == productVariantId), "Không tồn tại biến thể này.")
+                .MapAsync(async req =>
+                {
+                    var productVariant = await productVariantService.FindByKeysAsync(productVariantId);
+                    productVariant.AnotherPrice = anotherPrice;
+                    productVariantService.Update(productVariant);
+                    await this.CommitAsync();
+                    return productVariant.Id;
+                });
         }
     }
 }

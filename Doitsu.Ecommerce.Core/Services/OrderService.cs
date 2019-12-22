@@ -288,10 +288,7 @@ namespace Doitsu.Ecommerce.Core.Services
                         if (productVariant != null)
                         {
                             orderItem.ProductId = productVariant.ProductId;
-                            if (productVariant.PromotionDetails != null && productVariant.PromotionDetails.Count > 0)
-                            {
-                                orderItem.Discount = productVariant.PromotionDetails.OrderByDescending(x => x.Id).First().DiscountPercent;
-                            }
+                            orderItem.Discount = productVariant.AnotherDiscount;
                             var subTotalPrice = DetectSubTotalPrice(productVariant, orderItem.SubTotalPrice);
                             var subTotalQuantity = orderItem.SubTotalQuantity;
                             var discount = orderItem.Discount ?? 0;

@@ -87,8 +87,6 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public ICollection<ProductVariantViewModel> ProductVariants { get; set; }
     }
 
-
-
     public class ProductOverviewViewModel : BaseViewModel<Products>
     {
         [JsonProperty("id")]
@@ -180,9 +178,6 @@ namespace Doitsu.Ecommerce.Core.ViewModels
 
     public class ProductVariantDetailViewModel : ProductVariantViewModel
     {
-        [JsonProperty("promotionDetails")]
-
-        public virtual ICollection<PromotionDetailViewModel> PromotionDetails { get; set; }
     }
 
     public class ProductVariantOptionValueViewModel
