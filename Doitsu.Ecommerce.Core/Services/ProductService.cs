@@ -44,6 +44,8 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<ProductVariantDetailViewModel> FindProductVariantFromOptionsAsync(ICollection<ProductOptionValueViewModel> listProductOptions);
         Task<Option<int, string>> UpdateProductVariantAnotherDiscountAsync(int productId, int productVariantId, float anotherDiscount);
         Task<Option<int, string>> UpdateProductVariantAnotherPriceAsync(int productId, int productVariantId, decimal anotherPrice);
+        Task<Option<int, string>> CreateProductOptionAsync(int productId, ProductOptionViewModel data);
+        Task<Option<int, string>> UpdateProductOptionAsync(int productId, int productOptionId, ProductOptionViewModel data);
     }
 
     public class ProductService : BaseService<Products>, IProductService
@@ -467,6 +469,49 @@ namespace Doitsu.Ecommerce.Core.Services
                     productVariantService.Update(productVariant);
                     await this.CommitAsync();
                     return productVariant.Id;
+                });
+        }
+
+        public async Task<Option<int, string>> CreateProductOptionAsync(int productId, ProductOptionViewModel data)
+        {
+            return await (productId, data).SomeNotNull()
+                .WithException(string.Empty)
+                .Filter(req => req.data != null, "Dữ liệu thuộc tính rỗng.")
+                .FlatMapAsync(async req =>
+                {
+                    var updateProductViewModel = await FirstOrDefaultAsync<UpdateProductViewModel>(prod => prod.Id == productId);
+                    if (updateProductViewModel == null) return Option.None<int, string>($"Không tìm thấy sản phẩm tương ứng với id {req.productId}");
+                    updateProductViewModel.ProductOptions.Add(data);
+                    return await UpdateProductWithOptionAsync(updateProductViewModel);
+                });
+        }
+
+        public async Task<Option<int, string>> UpdateProductOptionAsync(int productId, int productOptionId, ProductOptionViewModel data)
+        {
+            return await (productId, productOptionId, data).SomeNotNull()
+                .WithException(string.Empty)
+                .Filter(req => req.data != null, "Dữ liệu thuộc tính rỗng.")
+                .FlatMapAsync(async req =>
+                {
+                    var updateProductViewModel = await FirstOrDefaultAsync<UpdateProductViewModel>(prod => prod.Id == productId);
+                    if (updateProductViewModel == null) return Option.None<int, string>($"Không tìm thấy sản phẩm tương ứng với id {req.productId}");
+                    else if (!updateProductViewModel.ProductOptions.Any(po => po.Id == req.productOptionId)) return Option.None<int, string>($"Không tìm thấy mã thuộc tính tương ứng với id {req.productOptionId}");
+                    var updatePo = updateProductViewModel.ProductOptions.First(po => po.Id == req.productOptionId);
+
+                    updatePo.ProductOptionValues = data.ProductOptionValues.Select(pov =>
+                    {
+                        var existPov = updatePo.ProductOptionValues.FirstOrDefault(dbPov => dbPov.Id == pov.Id);
+                        if (existPov != null)
+                        {
+                            pov.Vers = existPov.Vers;
+                            pov.Active = existPov.Active;
+                            pov.ProductOptionId = existPov.ProductOptionId;
+                        }
+                        return pov;
+                    }).ToImmutableList();
+                    updatePo.Name = data.Name;
+
+                    return await UpdateProductWithOptionAsync(updateProductViewModel);
                 });
         }
     }

@@ -80,6 +80,9 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         [JsonProperty("slug")]
         public string Slug { get; set; }
 
+        [JsonProperty("vers")]
+        public byte[] Vers { get; set; }
+
         [JsonProperty("productOptions")]
         public ICollection<ProductOptionViewModel> ProductOptions { get; set; }
 
@@ -171,7 +174,7 @@ namespace Doitsu.Ecommerce.Core.ViewModels
 
         [JsonProperty("productPrice")]
         public decimal ProductPrice { get; set; }
-        
+
         [JsonProperty("productVariantOptionValues")]
         public virtual ICollection<ProductVariantOptionValueViewModel> ProductVariantOptionValues { get; set; }
     }

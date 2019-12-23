@@ -14,6 +14,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public int ProductId { get; set; }
         [JsonProperty("active")]
         public bool Active { get; set; }
+        [JsonProperty("vers")]
+        public byte[] Vers { get; set; }
         [JsonProperty("productOptionValues")]
         public virtual ICollection<ProductOptionValueViewModel> ProductOptionValues { get; set; }
     }
@@ -30,6 +32,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public bool Active { get; set; }
         [JsonProperty("status")]
         public ProductOptionValueStatusEnum Status { get; set; }
+        [JsonProperty("vers")]
+        public byte[] Vers { get; set; }
     }
 }
 
