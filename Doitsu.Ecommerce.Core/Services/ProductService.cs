@@ -336,9 +336,10 @@ namespace Doitsu.Ecommerce.Core.Services
                                 .ThenInclude(po => po.ProductOptionValues)
                             .Include(prod => prod.ProductVariants)
                                 .ThenInclude(pv => pv.ProductVariantOptionValues)
+                                .AsNoTracking()
                                 .FirstOrDefaultAsync();
                         this.Mapper.Map(d, currentProduct);
-
+                        this.DbContext.Attach(currentProduct);
                         return currentProduct;
                     })
                     .MapAsync(async productEnt =>
@@ -358,10 +359,7 @@ namespace Doitsu.Ecommerce.Core.Services
                                 productEnt.ProductVariants.Add(gPv);
                             }
                         });
-
-                        this.Update(productEnt);
                         await this.DbContext.SaveChangesAsync();
-
                         return (
                             ProductEntId: productEnt.Id,
                             ProductEntProductVariants: productEnt.ProductVariants,
