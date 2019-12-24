@@ -330,7 +330,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     .WithException("Dữ liệu truyền vào bị rỗng")
                     .MapAsync(async d =>
                     {
-                        var currentProduct = await this.GetAsNoTracking(prod => prod.Id == d.Id)
+                        var currentProduct = await this.GetAsTracking(prod => prod.Id == d.Id)
                             .Include(prod => prod.ProductTag)
                             .Include(prod => prod.ProductOptions)
                                 .ThenInclude(po => po.ProductOptionValues)
@@ -338,8 +338,12 @@ namespace Doitsu.Ecommerce.Core.Services
                                 .ThenInclude(pv => pv.ProductVariantOptionValues)
                                 .AsNoTracking()
                                 .FirstOrDefaultAsync();
+                                
+                        // Change something
                         this.Mapper.Map(d, currentProduct);
-                        this.DbContext.Attach(currentProduct);
+                        DbContext.Entry(currentProduct).State = EntityState.Modified;
+                        DbContext.AttachRange(currentProduct.ProductOptions);
+                        await this.CommitAsync();
                         return currentProduct;
                     })
                     .MapAsync(async productEnt =>
@@ -347,20 +351,19 @@ namespace Doitsu.Ecommerce.Core.Services
                         var listGeneratedProductVariants = this.BuildListProductVariant(productEnt);
                         listGeneratedProductVariants.ForEach(gPv =>
                         {
-                            var modified = productEnt.ProductVariants.FirstOrDefault(pv => pv.Id == gPv.Id && pv.Id > 0);
-                            if (modified != null)
+                            if (productEnt.ProductVariants.Any(pv => pv.Id == gPv.Id && pv.Id > 0))
                             {
-                                // is modified some fields 
-                                modified.Sku = gPv.Sku;
+                                // modified variants
+                                productEnt.ProductVariants.First(pv => pv.Id == gPv.Id && pv.Id > 0).Sku = gPv.Sku;
                             }
                             else
                             {
-                                // is add new
+                                // Add new variant
                                 productEnt.ProductVariants.Add(gPv);
                             }
                         });
-                        await this.DbContext.SaveChangesAsync();
-                        return (
+                        await this.CommitAsync();
+                        return await Task.FromResult((
                             ProductEntId: productEnt.Id,
                             ProductEntProductVariants: productEnt.ProductVariants,
                             ListPoUnavailable: productEnt
@@ -370,7 +373,7 @@ namespace Doitsu.Ecommerce.Core.Services
                                 .Select(x => x.Id)
                                 .Distinct()
                                 .ToImmutableList()
-                            );
+                            ));
                     })
                     .MapAsync(async d =>
                     {
@@ -386,10 +389,8 @@ namespace Doitsu.Ecommerce.Core.Services
                             {
                                 pva.Status = ProductVariantStatusEnum.Available;
                             }
-                            this.DbContext.Entry(pva).State = EntityState.Modified;
                         });
-
-                        await this.DbContext.SaveChangesAsync();
+                        await this.CommitAsync();
                         await transaction.CommitAsync();
                         return d.ProductEntId;
                     });
@@ -477,9 +478,12 @@ namespace Doitsu.Ecommerce.Core.Services
                 .Filter(req => req.data != null, "Dữ liệu thuộc tính rỗng.")
                 .FlatMapAsync(async req =>
                 {
+                    req.data.Name = req.data.Name.Trim();
                     var updateProductViewModel = await FirstOrDefaultAsync<UpdateProductViewModel>(prod => prod.Id == productId);
                     if (updateProductViewModel == null) return Option.None<int, string>($"Không tìm thấy sản phẩm tương ứng với id {req.productId}");
+                    else if((await DbContext.ProductOptions.AnyAsync(po => po.Name == req.data.Name)))
                     updateProductViewModel.ProductOptions.Add(data);
+                    updateProductViewModel.Name = req.data.Name;
                     return await UpdateProductWithOptionAsync(updateProductViewModel);
                 });
         }
@@ -494,10 +498,19 @@ namespace Doitsu.Ecommerce.Core.Services
                     var updateProductViewModel = await FirstOrDefaultAsync<UpdateProductViewModel>(prod => prod.Id == productId);
                     if (updateProductViewModel == null) return Option.None<int, string>($"Không tìm thấy sản phẩm tương ứng với id {req.productId}");
                     else if (!updateProductViewModel.ProductOptions.Any(po => po.Id == req.productOptionId)) return Option.None<int, string>($"Không tìm thấy mã thuộc tính tương ứng với id {req.productOptionId}");
-                    var updatePo = updateProductViewModel.ProductOptions.First(po => po.Id == req.productOptionId);
+                    else {
+                        var createNewValues = req.data.ProductOptionValues
+                                        .Where(reqDataPov => reqDataPov.Id == 0)
+                                        .Select(reqDataPov => reqDataPov.Value.Trim());
+                        if (updateProductViewModel.ProductOptions.Any(po => po.Id == req.productOptionId 
+                                && po.ProductOptionValues.Any(pov => createNewValues.Contains(pov.Value)))) 
+                                    return Option.None<int, string>($"Giá trị cho thuộc tính mà bạn muốn tạo mới đã tồn tại");
+                    }
 
-                    updatePo.ProductOptionValues = data.ProductOptionValues.Select(pov =>
+                    var updatePo = updateProductViewModel.ProductOptions.First(po => po.Id == req.productOptionId);
+                    updatePo.ProductOptionValues = req.data.ProductOptionValues.Select(pov =>
                     {
+                        pov.Value = pov.Value.Trim();
                         var existPov = updatePo.ProductOptionValues.FirstOrDefault(dbPov => dbPov.Id == pov.Id);
                         if (existPov != null)
                         {
@@ -507,8 +520,7 @@ namespace Doitsu.Ecommerce.Core.Services
                         }
                         return pov;
                     }).ToImmutableList();
-                    updatePo.Name = data.Name;
-
+                    updatePo.Name = data.Name.Trim();
                     return await UpdateProductWithOptionAsync(updateProductViewModel);
                 });
         }
