@@ -462,7 +462,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     .WithException("Dữ liệu truyền vào bị rỗng")
                     .MapAsync(async d =>
                     {
-                        var currentProduct = await this.GetAsNoTracking(prod => prod.Id == d.Id)
+                        var currentProduct = await this.GetAsTracking(prod => prod.Id == d.Id)
                             .Include(prod => prod.ProductTag)
                             .Include(prod => prod.ProductOptions)
                             .ThenInclude(po => po.ProductOptionValues)
@@ -473,7 +473,8 @@ namespace Doitsu.Ecommerce.Core.Services
 
                         // Change something
                         this.Mapper.Map(d, currentProduct);
-                        this.MarkModifiedOrAddedWithTrackGraph(currentProduct);
+                        this.DbContext.Entry(currentProduct).State = EntityState.Modified;
+                        DbContext.AttachRange(currentProduct.ProductOptions);
                         await this.CommitAsync();
                         return currentProduct;
                     })
