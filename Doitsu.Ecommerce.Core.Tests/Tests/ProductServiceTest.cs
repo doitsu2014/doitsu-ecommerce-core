@@ -202,6 +202,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                 var productService = webhost.Services.GetService<IProductService>();
                 var firstProductData = _fixture.ProductData.First();
                 var updatedProduct = await productService.FirstOrDefaultAsync<UpdateProductViewModel>(x => x.Code == firstProductData.Code);
+                updatedProduct.Name  += "-- change";
                 updatedProduct.ProductOptions.First().ProductOptionValues.First().Status = ProductOptionValueStatusEnum.Unavailable;
                 updatedProduct.ProductOptions.Last().ProductOptionValues.First().Value = "Changed";
                 updatedProduct.ProductOptions.Last().ProductOptionValues.Add(new ProductOptionValueViewModel()
