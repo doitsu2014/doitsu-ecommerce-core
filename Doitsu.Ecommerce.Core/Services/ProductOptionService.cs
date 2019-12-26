@@ -5,6 +5,11 @@ using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
 using AutoMapper;
 using Doitsu.Ecommerce.Core.Data;
+using System.Threading.Tasks;
+using Optional;
+using Optional.Async;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Doitsu.Ecommerce.Core.Services
 {

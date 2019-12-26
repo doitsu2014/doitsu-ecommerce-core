@@ -50,6 +50,7 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<Option<int, string>> UpdateProductVariantAnotherPriceAsync(int productId, int productVariantId, decimal anotherPrice);
         Task<Option<int, string>> CreateProductOptionAsync(int productId, ProductOptionViewModel data);
         Task<Option<int, string>> UpdateProductOptionAsync(int productId, int productOptionId, ProductOptionViewModel data);
+        Task<Option<int, string>> DeleteProductOptionByKeyAsync(int productId, int productOptionId);
     }
 
     public class ProductService : BaseService<Products>, IProductService
@@ -503,17 +504,17 @@ namespace Doitsu.Ecommerce.Core.Services
                             ProductEntId: productEnt.Id,
                             ProductEntProductVariants: productEnt.ProductVariants,
                             ListPoUnavailable: productEnt.ProductOptions
-                                .SelectMany(po => po.ProductOptionValues)
-                                .Where(pov => pov.Status == ProductOptionValueStatusEnum.Unavailable)
-                                .Select(x => x.Id)
-                                .Distinct()
-                                .ToImmutableList()
+                            .SelectMany(po => po.ProductOptionValues)
+                            .Where(pov => pov.Status == ProductOptionValueStatusEnum.Unavailable)
+                            .Select(x => x.Id)
+                            .Distinct()
+                            .ToImmutableList()
                         ));
                     })
                     .MapAsync(async d =>
                     {
                         // Make product variant have any unavailable product option value to unavailable
-                        foreach(var pva in d.ProductEntProductVariants)
+                        foreach (var pva in d.ProductEntProductVariants)
                         {
                             var isUnavailable = pva.ProductVariantOptionValues.Any(pvov => d.ListPoUnavailable.Contains(pvov.ProductOptionValueId ?? int.MinValue));
                             if (isUnavailable)
@@ -529,6 +530,49 @@ namespace Doitsu.Ecommerce.Core.Services
                         await this.CommitAsync();
                         await transaction.CommitAsync();
                         return d.ProductEntId;
+                    });
+            }
+        }
+
+        public async Task<Option<int, string>> DeleteProductOptionByKeyAsync(int productId, int productOptionId)
+        {
+            using(var transaction = await this.DbContext.Database.BeginTransactionAsync())
+            {
+                return await (productId, productOptionId)
+                    .SomeNotNull()
+                    .WithException("Id rỗng.")
+                    .MapAsync(async req =>
+                    {
+                        var po = await this.DbContext.ProductOptions.Where(po => po.Id == req.productOptionId)
+                            .Include(po => po.ProductOptionValues)
+                            .ThenInclude(po => po.ProductVariantOptionValues)
+                            .ThenInclude(po => po.ProductVariant)
+                            .FirstOrDefaultAsync();
+                        DbContext.ProductOptions.Remove(po);
+                        DbContext.ProductOptionValues.RemoveRange(po.ProductOptionValues);
+                        DbContext.ProductVariantOptionValues.RemoveRange(po.ProductOptionValues.SelectMany(pov => pov.ProductVariantOptionValues));
+                        DbContext.ProductVariants.RemoveRange(po.ProductOptionValues.SelectMany(pov => pov.ProductVariantOptionValues.Select(pvov => pvov.ProductVariant)));
+                        await this.CommitAsync();
+                        return req;
+                    })
+                    .MapAsync(async req =>
+                    {
+                        var productEnt = await this.DbContext.Products.Where(p => p.Id == req.productId)
+                            .Include(p => p.ProductVariants)
+                            .ThenInclude(p => p.ProductVariantOptionValues)
+                            .FirstOrDefaultAsync();
+                        var listGeneratedProductVariants = this.BuildListProductVariant(productEnt);
+                        listGeneratedProductVariants.ForEach(gPv =>
+                        {
+                            if(productEnt.ProductVariants.Any(pv => pv.Id == 0))
+                            {
+                                // Add new variant
+                                productEnt.ProductVariants.Add(gPv);
+                            }
+                        });
+                        await this.CommitAsync();
+                        await transaction.CommitAsync();
+                        return req.productOptionId;
                     });
             }
         }
