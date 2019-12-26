@@ -232,12 +232,15 @@ namespace Doitsu.Ecommerce.Core.Services
 
         private ImmutableList<ProductVariants> BuildListProductVariant(Products product)
         {
-            if (product.ProductOptions == null || product.ProductOptions.Count == 0)
+            
+            Func<ProductOptions, bool> predicatePoExistAndActive = po => po.Id == 0 || (po.Id != 0 && po.Active);
+            if (product.ProductOptions == null || product.ProductOptions.Where(predicatePoExistAndActive).Count() == 0)
             {
                 return ImmutableList<ProductVariants>.Empty;
             }
 
             var productVariants = product.ProductOptions
+                .Where(predicatePoExistAndActive)
                 .Select(po => po.ProductOptionValues)
                 .CartesianProduct()
                 // Mapping cartesian to product variant
@@ -245,13 +248,13 @@ namespace Doitsu.Ecommerce.Core.Services
                 {
                     var productVariant = new ProductVariants()
                     {
-                    ProductId = product.Id,
-                    AnotherPrice = 0,
-                    AnotherDiscount = 0,
-                    InventoryQuantity = 0,
-                    Sku = $"{product.Code}",
-                    Product = product,
-                    ProductVariantOptionValues = new List<ProductVariantOptionValues>()
+                        ProductId = product.Id,
+                        AnotherPrice = 0,
+                        AnotherDiscount = 0,
+                        InventoryQuantity = 0,
+                        Sku = $"{product.Code}",
+                        Product = product,
+                        ProductVariantOptionValues = new List<ProductVariantOptionValues>()
                     };
 
                     foreach (var productOptionValue in listProductOptionValues)
@@ -261,9 +264,9 @@ namespace Doitsu.Ecommerce.Core.Services
                         productVariant.ProductVariantOptionValues.Add(new ProductVariantOptionValues()
                         {
                             ProductOptionId = productOption.Id,
-                                ProductOptionValueId = productOptionValue.Id,
-                                ProductOptionValue = productOptionValue,
-                                ProductOption = productOption
+                            ProductOptionValueId = productOptionValue.Id,
+                            ProductOptionValue = productOptionValue,
+                            ProductOption = productOption
                         });
                     }
 
@@ -311,7 +314,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public async Task<Option<int, string>> CreateProductWithOptionAsync(CreateProductViewModel data)
         {
-            using(var transaction = await this.DbContext.Database.BeginTransactionAsync())
+            using (var transaction = await this.DbContext.Database.BeginTransactionAsync())
             {
                 return await data.SomeNotNull()
                     .WithException("Dữ liệu truyền vào bị rỗng")
@@ -336,7 +339,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public async Task<Option<int[], string>> CreateProductWithOptionAsync(ICollection<CreateProductViewModel> data)
         {
-            using(var transaction = await this.DbContext.Database.BeginTransactionAsync())
+            using (var transaction = await this.DbContext.Database.BeginTransactionAsync())
             {
                 return await data.SomeNotNull()
                     .WithException("Dữ liệu truyền vào bị rỗng")
@@ -460,7 +463,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public async Task<Option<int, string>> UpdateProductWithOptionAsync(UpdateProductViewModel data)
         {
-            using(var transaction = await this.DbContext.Database.BeginTransactionAsync())
+            using (var transaction = await this.DbContext.Database.BeginTransactionAsync())
             {
                 return await data.SomeNotNull()
                     .WithException("Dữ liệu truyền vào bị rỗng")
@@ -536,7 +539,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public async Task<Option<int, string>> DeleteProductOptionByKeyAsync(int productId, int productOptionId)
         {
-            using(var transaction = await this.DbContext.Database.BeginTransactionAsync())
+            using (var transaction = await this.DbContext.Database.BeginTransactionAsync())
             {
                 return await (productId, productOptionId)
                     .SomeNotNull()
@@ -558,18 +561,17 @@ namespace Doitsu.Ecommerce.Core.Services
                     .MapAsync(async req =>
                     {
                         var productEnt = await this.DbContext.Products.Where(p => p.Id == req.productId)
+                            .Include(prod => prod.ProductOptions)
+                            .ThenInclude(po => po.ProductOptionValues)
                             .Include(p => p.ProductVariants)
                             .ThenInclude(p => p.ProductVariantOptionValues)
                             .FirstOrDefaultAsync();
+
                         var listGeneratedProductVariants = this.BuildListProductVariant(productEnt);
-                        listGeneratedProductVariants.ForEach(gPv =>
+                        foreach(var gPv in listGeneratedProductVariants.Where(gPv => gPv.Id == 0).ToImmutableList())
                         {
-                            if(productEnt.ProductVariants.Any(pv => pv.Id == 0))
-                            {
-                                // Add new variant
-                                productEnt.ProductVariants.Add(gPv);
-                            }
-                        });
+                            await this.productVariantService.CreateAsync(gPv);
+                        };
                         await this.CommitAsync();
                         await transaction.CommitAsync();
                         return req.productOptionId;
