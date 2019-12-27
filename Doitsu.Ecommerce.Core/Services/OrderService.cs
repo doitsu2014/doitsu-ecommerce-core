@@ -41,6 +41,14 @@ namespace Doitsu.Ecommerce.Core.Services
                                                                          DateTime? toDate,
                                                                          string userPhone,
                                                                          string orderCode);
+
+        Task<ImmutableList<OrderDetailViewModel>> GetOrderDetailByParams(OrderStatusEnum? orderStatus,
+                                                                         DateTime? fromDate,
+                                                                         DateTime? toDate,
+                                                                         string userPhone,
+                                                                         string orderCode,
+                                                                         OrderTypeEnum orderType);
+
         Task<Option<OrderViewModel, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum);
         Task<Option<OrderViewModel, string>> CancelOrderAsync(string orderCode, int userId);
         Task<Option<OrderViewModel, string>> CreateSaleOrderWithOptionAsync(CreateOrderWithOptionViewModel request);
@@ -410,6 +418,44 @@ namespace Doitsu.Ecommerce.Core.Services
                         return Option.Some<OrderViewModel, string>(Mapper.Map<OrderViewModel>(order));
                     }
                 });
+        }
+
+        public async Task<ImmutableList<OrderDetailViewModel>> GetOrderDetailByParams(OrderStatusEnum? orderStatus, DateTime? fromDate, DateTime? toDate, string userPhone, string orderCode, OrderTypeEnum orderType)
+        {
+            var query = this.GetAllAsNoTracking();
+
+            if (orderStatus.HasValue)
+            {
+                query = query.Where(x => x.Status == (int)orderStatus.Value);
+            }
+
+            if (!userPhone.IsNullOrEmpty())
+            {
+                query = query.Where(x => x.User.PhoneNumber.Contains(userPhone));
+            }
+
+            if (fromDate.HasValue && fromDate != DateTime.MinValue)
+            {
+                query = query.Where(x => x.CreatedDate >= fromDate.Value.StartOfDay());
+                if (toDate.HasValue && toDate != DateTime.MinValue)
+                {
+                    query = query.Where(x => x.CreatedDate <= toDate.Value.EndOfDay());
+                }
+            }
+
+            if (!orderCode.IsNullOrEmpty())
+            {
+                query = query.Where(x => x.Code.Contains(orderCode));
+            }
+
+            query = query.Where(x => x.Type == orderType);
+
+            var result = await query
+                .ProjectTo<OrderDetailViewModel>(Mapper.ConfigurationProvider)
+                .OrderByDescending(x => x.CreatedDate)
+                .ToListAsync();
+
+            return result.ToImmutableList();
         }
     }
 }

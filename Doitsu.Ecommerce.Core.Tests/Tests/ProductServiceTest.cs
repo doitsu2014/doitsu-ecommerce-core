@@ -64,6 +64,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                 await dbContext.Database.MigrateAsync();
                 DatabaseHelper.TruncateAllTable(webhost, _poolKey);
                 DatabaseHelper.ReseedAllTable(webhost, _poolKey);
+
                 // Add Brand
                 var brandService = webhost.Services.GetService<IBrandService>();
                 await brandService.CreateAsync<BrandViewModel>(_fixture.BrandData);
@@ -89,6 +90,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                 var dbContext = webhost.Services.GetService<EcommerceDbContext>();
                 var productService = webhost.Services.GetService<IProductService>();
                 var productVariantService = webhost.Services.GetService<IProductVariantService>();
+
                 // Add Promotion Detail
                 var promotionDetailService = webhost.Services.GetService<IPromotionDetailService>();
                 var listProductVariantOfProduct01 = (await productService.Get(pro => pro.Code == "PRODUCT01")
@@ -129,7 +131,6 @@ namespace Doitsu.Ecommerce.Core.Tests
                     .ToImmutableList();
 
                 productVariantService.UpdateRange(listProductVariantIdOfProduct03);
-
                 await dbContext.SaveChangesAsync();
             }
 

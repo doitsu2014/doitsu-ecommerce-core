@@ -546,10 +546,10 @@ namespace Doitsu.Ecommerce.Core.Services
                     .WithException("Id rỗng.")
                     .MapAsync(async req =>
                     {
-                        var po = await this.DbContext.ProductOptions.Where(po => po.Id == req.productOptionId)
-                            .Include(po => po.ProductOptionValues)
-                            .ThenInclude(po => po.ProductVariantOptionValues)
-                            .ThenInclude(po => po.ProductVariant)
+                        var po = await this.DbContext.ProductOptions.Where(dPo => dPo.Id == req.productOptionId)
+                            .Include(dPo => dPo.ProductOptionValues)
+                            .ThenInclude(dPo => dPo.ProductVariantOptionValues)
+                            .ThenInclude(dPo => dPo.ProductVariant)
                             .FirstOrDefaultAsync();
                         DbContext.ProductOptions.Remove(po);
                         DbContext.ProductOptionValues.RemoveRange(po.ProductOptionValues);
