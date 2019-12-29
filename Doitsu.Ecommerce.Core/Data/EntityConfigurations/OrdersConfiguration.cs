@@ -45,7 +45,7 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
             builder.Property(e => e.Dynamic05).HasMaxLength(1000);
 
             builder.Property(e => e.Note).HasMaxLength(500);
-            
+
             builder.Property(e => e.Status).HasDefaultValue(OrderTypeEnum.Sale);
 
             builder.HasOne(d => d.User)
@@ -53,6 +53,10 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Orders__UserId__114A936A");
+
+            builder.HasOne(o => o.SummaryOrder)
+                .WithMany(o => o.InverseSummaryOrders)
+                .HasForeignKey(o => o.SummaryOrderId);
         }
     }
 }

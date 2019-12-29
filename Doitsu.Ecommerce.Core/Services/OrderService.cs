@@ -1,3 +1,4 @@
+using System.Runtime.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -21,6 +22,8 @@ using Doitsu.Ecommerce.Core.Abstraction;
 using AutoMapper;
 using Doitsu.Ecommerce.Core.Data;
 using Doitsu.Ecommerce.Core.IdentitiesExtension;
+using OfficeOpenXml;
+using System.Linq.Expressions;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -53,6 +56,17 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<Option<OrderViewModel, string>> CancelOrderAsync(string orderCode, int userId);
         Task<Option<OrderViewModel, string>> CreateSaleOrderWithOptionAsync(CreateOrderWithOptionViewModel request);
         Task<Option<OrderViewModel, string>> CreateDepositOrderAsync(OrderViewModel request);
+
+        /// <summary>
+        /// This feature just use for Orders with New Status, and Sale Type
+        /// Inverse Orders will be overrided to Processing Status if feature done.
+        /// </summary>
+        /// <param name="inverseOrders"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<Option<OrderViewModel, string>> CreateSummaryOrder(List<OrderViewModel> inverseOrders, int userId);
+
+        Task<Option<byte[], string>> GetSummaryOrderAsExcelBytes(int summaryOrderId);
     }
 
     public class OrderService : BaseService<Orders>, IOrderService
@@ -405,7 +419,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     {
                         order.Status = (int)OrderStatusEnum.Cancel;
                         this.Update(order);
-                        
+
                         var user = await userManager.FindByIdAsync(order.UserId.ToString());
                         if (user == null)
                         {
@@ -456,6 +470,179 @@ namespace Doitsu.Ecommerce.Core.Services
                 .ToListAsync();
 
             return result.ToImmutableList();
+        }
+
+        public async Task<Option<OrderViewModel, string>> CreateSummaryOrder(List<OrderViewModel> inverseOrders, int userId)
+        {
+            using (var transaction = await this.CreateTransactionAsync())
+            {
+                return await (inverseOrders, userId).SomeNotNull()
+                    .WithException(string.Empty)
+                    .Filter(req => req.userId != 0, "Không tìm thấy thông tin người sử dụng tính năng tạo Đơn Tổng")
+                    .Filter(req => req.inverseOrders != null && req.inverseOrders.Count > 0, "Không tìm thấy dữ liệu để tạo Đơn Tổng")
+                    .MapAsync(async req =>
+                    {
+                        var data = req.inverseOrders;
+                        var newOIds = data.Where(o => o.Status == (int)OrderStatusEnum.New).Select(o => o.Id).ToImmutableList();
+                        var newOEntities = await this.GetAsTracking(dbO => newOIds.Contains(dbO.Id)).ToListAsync();
+                        return (listNewDbOrders: newOEntities.Select(o =>
+                        {
+                            o.Status = (int)OrderStatusEnum.Processing;
+                            return o;
+                        }).ToImmutableList(), uId: req.userId);
+                    })
+                    .MapAsync(async transformedData =>
+                    {
+                        var summaryOrder = new Orders()
+                        {
+                            UserId = transformedData.uId,
+                            Code = DataUtils.GenerateCode(Constants.OrderInformation.ORDER_CODE_LENGTH),
+                            CreatedDate = DateTime.UtcNow.ToVietnamDateTime(),
+                            FinalPrice = transformedData.listNewDbOrders.Sum(newDbO => newDbO.FinalPrice),
+                            TotalPrice = transformedData.listNewDbOrders.Sum(newDbO => newDbO.FinalPrice),
+                            Status = (int)OrderStatusEnum.Processing,
+                            Type = OrderTypeEnum.Summary,
+                            InverseSummaryOrders = transformedData.listNewDbOrders
+                        };
+                        await this.CreateAsync(summaryOrder);
+                        await this.CommitAsync();
+                        await transaction.CommitAsync();
+                        return this.Mapper.Map<OrderViewModel>(summaryOrder);
+                    });
+            }
+        }
+
+        public Task<Option<byte[], string>> GetSummaryOrderAsExcelBytes(int summaryOrderId)
+        {
+            Expression<Func<Orders, bool>> filterSummaryOrderWithId = (o) => o.Id == summaryOrderId && o.Type == OrderTypeEnum.Summary && o.Status == (int)OrderStatusEnum.Processing;
+            return summaryOrderId.SomeNotNull()
+                .WithException("Mã của Đơn Tổng không hợp lệ.")
+                .Filter(req => req != 0, "Không tìm thấy mã của Đơn Tổng")
+                .FilterAsync(async req => await this.AnyAsync(filterSummaryOrderWithId), "Không tìm thấy bất kỳ Đơn Hàng Tổng nào với mã này.")
+                .MapAsync(async id =>
+                {
+                    var summaryOrder = await this.GetAsNoTracking(filterSummaryOrderWithId)
+                        .Include(o => o.InverseSummaryOrders)
+                        .ThenInclude(o => o.OrderItems)
+                            .ThenInclude(oi => oi.ProductVariant)
+                                .ThenInclude(pv => pv.ProductVariantOptionValues)
+                                    .ThenInclude(pvov => pvov.ProductOptionValue)
+                                        .ThenInclude(pov => pov.ProductOption)
+                        .Include(o => o.InverseSummaryOrders)
+                            .ThenInclude(o => o.User)
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync();
+
+                    using (var package = new ExcelPackage())
+                    {
+                        var sheet = package.Workbook.Worksheets.Add(GetNormalizedOfType(OrderTypeEnum.Summary));
+                        var rowIndex = 1;
+                        sheet.Cells[rowIndex, 1].Value = $"Mã {GetNormalizedOfType(OrderTypeEnum.Summary)}";
+                        sheet.Cells[rowIndex++, 2].Value = summaryOrder.Code;
+                        sheet.Cells[rowIndex, 1].Value = "Tổng tiền";
+                        sheet.Cells[rowIndex++, 2].Value = summaryOrder.FinalPrice;
+                        sheet.Cells[1, 2, 2, 2].Style.Font.Bold = true;
+                        sheet.Cells[1, 2, 2, 2].AutoFitColumns();
+                        
+                        var headerColumnIndex = 1;
+                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Mã Đơn";
+                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Ngày tạo";
+                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Chi tiết";
+                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Người đặt hàng";
+                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Số điện thoại";
+                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Loại đơn hàng";
+                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Số tiền tạm tính";
+                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Giảm giá trên đơn hàng";
+                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Số lượng";
+                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Số tiền đã trả";
+                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Trạng thái";
+                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Ghi chú";
+                        if (summaryOrder != null && summaryOrder.InverseSummaryOrders != null && summaryOrder.InverseSummaryOrders.Count > 0)
+                        {
+                            foreach (var o in summaryOrder.InverseSummaryOrders)
+                            {
+                                ++rowIndex;
+                                var dataColumnIndex = 1;
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.Code;
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.CreatedDate.ToString("MM/dd/yyyy");
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = GetNormalizedDescriptionOrder(o);
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.User.Fullname;
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.DeliveryPhone;
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = GetNormalizedOfType(o.Type);
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.TotalPrice;
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.Discount;
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.TotalQuantity;
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.FinalPrice;
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = GetNormalizedOfStatus((OrderStatusEnum)o.Status);
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.Note;
+                            }
+                        }
+
+                        var excelRangeHeader = sheet.Cells[3, 1, 3, headerColumnIndex - 1];
+                        excelRangeHeader.Style.Font.Bold = true;
+                        excelRangeHeader.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                        var excelRangeAll = sheet.Cells[3, 1, rowIndex, headerColumnIndex - 1];
+                        excelRangeAll.AutoFitColumns();
+                        excelRangeAll.Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                        excelRangeAll.Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                        excelRangeAll.Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                        excelRangeAll.Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                        return package.GetAsByteArray();
+                    }
+                });
+        }
+
+        private string GetNormalizedOfType(OrderTypeEnum typeEnum)
+        {
+            return typeEnum switch
+            {
+                OrderTypeEnum.Summary => "Hóa đơn tổng",
+                OrderTypeEnum.Sale => "Hóa đơn hàng bán",
+                OrderTypeEnum.Desposit => "Hóa đơn nạp tiền",
+                _ => "Hóa đơn rút tiền"
+            };
+        }
+
+        private string GetNormalizedOfStatus(OrderStatusEnum statusEnum)
+        {
+            return statusEnum switch
+            {
+                OrderStatusEnum.New => "Đang chờ nạp",
+                OrderStatusEnum.Processing => "Đang xử lý",
+                OrderStatusEnum.Cancel => "Đã hủy",
+                OrderStatusEnum.Done => "Hoàn thành",
+                _ => "Thất bại"
+            };
+        }
+
+        private string GetNormalizedDescriptionOrder(Orders order)
+        {
+            if (order == null) return "";
+            else
+            {
+                var orderItems = order.OrderItems;
+                if (orderItems == null || orderItems.Count() <= 0) return "";
+                else
+                {
+                    var messages = orderItems.Select(oi =>
+                    {
+                        var message = "";
+                        if (oi.Product != null)
+                        {
+                            message += $"- Sản phẩm: {oi.Product.Name}, giá tiền: {oi.SubTotalFinalPrice}, giảm giá: {oi.Discount}, số lượng: {oi.SubTotalQuantity}";
+                        }
+                        return message;
+                    })
+                    .Append($"- Ưu tiên: {order.Priority}");
+                    if (!order.Dynamic01.IsNullOrEmpty()) messages = messages.Append($"- {order.Dynamic01}");
+                    if (!order.Dynamic02.IsNullOrEmpty()) messages = messages.Append($"- {order.Dynamic02}");
+                    if (!order.Dynamic03.IsNullOrEmpty()) messages = messages.Append($"- {order.Dynamic03}");
+                    if (!order.Dynamic04.IsNullOrEmpty()) messages = messages.Append($"- {order.Dynamic04}");
+                    if (!order.Dynamic05.IsNullOrEmpty()) messages = messages.Append($"- {order.Dynamic05}");
+
+                    return messages.Aggregate((x, y) => $"{x}\n\r{y}");
+                }
+            }
         }
     }
 }

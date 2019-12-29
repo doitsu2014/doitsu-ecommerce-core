@@ -6,7 +6,8 @@ namespace Doitsu.Ecommerce.Core
     {
         Sale = 0,
         Desposit = 1,
-        Withdrawal = 2
+        Withdrawal = 2,
+        Summary = 3
     }
 
     public enum OrderPriorityEnum
