@@ -121,6 +121,9 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public EcommerceIdentityUserViewModel User { get; set; }
         [JsonProperty("orderItems")]
         public virtual ICollection<OrderItemViewModel> OrderItems { get; set; }
+
+        [JsonProperty("inverseSummaryOrders")]
+        public virtual ICollection<OrderViewModel> InverseSummaryOrders { get; set; }
     }
 
 }

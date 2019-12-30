@@ -76,7 +76,7 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<OrderViewModel, Orders>();
                 cfg.CreateMap<CreateOrderWithOptionViewModel, Orders>();
                 cfg.CreateMap<Orders, OrderViewModel>();
-                cfg.CreateMap<Orders, OrderDetailViewModel>();
+                cfg.CreateMap<Orders, OrderDetailViewModel>().MaxDepth(3);
 
                 cfg.CreateMap<OrderItems, OrderItemViewModel>().ReverseMap();
                 cfg.CreateMap<OrderItemViewModel, OrderItems>();

@@ -1,3 +1,4 @@
+using System.Transactions;
 using System.Runtime.Serialization;
 using System;
 using System.Collections.Generic;
@@ -37,8 +38,11 @@ namespace Doitsu.Ecommerce.Core.Services
         /// <param name="user"></param>
         /// <returns></returns>
         Task<Option<string, string>> CheckoutCartAsync(CheckoutCartViewModel data, EcommerceIdentityUser user);
+
         Task<ImmutableList<OrderDetailViewModel>> GetAllOrdersByUserIdAsync(int userId);
+
         Task<OrderDetailViewModel> GetOrderDetailByCodeAsync(string orderCode);
+
         Task<ImmutableList<OrderDetailViewModel>> GetOrderDetailByParams(OrderStatusEnum? orderStatus,
                                                                          DateTime? fromDate,
                                                                          DateTime? toDate,
@@ -53,8 +57,11 @@ namespace Doitsu.Ecommerce.Core.Services
                                                                          OrderTypeEnum orderType);
 
         Task<Option<OrderViewModel, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum);
+
         Task<Option<OrderViewModel, string>> CancelOrderAsync(string orderCode, int userId);
+
         Task<Option<OrderViewModel, string>> CreateSaleOrderWithOptionAsync(CreateOrderWithOptionViewModel request);
+
         Task<Option<OrderViewModel, string>> CreateDepositOrderAsync(OrderViewModel request);
 
         /// <summary>
@@ -64,9 +71,19 @@ namespace Doitsu.Ecommerce.Core.Services
         /// <param name="inverseOrders"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        Task<Option<OrderViewModel, string>> CreateSummaryOrder(List<OrderViewModel> inverseOrders, int userId);
+        Task<Option<OrderViewModel, string>> CreateSummaryOrderAsync(List<OrderViewModel> inverseOrders, int userId);
 
-        Task<Option<byte[], string>> GetSummaryOrderAsExcelBytes(int summaryOrderId);
+        /// <summary>
+        /// Get bytes array of Export Summary Excel
+        /// </summary>
+        /// <param name="summaryOrderId"></param>
+        /// <returns></returns>
+        Task<Option<byte[], string>> GetSummaryOrderAsExcelBytesAsync(int summaryOrderId);
+
+        Task<Option<OrderViewModel, string>> MakeCompleteSummaryOrderAsync(int summaryOrderId);
+
+        Task<Option<OrderViewModel, string>> MakeCancelSummaryOrderAsync(int summaryOrderId);
+
     }
 
     public class OrderService : BaseService<Orders>, IOrderService
@@ -437,17 +454,9 @@ namespace Doitsu.Ecommerce.Core.Services
         public async Task<ImmutableList<OrderDetailViewModel>> GetOrderDetailByParams(OrderStatusEnum? orderStatus, DateTime? fromDate, DateTime? toDate, string userPhone, string orderCode, OrderTypeEnum orderType)
         {
             var query = this.GetAllAsNoTracking();
-
-            if (orderStatus.HasValue)
-            {
-                query = query.Where(x => x.Status == (int)orderStatus.Value);
-            }
-
-            if (!userPhone.IsNullOrEmpty())
-            {
-                query = query.Where(x => x.User.PhoneNumber.Contains(userPhone));
-            }
-
+            if (orderStatus.HasValue) query = query.Where(x => x.Status == (int)orderStatus.Value);
+            if (!userPhone.IsNullOrEmpty()) query = query.Where(x => x.User.PhoneNumber.Contains(userPhone));
+            if (!orderCode.IsNullOrEmpty()) query = query.Where(x => x.Code.Contains(orderCode));
             if (fromDate.HasValue && fromDate != DateTime.MinValue)
             {
                 query = query.Where(x => x.CreatedDate >= fromDate.Value.StartOfDay());
@@ -456,13 +465,8 @@ namespace Doitsu.Ecommerce.Core.Services
                     query = query.Where(x => x.CreatedDate <= toDate.Value.EndOfDay());
                 }
             }
-
-            if (!orderCode.IsNullOrEmpty())
-            {
-                query = query.Where(x => x.Code.Contains(orderCode));
-            }
-
             query = query.Where(x => x.Type == orderType);
+            if (orderType == OrderTypeEnum.Summary) query.Include(o => o.InverseSummaryOrders);
 
             var result = await query
                 .ProjectTo<OrderDetailViewModel>(Mapper.ConfigurationProvider)
@@ -472,7 +476,7 @@ namespace Doitsu.Ecommerce.Core.Services
             return result.ToImmutableList();
         }
 
-        public async Task<Option<OrderViewModel, string>> CreateSummaryOrder(List<OrderViewModel> inverseOrders, int userId)
+        public async Task<Option<OrderViewModel, string>> CreateSummaryOrderAsync(List<OrderViewModel> inverseOrders, int userId)
         {
             using (var transaction = await this.CreateTransactionAsync())
             {
@@ -512,7 +516,7 @@ namespace Doitsu.Ecommerce.Core.Services
             }
         }
 
-        public Task<Option<byte[], string>> GetSummaryOrderAsExcelBytes(int summaryOrderId)
+        public Task<Option<byte[], string>> GetSummaryOrderAsExcelBytesAsync(int summaryOrderId)
         {
             Expression<Func<Orders, bool>> filterSummaryOrderWithId = (o) => o.Id == summaryOrderId && o.Type == OrderTypeEnum.Summary && o.Status == (int)OrderStatusEnum.Processing;
             return summaryOrderId.SomeNotNull()
@@ -577,7 +581,7 @@ namespace Doitsu.Ecommerce.Core.Services
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = o.DeliveryPhone;
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = GetNormalizedOfType(o.Type);
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = o.TotalPrice.GetVietnamDong();
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = $"{o.Discount}%" ;
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = $"{o.Discount}%";
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = o.TotalQuantity;
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = o.FinalPrice.GetVietnamDong();
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = GetNormalizedOfStatus((OrderStatusEnum)o.Status);
@@ -649,6 +653,46 @@ namespace Doitsu.Ecommerce.Core.Services
 
                     return messages.Aggregate((x, y) => $"{x}\n{y}");
                 }
+            }
+        }
+
+        public async Task<Option<OrderViewModel, string>> MakeCompleteSummaryOrderAsync(int summaryOrderId)
+        {
+            return await (summaryOrderId).SomeNotNull()
+                .WithException("Mã của Đơn Tổng không hợp lệ.")
+                .MapAsync(async req =>
+                {
+                    var summaryOrder = await this.GetAsTracking(o => o.Id == req && OrderTypeEnum.Summary == o.Type).Include(o => o.InverseSummaryOrders).FirstOrDefaultAsync();
+                    summaryOrder.Status = (int)OrderStatusEnum.Done;
+                    summaryOrder.InverseSummaryOrders.Select(io => { io.Status = (int)OrderStatusEnum.Done; return io; });
+                    this.Update(summaryOrder);
+                    await this.CommitAsync();
+                    return this.Mapper.Map<OrderViewModel>(summaryOrder);
+                });
+        }
+
+        public async Task<Option<OrderViewModel, string>> MakeCancelSummaryOrderAsync(int summaryOrderId)
+        {
+            using (var transaction = await this.CreateTransactionAsync())
+            {
+                return await (summaryOrderId).SomeNotNull()
+                   .WithException("Mã của Đơn Tổng không hợp lệ.")
+                   .MapAsync(async req =>
+                   {
+                       var summaryOrder = await this.GetAsTracking(o => o.Id == req && OrderTypeEnum.Summary == o.Type).FirstOrDefaultAsync();
+                       summaryOrder.Status = (int)OrderStatusEnum.Cancel;
+                       this.Update(summaryOrder);
+                       await this.CommitAsync();
+
+                       var orderCodeIds = await this.GetAsNoTracking(o => o.SummaryOrderId == summaryOrder.Id && OrderTypeEnum.Sale == o.Type).Select(o => new { o.Code, o.UserId }).ToListAsync();
+                       await Task.WhenAll(orderCodeIds.Select(async cancelData =>
+                       {
+                           return await CancelOrderAsync(cancelData.Code, cancelData.UserId);
+                       }));
+
+                       await transaction.CommitAsync();
+                       return this.Mapper.Map<OrderViewModel>(summaryOrder);
+                   });
             }
         }
     }
