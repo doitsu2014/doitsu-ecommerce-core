@@ -1,26 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <LangVersion>8.0</LangVersion>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-      <PackageVersion>3.1.100.3</PackageVersion>
-      <Title>Doitsu.Ecommerce.Core</Title>
-      <PackageId>Doitsu.Ecommerce.Core</PackageId>
-      <Authors>Doitsu Technology</Authors>
-      <Owners>Doitsu Technology</Owners>
-      <Copyright>2019</Copyright>
-      <DevelopmentDependency>true</DevelopmentDependency>
-      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-      <SynchReleaseVersion>false</SynchReleaseVersion>
-      <NeutralLanguage>en</NeutralLanguage>
-      <Summary>Core of doitsu api website service</Summary>
-      <PackageTags>Code First Database, Ecommerce Services</PackageTags>
-      <Description>Doitsu.Ecommerce.Core is a library implement business logic and code first database for a Ecommerce Platform by AspNetCore. It is using Doitsu.Service.Core library as a helper library to implement abstraction.</Description>
-      <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-      <RepositoryUrl>https://doitsutechnology@dev.azure.com/doitsutechnology/Doitsu.Technology.Core/_git/Doitsu.Ecommerce.Core</RepositoryUrl>
-      <PackageProjectUrl>https://dev.azure.com/doitsutechnology/Doitsu.Technology.Core</PackageProjectUrl>
-      <PackageIconUrl>https://dev.azure.com/doitsutechnology/_apis/GraphProfile/MemberAvatars/faa2f78a-c648-4d7d-8307-b8beeb82fe12?overrideDisplayName=Doitsu.Technology.Core&amp;size=2</PackageIconUrl>
-      <RepositoryType>Azure Repos</RepositoryType>
-      <PackageReleaseNotes>Release 11/26/2019: Update product variants and order dynamic</PackageReleaseNotes>
+    <PackageVersion>3.1.100.3</PackageVersion>
+    <Title>Doitsu.Ecommerce.Core</Title>
+    <PackageId>Doitsu.Ecommerce.Core</PackageId>
+    <Authors>Doitsu Technology</Authors>
+    <Owners>Doitsu Technology</Owners>
+    <Copyright>2019</Copyright>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <SynchReleaseVersion>false</SynchReleaseVersion>
+    <NeutralLanguage>en</NeutralLanguage>
+    <Summary>Core of doitsu api website service</Summary>
+    <PackageTags>Code First Database, Ecommerce Services</PackageTags>
+    <Description>Doitsu.Ecommerce.Core is a library implement business logic and code first database for a Ecommerce Platform by AspNetCore. It is using Doitsu.Service.Core library as a helper library to implement abstraction.</Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <RepositoryUrl>https://doitsutechnology@dev.azure.com/doitsutechnology/Doitsu.Technology.Core/_git/Doitsu.Ecommerce.Core</RepositoryUrl>
+    <PackageProjectUrl>https://dev.azure.com/doitsutechnology/Doitsu.Technology.Core</PackageProjectUrl>
+    <PackageIconUrl>https://dev.azure.com/doitsutechnology/_apis/GraphProfile/MemberAvatars/faa2f78a-c648-4d7d-8307-b8beeb82fe12?overrideDisplayName=Doitsu.Technology.Core&amp;size=2</PackageIconUrl>
+    <RepositoryType>Azure Repos</RepositoryType>
+    <PackageReleaseNotes>Release 11/26/2019: Update product variants and order dynamic</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="4.5.3.2" />

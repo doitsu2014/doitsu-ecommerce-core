@@ -523,13 +523,16 @@ namespace Doitsu.Ecommerce.Core.Services
                 {
                     var summaryOrder = await this.GetAsNoTracking(filterSummaryOrderWithId)
                         .Include(o => o.InverseSummaryOrders)
-                        .ThenInclude(o => o.OrderItems)
-                            .ThenInclude(oi => oi.ProductVariant)
-                                .ThenInclude(pv => pv.ProductVariantOptionValues)
-                                    .ThenInclude(pvov => pvov.ProductOptionValue)
-                                        .ThenInclude(pov => pov.ProductOption)
+                            .ThenInclude(o => o.OrderItems)
+                                .ThenInclude(oi => oi.ProductVariant)
+                                    .ThenInclude(pv => pv.ProductVariantOptionValues)
+                                        .ThenInclude(pvov => pvov.ProductOptionValue)
+                                            .ThenInclude(pov => pov.ProductOption)
                         .Include(o => o.InverseSummaryOrders)
                             .ThenInclude(o => o.User)
+                        .Include(o => o.InverseSummaryOrders)
+                            .ThenInclude(o => o.OrderItems)
+                                .ThenInclude(oi => oi.Product)
                         .AsNoTracking()
                         .FirstOrDefaultAsync();
 
@@ -540,10 +543,14 @@ namespace Doitsu.Ecommerce.Core.Services
                         sheet.Cells[rowIndex, 1].Value = $"Mã {GetNormalizedOfType(OrderTypeEnum.Summary)}";
                         sheet.Cells[rowIndex++, 2].Value = summaryOrder.Code;
                         sheet.Cells[rowIndex, 1].Value = "Tổng tiền";
-                        sheet.Cells[rowIndex++, 2].Value = summaryOrder.FinalPrice;
-                        sheet.Cells[1, 2, 2, 2].Style.Font.Bold = true;
-                        sheet.Cells[1, 2, 2, 2].AutoFitColumns();
-                        
+                        sheet.Cells[rowIndex++, 2].Value = summaryOrder.FinalPrice.GetVietnamDong();
+                        sheet.Cells[rowIndex, 1].Value = $"Ngày tạo";
+                        sheet.Cells[rowIndex++, 2].Value = summaryOrder.CreatedDate.ToString(Constants.DateTimeFormat.Default);
+                        var excelRangeTitle = sheet.Cells[1, 1, 3, 2];
+                        excelRangeTitle.Style.Font.Bold = true;
+                        excelRangeTitle.Style.Font.Size = 14;
+                        excelRangeTitle.AutoFitColumns();
+
                         var headerColumnIndex = 1;
                         sheet.Cells[rowIndex, headerColumnIndex++].Value = "Mã Đơn";
                         sheet.Cells[rowIndex, headerColumnIndex++].Value = "Ngày tạo";
@@ -564,24 +571,24 @@ namespace Doitsu.Ecommerce.Core.Services
                                 ++rowIndex;
                                 var dataColumnIndex = 1;
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = o.Code;
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.CreatedDate.ToString("MM/dd/yyyy");
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.CreatedDate.ToString(Constants.DateTimeFormat.Default);
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = GetNormalizedDescriptionOrder(o);
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = o.User.Fullname;
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = o.DeliveryPhone;
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = GetNormalizedOfType(o.Type);
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.TotalPrice;
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.Discount;
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.TotalPrice.GetVietnamDong();
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = $"{o.Discount}%" ;
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = o.TotalQuantity;
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.FinalPrice;
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.FinalPrice.GetVietnamDong();
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = GetNormalizedOfStatus((OrderStatusEnum)o.Status);
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = o.Note;
                             }
                         }
 
-                        var excelRangeHeader = sheet.Cells[3, 1, 3, headerColumnIndex - 1];
+                        var excelRangeHeader = sheet.Cells[4, 1, 4, headerColumnIndex - 1];
                         excelRangeHeader.Style.Font.Bold = true;
                         excelRangeHeader.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
-                        var excelRangeAll = sheet.Cells[3, 1, rowIndex, headerColumnIndex - 1];
+                        var excelRangeAll = sheet.Cells[4, 1, rowIndex, headerColumnIndex - 1];
                         excelRangeAll.AutoFitColumns();
                         excelRangeAll.Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
                         excelRangeAll.Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
@@ -629,7 +636,7 @@ namespace Doitsu.Ecommerce.Core.Services
                         var message = "";
                         if (oi.Product != null)
                         {
-                            message += $"- Sản phẩm: {oi.Product.Name}, giá tiền: {oi.SubTotalFinalPrice}, giảm giá: {oi.Discount}, số lượng: {oi.SubTotalQuantity}";
+                            message += $"- Sản phẩm: {oi.Product.Name}, giá tiền: {oi.SubTotalFinalPrice.GetVietnamDong()}, giảm giá: {oi.Discount}%, số lượng: {oi.SubTotalQuantity}";
                         }
                         return message;
                     })
@@ -640,7 +647,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     if (!order.Dynamic04.IsNullOrEmpty()) messages = messages.Append($"- {order.Dynamic04}");
                     if (!order.Dynamic05.IsNullOrEmpty()) messages = messages.Append($"- {order.Dynamic05}");
 
-                    return messages.Aggregate((x, y) => $"{x}\n\r{y}");
+                    return messages.Aggregate((x, y) => $"{x}\n{y}");
                 }
             }
         }

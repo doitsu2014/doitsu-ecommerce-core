@@ -59,5 +59,10 @@ namespace Doitsu.Ecommerce.Core
         {
             public const string EXCEL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
         }
+
+        public static class DateTimeFormat
+        {
+            public const string Default = "MM/dd/yyyy";
+        }
     }
 }
