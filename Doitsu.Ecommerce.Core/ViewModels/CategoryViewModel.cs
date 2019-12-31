@@ -48,6 +48,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public bool IsFixed { get; set; }
         [JsonProperty("parentCateId")]
         public int? ParentCateId { get; set; }
+        [JsonProperty("parentCateName")]
+        public string ParentCateName { get; set; }
         [JsonProperty("inverseParentCate")]
         public ICollection<CategoryWithInverseParentViewModel> InverseParentCate { get; set; }
     }
@@ -83,7 +85,7 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string Slug { get; set; }
         public bool IsFixed { get; set; }
         public int? ParentCateId { get; set; }
-
+        public string ParentCateName { get; set; }
         public ICollection<CategoryViewModel> InverseParentCate { get; set; }
 
     }

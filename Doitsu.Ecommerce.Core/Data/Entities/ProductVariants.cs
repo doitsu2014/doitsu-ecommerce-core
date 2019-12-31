@@ -18,6 +18,5 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public virtual Products Product { get; set; }
         public virtual ICollection<ProductVariantOptionValues> ProductVariantOptionValues { get; set; }
         public virtual ICollection<OrderItems> OrderItems { get; set; }
-        public virtual ICollection<PromotionDetail> PromotionDetails { get; set; }
     }
 }

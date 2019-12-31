@@ -11,7 +11,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
     {
         public string ServicePoolKey { get; set; }
         public BrandViewModel BrandData { get; }
-        public ICollection<CategoryViewModel> CategoryData { get; }
+        public ICollection<CategoryWithInverseParentViewModel> CategoryData { get; }
         public ICollection<CreateProductViewModel> ProductData { get; }
         public ICollection<ProductOptionViewModel> Product1ProductOptionsData { get; }
         public ICollection<ProductOptionViewModel> Product2ProductOptionsData { get; }
@@ -38,14 +38,24 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 CloseDayOfWeek = (int)DayOfWeek.Sunday
             };
 
-            CategoryData = new List<CategoryViewModel>()
+            CategoryData = new List<CategoryWithInverseParentViewModel>()
             {
-                new CategoryViewModel()
+                new CategoryWithInverseParentViewModel()
                 {
-                    Name = "Phone Card SMS",
-                    IsFixed = false,
+                    Name = "Sản phẩm",
+                    IsFixed = true,
                     ParentCateId = null,
-                    Slug = "phone-card-sms"
+                    Slug = "san-pham",
+                    InverseParentCate = new List<CategoryWithInverseParentViewModel>()
+                    {
+                        new CategoryWithInverseParentViewModel()
+                        {
+                            Name = "Hàng bán",
+                            IsFixed = true,
+                            ParentCateId = null,
+                            Slug = "hang-ban"
+                        }
+                    }
                 }
             };
 

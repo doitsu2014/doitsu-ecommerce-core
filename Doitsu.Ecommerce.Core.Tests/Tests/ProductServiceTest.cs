@@ -1,24 +1,27 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 
 using Doitsu.Ecommerce.Core.Data;
-using Microsoft.EntityFrameworkCore;
 using Doitsu.Ecommerce.Core.Data.Entities;
-using Doitsu.Ecommerce.Core.Tests.Helpers;
-using Xunit;
-using Xunit.Abstractions;
+using Doitsu.Ecommerce.Core.Data.Identities;
+using Doitsu.Ecommerce.Core.IdentitiesExtension;
+using Doitsu.Ecommerce.Core.IdentityManagers;
 using Doitsu.Ecommerce.Core.Services;
+using Doitsu.Ecommerce.Core.Tests.Helpers;
 using Doitsu.Ecommerce.Core.ViewModels;
 using Doitsu.Service.Core.Extensions;
+using Doitsu.Utils;
+
+using Microsoft.EntityFrameworkCore;
+
 using Optional;
 using Optional.Async;
-using System.Collections.Immutable;
-using System.Collections.Generic;
-using Doitsu.Ecommerce.Core.IdentitiesExtension;
-using Doitsu.Ecommerce.Core.Data.Identities;
-using Doitsu.Ecommerce.Core.IdentityManagers;
-using Doitsu.Utils;
+
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Doitsu.Ecommerce.Core.Tests
 {
@@ -41,9 +44,9 @@ namespace Doitsu.Ecommerce.Core.Tests
                 // Add Products
                 var productService = webhost.Services.GetService<IProductService>();
                 var listProductOptionValues = (await productService.Get(pro => pro.Code == _fixture.ProductData.First().Name)
-                    .Include(p => p.ProductOptions)
+                        .Include(p => p.ProductOptions)
                         .ThenInclude(po => po.ProductOptionValues)
-                    .FirstOrDefaultAsync())
+                        .FirstOrDefaultAsync())
                     .ProductOptions
                     .Select(x => productService.Mapper.Map<ProductOptionValueViewModel>(x.ProductOptionValues.First()))
                     .ToImmutableList();
@@ -64,18 +67,20 @@ namespace Doitsu.Ecommerce.Core.Tests
                 await dbContext.Database.MigrateAsync();
                 DatabaseHelper.TruncateAllTable(webhost, _poolKey);
                 DatabaseHelper.ReseedAllTable(webhost, _poolKey);
+
                 // Add Brand
                 var brandService = webhost.Services.GetService<IBrandService>();
                 await brandService.CreateAsync<BrandViewModel>(_fixture.BrandData);
+                await dbContext.SaveChangesAsync();
 
                 // Add Category
                 var categoryService = webhost.Services.GetService<ICategoryService>();
-                await categoryService.CreateAsync<CategoryViewModel>(_fixture.CategoryData);
+                await categoryService.CreateAsync<CategoryWithInverseParentViewModel>(_fixture.CategoryData);
                 await dbContext.SaveChangesAsync();
 
                 // Add Products
                 var productService = webhost.Services.GetService<IProductService>();
-                var firstCategory = await dbContext.Set<Categories>().AsNoTracking().FirstOrDefaultAsync();
+                var firstCategory = await dbContext.Set<Categories>().AsNoTracking().FirstOrDefaultAsync(x => x.Slug == "hang-ban");
                 var createData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; }).ToImmutableList();
                 var result = await productService.CreateProductWithOptionAsync(createData);
                 await dbContext.SaveChangesAsync();
@@ -88,41 +93,30 @@ namespace Doitsu.Ecommerce.Core.Tests
                 var dbContext = webhost.Services.GetService<EcommerceDbContext>();
                 var productService = webhost.Services.GetService<IProductService>();
                 var productVariantService = webhost.Services.GetService<IProductVariantService>();
+
                 // Add Promotion Detail
                 var promotionDetailService = webhost.Services.GetService<IPromotionDetailService>();
-                var listProductVariantIdOfProduct01Ids = (await productService.Get(pro => pro.Code == "PRODUCT01")
-                    .Include(p => p.ProductVariants)
-                    .FirstOrDefaultAsync())
+                var listProductVariantOfProduct01 = (await productService.Get(pro => pro.Code == "PRODUCT01")
+                        .Include(p => p.ProductVariants)
+                        .FirstOrDefaultAsync())
                     .ProductVariants
-                    .Select(x => x.Id)
+                    .Select(x => { x.AnotherDiscount = 25; return x; })
                     .ToImmutableList();
+                productVariantService.UpdateRange(listProductVariantOfProduct01);
 
-                var listPromotionDetailProduct01ViewModel = listProductVariantIdOfProduct01Ids.Select(pvId => new PromotionDetailViewModel()
-                {
-                    ProductVariantId = pvId,
-                    Name = $"PRODUCT01-{pvId}",
-                    DiscountPercent = 25
-                });
-                await promotionDetailService.CreateAsync(listPromotionDetailProduct01ViewModel);
-
-                var listProductVariantIdOfProduct02Ids = (await productService.Get(pro => pro.Code == "PRODUCT02")
-                    .Include(p => p.ProductVariants)
-                    .FirstOrDefaultAsync())
+                var listProductVariantOfProduct02 = (await productService.Get(pro => pro.Code == "PRODUCT02")
+                        .Include(p => p.ProductVariants)
+                        .FirstOrDefaultAsync())
                     .ProductVariants
-                    .Select(x => x.Id)
+                    .Select(x => { x.AnotherDiscount = 25; return x; })
                     .ToImmutableList();
-                var listPromotionDetailProduct02ViewModel = listProductVariantIdOfProduct02Ids.Select(pvId => new PromotionDetailViewModel() {
-                    ProductVariantId = pvId,
-                    Name = $"PRODUCT02-{pvId}",
-                    DiscountPercent = 25
-                });
-                await promotionDetailService.CreateAsync(listPromotionDetailProduct02ViewModel);
+                productVariantService.UpdateRange(listProductVariantOfProduct02);
 
                 var listProductVariantIdOfProduct03 = (await productService.Get(pro => pro.Code == "PRODUCT03")
-                    .Include(p => p.ProductVariants)
+                        .Include(p => p.ProductVariants)
                         .ThenInclude(p => p.ProductVariantOptionValues)
-                            .ThenInclude(p => p.ProductOptionValue)
-                    .ToListAsync())
+                        .ThenInclude(p => p.ProductOptionValue)
+                        .ToListAsync())
                     .FirstOrDefault()
                     .ProductVariants
                     .Select(x =>
@@ -138,15 +132,8 @@ namespace Doitsu.Ecommerce.Core.Tests
                         return x;
                     })
                     .ToImmutableList();
-                productVariantService.UpdateRange(listProductVariantIdOfProduct03);
 
-                var listPromotionDetailProduct03ViewModel = listProductVariantIdOfProduct03.Select(pvId => new PromotionDetailViewModel() {
-                    ProductVariantId = pvId.Id,
-                    Name = $"PRODUCT03-{pvId.Id}",
-                    DiscountPercent = 25
-                });
-                await promotionDetailService.CreateAsync(listPromotionDetailProduct03ViewModel);
-                
+                productVariantService.UpdateRange(listProductVariantIdOfProduct03);
                 await dbContext.SaveChangesAsync();
             }
 
@@ -170,7 +157,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                     Name = r,
                     NormalizedName = r
                 }).ToList();
-                
+
                 foreach (var role in roles)
                 {
                     await roleManager.CreateAsync(role);
@@ -189,22 +176,177 @@ namespace Doitsu.Ecommerce.Core.Tests
 
                 Assert.True(true);
             }
+
+            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            {
+                // Add Products
+                var userManager = webhost.Services.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
+                var orderService = webhost.Services.GetService<IOrderService>();
+                var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
+                var listOrders = new List<CreateOrderWithOptionViewModel>()
+                {
+                    new CreateOrderWithOptionViewModel()
+                    {
+                        UserId = user.Id,
+                        DeliveryPhone = "0946680600",
+                        Priority = OrderPriorityEnum.FivePercent,
+                        Dynamic01 = "Mã app ...",
+                        Note = "Ghi chú sản phẩm 01",
+                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                        {
+                            new CreateOrderItemWithOptionViewModel()
+                            {
+                                SubTotalQuantity = 1,
+                                SubTotalPrice = 100000,
+                                SubTotalFinalPrice = 100000,
+                                ProductOptionValues = new List<ProductOptionValueViewModel>()
+                                {
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 1
+                                    },
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 5
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    new CreateOrderWithOptionViewModel()
+                    {
+                        UserId = user.Id,
+                        DeliveryPhone = "0946680600",
+                        Dynamic01 = "",
+                        Note = "Ghi chú sản phẩm 02",
+                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                        {
+                            new CreateOrderItemWithOptionViewModel()
+                            {
+                                SubTotalQuantity = 1,
+                                SubTotalPrice = 500000,
+                                SubTotalFinalPrice = 500000,
+                                ProductOptionValues = new List<ProductOptionValueViewModel>()
+                                {
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 6
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    new CreateOrderWithOptionViewModel()
+                    {
+                        UserId = user.Id,
+                        Dynamic01 = "VNG DK100 VLTK 04 05",
+                        Note = "Ghi chú sản phẩm 03",
+                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                        {
+                            new CreateOrderItemWithOptionViewModel()
+                            {
+                                SubTotalQuantity = 5,
+                                ProductOptionValues = new List<ProductOptionValueViewModel>()
+                                {
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 12
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    new CreateOrderWithOptionViewModel()
+                    {
+                        UserId = user.Id,
+                        DeliveryPhone = "0946680600",
+                        Dynamic01 = "",
+                        Note = "Ghi chú sản phẩm 02",
+                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                        {
+                            new CreateOrderItemWithOptionViewModel()
+                            {
+                                SubTotalQuantity = 1,
+                                SubTotalPrice = 400000,
+                                SubTotalFinalPrice = 400000,
+                                ProductOptionValues = new List<ProductOptionValueViewModel>()
+                                {
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 6
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    new CreateOrderWithOptionViewModel()
+                    {
+                        UserId = user.Id,
+                        DeliveryPhone = "0946680600",
+                        Dynamic01 = "",
+                        Note = "Ghi chú sản phẩm 02",
+                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                        {
+                            new CreateOrderItemWithOptionViewModel()
+                            {
+                                SubTotalQuantity = 1,
+                                SubTotalPrice = 300000,
+                                SubTotalFinalPrice = 300000,
+                                ProductOptionValues = new List<ProductOptionValueViewModel>()
+                                {
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 6
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    new CreateOrderWithOptionViewModel()
+                    {
+                        UserId = user.Id,
+                        Dynamic01 = "VNG DK100 VLTK 03 06",
+                        Note = "Ghi chú sản phẩm 03",
+                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                        {
+                            new CreateOrderItemWithOptionViewModel()
+                            {
+                                SubTotalQuantity = 10,
+                                ProductOptionValues = new List<ProductOptionValueViewModel>()
+                                {
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 12
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+                foreach (var order in listOrders)
+                {
+                    await orderService.CreateSaleOrderWithOptionAsync(order);
+                }
+
+
+                Assert.True(true);
+            }
         }
 
         [System.Obsolete]
         [Fact]
-        private async Task Test_ProductManagement()
+        private async Task Test_UpdateProductWithOption()
         {
             using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
             {
                 var dbContext = webhost.Services.GetService<EcommerceDbContext>();
                 await dbContext.Database.MigrateAsync();
                 DatabaseHelper.TruncateAllTable(webhost, _poolKey);
-
+                DatabaseHelper.ReseedAllTable(webhost, _poolKey);
                 var categoryService = webhost.Services.GetService<ICategoryService>();
                 var productService = webhost.Services.GetService<IProductService>();
 
-                await categoryService.CreateAsync<CategoryViewModel>(_fixture.CategoryData);
+                await categoryService.CreateAsync<CategoryWithInverseParentViewModel>(_fixture.CategoryData);
                 await dbContext.SaveChangesAsync();
 
                 var firstCategory = await dbContext.Set<Categories>().AsNoTracking().FirstOrDefaultAsync();
@@ -219,6 +361,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                 var productService = webhost.Services.GetService<IProductService>();
                 var firstProductData = _fixture.ProductData.First();
                 var updatedProduct = await productService.FirstOrDefaultAsync<UpdateProductViewModel>(x => x.Code == firstProductData.Code);
+                updatedProduct.Name += "-- change";
                 updatedProduct.ProductOptions.First().ProductOptionValues.First().Status = ProductOptionValueStatusEnum.Unavailable;
                 updatedProduct.ProductOptions.Last().ProductOptionValues.First().Value = "Changed";
                 updatedProduct.ProductOptions.Last().ProductOptionValues.Add(new ProductOptionValueViewModel()
@@ -226,6 +369,39 @@ namespace Doitsu.Ecommerce.Core.Tests
                     Value = "Trả ông nội mày"
                 });
                 await productService.UpdateProductWithOptionAsync(updatedProduct);
+                Assert.True(true);
+            }
+        }
+
+        [System.Obsolete]
+        [Fact]
+        private async Task Test_DeleteProductOptions()
+        {
+            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            {
+                var dbContext = webhost.Services.GetService<EcommerceDbContext>();
+                await dbContext.Database.MigrateAsync();
+                DatabaseHelper.TruncateAllTable(webhost, _poolKey);
+                DatabaseHelper.ReseedAllTable(webhost, _poolKey);
+
+                var categoryService = webhost.Services.GetService<ICategoryService>();
+                var productService = webhost.Services.GetService<IProductService>();
+
+                await categoryService.CreateAsync<CategoryWithInverseParentViewModel>(_fixture.CategoryData);
+                await dbContext.SaveChangesAsync();
+
+                var firstCategory = await dbContext.Set<Categories>().AsNoTracking().FirstOrDefaultAsync();
+                var createData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; });
+                var firstProduct = createData.First();
+                var result = await productService.CreateProductWithOptionAsync(firstProduct);
+                Assert.True(true);
+            }
+
+            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            {
+                var productService = webhost.Services.GetService<IProductService>();
+                var firstProduct = productService.GetAll<ProductDetailViewModel>().First();
+                await productService.DeleteProductOptionByKeyAsync(firstProduct.Id, firstProduct.ProductOptions.First().Id);
                 Assert.True(true);
             }
         }

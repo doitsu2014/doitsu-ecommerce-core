@@ -6,15 +6,21 @@ namespace Doitsu.Ecommerce.Core
     {
         Sale = 0,
         Desposit = 1,
-        Withdrawal = 2
+        Withdrawal = 2,
+        Summary = 3
     }
 
     public enum OrderPriorityEnum
     {
+        [Display(Name = "1%")]
         OnePercent = 1,
+        [Display(Name = "2%")]
         TwoPercent = 2,
+        [Display(Name = "3%")]
         ThreePercent = 3,
+        [Display(Name = "4%")]
         FourPercent = 4,
+        [Display(Name = "5%")]
         FivePercent = 5
     }
 
@@ -39,9 +45,8 @@ namespace Doitsu.Ecommerce.Core
     public enum UserTransactionSignEnum
     {
         Plus = '+',
-        Substract = '-' 
+        Substract = '-'
     }
-
 
     public enum ProductOptionValueStatusEnum
     {
@@ -58,25 +63,27 @@ namespace Doitsu.Ecommerce.Core
     public enum GenderEnum
     {
         [Display(Name = "Không rõ")]
-        Unknown = 0, [Display(Name = "Nam")]
-        Male = 1, [Display(Name = "Nữ")]
+        Unknown = 0, 
+        [Display(Name = "Nam")]
+        Male = 1, 
+        [Display(Name = "Nữ")]
         Female = 2
     }
 
     public enum DayOfWeek
     {
         [Display(Name = "Thứ 2")]
-        Monday = 0,
+        Monday = 0, 
         [Display(Name = "Thứ 3")]
-        Tuesday = 1,
+        Tuesday = 1, 
         [Display(Name = "Thứ 4")]
-        Wednesday = 2,
+        Wednesday = 2, 
         [Display(Name = "Thứ 5")]
-        Thursday = 3,
+        Thursday = 3, 
         [Display(Name = "Thứ 6")]
-        Friday = 4,
+        Friday = 4, 
         [Display(Name = "Thứ 7")]
-        Saturday = 5,
+        Saturday = 5, 
         [Display(Name = "Chủ nhật")]
         Sunday = 6
     }

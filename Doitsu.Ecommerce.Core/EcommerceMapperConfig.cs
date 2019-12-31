@@ -27,7 +27,7 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<EcommerceIdentityRole, EcommerceIdentityRoleViewModel>();
                 #endregion
                 #region Categories
-                cfg.CreateMap<Categories, CategoryMenuViewModel>();
+                cfg.CreateMap<Categories, CategoryMenuViewModel>().MaxDepth(5);
                 cfg.CreateMap<Categories, CategoryViewModel>();
                 cfg.CreateMap<Categories, CategoryWithProductOverviewViewModel>();
                 cfg.CreateMap<Categories, CategoryWithParentViewModel>().MaxDepth(3);
@@ -76,7 +76,7 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<OrderViewModel, Orders>();
                 cfg.CreateMap<CreateOrderWithOptionViewModel, Orders>();
                 cfg.CreateMap<Orders, OrderViewModel>();
-                cfg.CreateMap<Orders, OrderDetailViewModel>();
+                cfg.CreateMap<Orders, OrderDetailViewModel>().MaxDepth(3);
 
                 cfg.CreateMap<OrderItems, OrderItemViewModel>().ReverseMap();
                 cfg.CreateMap<OrderItemViewModel, OrderItems>();

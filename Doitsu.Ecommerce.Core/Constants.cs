@@ -50,8 +50,19 @@ namespace Doitsu.Ecommerce.Core
             public const string JWT_SCHEME = "api_jwt";
         }
 
-        public static class OrderInformation { 
+        public static class OrderInformation
+        {
             public const int ORDER_CODE_LENGTH = 12;
+        }
+
+        public static class FileExtension
+        {
+            public const string EXCEL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        }
+
+        public static class DateTimeFormat
+        {
+            public const string Default = "MM/dd/yyyy";
         }
     }
 }

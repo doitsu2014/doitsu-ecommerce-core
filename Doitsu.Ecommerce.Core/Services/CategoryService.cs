@@ -71,25 +71,17 @@ namespace Doitsu.Ecommerce.Core.Services
             return listChild;
         }
 
-        public async Task<ImmutableList<CategoryViewModel>> GetBuildingCategoryChildrenAsync()
-        {
-            var listFixedCategory = await this.Get(cate => cate.ParentCate.Slug == Constants.SuperFixedCategorySlug.BUILDING && cate.IsFixed)
+        public async Task<ImmutableList<CategoryViewModel>> GetBuildingCategoryChildrenAsync() => (await this.Get(cate => cate.ParentCate.Slug == Constants.SuperFixedCategorySlug.BUILDING)
+                .Where(cate => cate.IsFixed)
                 .ProjectTo<CategoryViewModel>(Mapper.ConfigurationProvider)
-                .ToListAsync();
+                .ToListAsync()).ToImmutableList();
 
-            return listFixedCategory.ToImmutableList();
-        }
-
-        public async Task<ImmutableList<CategoryMenuViewModel>> GetProductCategoryChildrenAsync()
-        {
-            var listFixedCategory =
-            await this.Get(cate => cate.ParentCate.Slug == Constants.SuperFixedCategorySlug.PRODUCT && cate.IsFixed)
+        public async Task<ImmutableList<CategoryMenuViewModel>> GetProductCategoryChildrenAsync() => (await this.Get(cate => cate.ParentCate.Slug == Constants.SuperFixedCategorySlug.PRODUCT)
+                .Where(cate => cate.IsFixed)
                 .Include(cate => cate.InverseParentCate)
                 .ProjectTo<CategoryMenuViewModel>(Mapper.ConfigurationProvider)
-                .ToListAsync();
-
-            return listFixedCategory.ToImmutableList();
-        }
+                .ToListAsync())
+                .ToImmutableList();
 
         public async Task<ImmutableList<CategoryWithInverseParentViewModel>> GetInverseCategory(string slug = default, int depth = default)
         {
