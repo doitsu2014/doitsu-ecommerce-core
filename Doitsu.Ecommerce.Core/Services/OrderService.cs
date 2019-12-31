@@ -1,30 +1,33 @@
-using System.Transactions;
-using System.Runtime.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using System.Transactions;
 
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 
+using Doitsu.Ecommerce.Core.Abstraction;
+using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
+using Doitsu.Ecommerce.Core.Data;
+using Doitsu.Ecommerce.Core.Data.Entities;
+using Doitsu.Ecommerce.Core.Data.Identities;
+using Doitsu.Ecommerce.Core.IdentitiesExtension;
+using Doitsu.Ecommerce.Core.ViewModels;
 using Doitsu.Service.Core;
 using Doitsu.Service.Core.Services.EmailService;
 using Doitsu.Utils;
-using Doitsu.Ecommerce.Core.ViewModels;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+
+using OfficeOpenXml;
+
 using Optional;
 using Optional.Async;
-using Doitsu.Ecommerce.Core.Data.Entities;
-using Doitsu.Ecommerce.Core.Data.Identities;
-using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
-using Doitsu.Ecommerce.Core.Abstraction;
-using AutoMapper;
-using Doitsu.Ecommerce.Core.Data;
-using Doitsu.Ecommerce.Core.IdentitiesExtension;
-using OfficeOpenXml;
-using System.Linq.Expressions;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -44,17 +47,17 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<OrderDetailViewModel> GetOrderDetailByCodeAsync(string orderCode);
 
         Task<ImmutableList<OrderDetailViewModel>> GetOrderDetailByParams(OrderStatusEnum? orderStatus,
-                                                                         DateTime? fromDate,
-                                                                         DateTime? toDate,
-                                                                         string userPhone,
-                                                                         string orderCode);
+            DateTime? fromDate,
+            DateTime? toDate,
+            string userPhone,
+            string orderCode);
 
         Task<ImmutableList<OrderDetailViewModel>> GetOrderDetailByParams(OrderStatusEnum? orderStatus,
-                                                                         DateTime? fromDate,
-                                                                         DateTime? toDate,
-                                                                         string userPhone,
-                                                                         string orderCode,
-                                                                         OrderTypeEnum orderType);
+            DateTime? fromDate,
+            DateTime? toDate,
+            string userPhone,
+            string orderCode,
+            OrderTypeEnum orderType);
 
         Task<Option<OrderViewModel, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum);
 
@@ -94,12 +97,12 @@ namespace Doitsu.Ecommerce.Core.Services
         private readonly EcommerceIdentityUserManager<EcommerceIdentityUser> userManager;
 
         public OrderService(EcommerceDbContext dbContext,
-                            IMapper mapper,
-                            ILogger<BaseService<Orders, EcommerceDbContext>> logger,
-                            IEmailService emailService,
-                            IProductService productService,
-                            EcommerceIdentityUserManager<EcommerceIdentityUser> userManager,
-                            IUserTransactionService userTransactionService) : base(dbContext, mapper, logger)
+            IMapper mapper,
+            ILogger<BaseService<Orders, EcommerceDbContext>> logger,
+            IEmailService emailService,
+            IProductService productService,
+            EcommerceIdentityUserManager<EcommerceIdentityUser> userManager,
+            IUserTransactionService userTransactionService) : base(dbContext, mapper, logger)
         {
             this.emailService = emailService;
             this.productService = productService;
@@ -120,8 +123,6 @@ namespace Doitsu.Ecommerce.Core.Services
             return result;
         }
 
-
-
         public async Task<Option<string, string>> CheckoutCartAsync(CheckoutCartViewModel data, EcommerceIdentityUser user)
         {
             return await new { data, user }
@@ -129,10 +130,10 @@ namespace Doitsu.Ecommerce.Core.Services
                 .WithException(string.Empty)
                 .FlatMapAsync(async d =>
                 {
-                    using (var trans = await CreateTransactionAsync())
+                    using(var trans = await CreateTransactionAsync())
                     {
                         var order = new Orders();
-                        order.Status = (int)OrderStatusEnum.New;
+                        order.Status = (int) OrderStatusEnum.New;
                         order.Discount = 0;
                         order.Code = DataUtils.GenerateCode(Constants.OrderInformation.ORDER_CODE_LENGTH).ToUpper();
                         order.TotalPrice = data.TotalPrice;
@@ -208,7 +209,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 .MapAsync(async d =>
                 {
                     var order = await this.FindByKeysAsync(d.orderId);
-                    order.Status = (int)statusEnum;
+                    order.Status = (int) statusEnum;
                     this.Update(order);
                     await CommitAsync();
                     return Mapper.Map<OrderViewModel>(order);
@@ -216,16 +217,16 @@ namespace Doitsu.Ecommerce.Core.Services
         }
 
         public async Task<ImmutableList<OrderDetailViewModel>> GetOrderDetailByParams(OrderStatusEnum? orderStatus,
-                                                                                      DateTime? fromDate,
-                                                                                      DateTime? toDate,
-                                                                                      string userPhone,
-                                                                                      string orderCode)
+            DateTime? fromDate,
+            DateTime? toDate,
+            string userPhone,
+            string orderCode)
         {
             var query = this.GetAllAsNoTracking();
 
             if (orderStatus.HasValue)
             {
-                query = query.Where(x => x.Status == (int)orderStatus.Value);
+                query = query.Where(x => x.Status == (int) orderStatus.Value);
             }
 
             if (!userPhone.IsNullOrEmpty())
@@ -332,7 +333,7 @@ namespace Doitsu.Ecommerce.Core.Services
                             var subTotalQuantity = orderItem.SubTotalQuantity;
                             var discount = orderItem.Discount ?? 0;
                             var price = subTotalPrice * subTotalQuantity;
-                            orderItem.SubTotalFinalPrice = price - (price * ((decimal)discount) / 100);
+                            orderItem.SubTotalFinalPrice = price - (price * ((decimal) discount) / 100);
                             orderItem.ProductId = productVariant.ProductId;
                             orderItem.ProductVariant = productVariant;
                             orderItem.ProductVariantId = productVariant.Id;
@@ -346,7 +347,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     if (d.Priority.HasValue)
                     {
                         var originPrice = d.TotalPrice * d.TotalQuantity;
-                        var priorityValue = ((decimal)d.Priority.Value / 100);
+                        var priorityValue = ((decimal) d.Priority.Value / 100);
                         d.FinalPrice += (originPrice * priorityValue);
                     }
 
@@ -354,7 +355,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     order.Code = DataUtils.GenerateCode(Constants.OrderInformation.ORDER_CODE_LENGTH);
                     order.CreatedDate = DateTime.UtcNow.ToVietnamDateTime();
                     order.Type = OrderTypeEnum.Sale;
-                    order.Status = (int)OrderStatusEnum.New;
+                    order.Status = (int) OrderStatusEnum.New;
 
                     return order;
                 });
@@ -371,9 +372,9 @@ namespace Doitsu.Ecommerce.Core.Services
                     order.Code = DataUtils.GenerateCode(Constants.OrderInformation.ORDER_CODE_LENGTH);
                     order.CreatedDate = DateTime.UtcNow.ToVietnamDateTime();
                     order.Type = OrderTypeEnum.Desposit;
-                    order.Status = (int)OrderStatusEnum.Done;
+                    order.Status = (int) OrderStatusEnum.Done;
                     var price = d.TotalPrice * d.TotalQuantity;
-                    order.FinalPrice = price - (price * (decimal)d.Discount);
+                    order.FinalPrice = price - (price * (decimal) d.Discount);
                     return order;
                 })
                 .FlatMapAsync(async o =>
@@ -423,25 +424,27 @@ namespace Doitsu.Ecommerce.Core.Services
                 {
                     var order = await Get(o => o.Code == d.orderCode && userId == o.UserId)
                         .FirstOrDefaultAsync();
-
+                    
+                    var user = await userManager.FindByIdAsync(order.UserId.ToString());
+                    if (user == null)
+                    {
+                        return Option.None<OrderViewModel, string>("Không tìm thấy tài khoản chứa đơn hàng này.");
+                    }
+                    var isInRoleAdmin = await userManager.IsInRoleAsync(user, Constants.UserRoles.ADMIN);
+                
                     if (order == null)
                     {
                         return Option.None<OrderViewModel, string>("Không tìm thấy đơn hàng phù hợp để hủy đơn.");
                     }
-                    else if ((OrderStatusEnum)order.Status != OrderStatusEnum.New)
+                    else if (!isInRoleAdmin && (OrderStatusEnum) order.Status != OrderStatusEnum.New)
                     {
                         return Option.None<OrderViewModel, string>("Không phải đơn hàng mới nên không thể xóa.");
                     }
                     else
                     {
-                        order.Status = (int)OrderStatusEnum.Cancel;
+                        order.Status = (int) OrderStatusEnum.Cancel;
                         this.Update(order);
 
-                        var user = await userManager.FindByIdAsync(order.UserId.ToString());
-                        if (user == null)
-                        {
-                            return Option.None<OrderViewModel, string>("Không tìm thấy tài khoản chứa đơn hàng này.");
-                        }
                         var userTransaction = this.userTransactionService.PrepareUserTransaction(order, ImmutableList<ProductVariantViewModel>.Empty, user, UserTransactionTypeEnum.Rollback);
                         await this.userTransactionService.UpdateUserBalanceAsync(userTransaction, user);
                         await userTransactionService.CreateAsync(userTransaction);
@@ -454,7 +457,7 @@ namespace Doitsu.Ecommerce.Core.Services
         public async Task<ImmutableList<OrderDetailViewModel>> GetOrderDetailByParams(OrderStatusEnum? orderStatus, DateTime? fromDate, DateTime? toDate, string userPhone, string orderCode, OrderTypeEnum orderType)
         {
             var query = this.GetAllAsNoTracking();
-            if (orderStatus.HasValue) query = query.Where(x => x.Status == (int)orderStatus.Value);
+            if (orderStatus.HasValue) query = query.Where(x => x.Status == (int) orderStatus.Value);
             if (!userPhone.IsNullOrEmpty()) query = query.Where(x => x.User.PhoneNumber.Contains(userPhone));
             if (!orderCode.IsNullOrEmpty()) query = query.Where(x => x.Code.Contains(orderCode));
             if (fromDate.HasValue && fromDate != DateTime.MinValue)
@@ -478,7 +481,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public async Task<Option<OrderViewModel, string>> CreateSummaryOrderAsync(List<OrderViewModel> inverseOrders, int userId)
         {
-            using (var transaction = await this.CreateTransactionAsync())
+            using(var transaction = await this.CreateTransactionAsync())
             {
                 return await (inverseOrders, userId).SomeNotNull()
                     .WithException(string.Empty)
@@ -487,26 +490,26 @@ namespace Doitsu.Ecommerce.Core.Services
                     .MapAsync(async req =>
                     {
                         var data = req.inverseOrders;
-                        var newOIds = data.Where(o => o.Status == (int)OrderStatusEnum.New).Select(o => o.Id).ToImmutableList();
+                        var newOIds = data.Where(o => o.Status == (int) OrderStatusEnum.New).Select(o => o.Id).ToImmutableList();
                         var newOEntities = await this.GetAsTracking(dbO => newOIds.Contains(dbO.Id)).ToListAsync();
                         return (listNewDbOrders: newOEntities.Select(o =>
                         {
-                            o.Status = (int)OrderStatusEnum.Processing;
+                            o.Status = (int) OrderStatusEnum.Processing;
                             return o;
-                        }).ToImmutableList(), uId: req.userId);
+                        }).ToImmutableList(), uId : req.userId);
                     })
                     .MapAsync(async transformedData =>
                     {
                         var summaryOrder = new Orders()
                         {
-                            UserId = transformedData.uId,
-                            Code = DataUtils.GenerateCode(Constants.OrderInformation.ORDER_CODE_LENGTH),
-                            CreatedDate = DateTime.UtcNow.ToVietnamDateTime(),
-                            FinalPrice = transformedData.listNewDbOrders.Sum(newDbO => newDbO.FinalPrice),
-                            TotalPrice = transformedData.listNewDbOrders.Sum(newDbO => newDbO.FinalPrice),
-                            Status = (int)OrderStatusEnum.Processing,
-                            Type = OrderTypeEnum.Summary,
-                            InverseSummaryOrders = transformedData.listNewDbOrders
+                        UserId = transformedData.uId,
+                        Code = DataUtils.GenerateCode(Constants.OrderInformation.ORDER_CODE_LENGTH),
+                        CreatedDate = DateTime.UtcNow.ToVietnamDateTime(),
+                        FinalPrice = transformedData.listNewDbOrders.Sum(newDbO => newDbO.FinalPrice),
+                        TotalPrice = transformedData.listNewDbOrders.Sum(newDbO => newDbO.FinalPrice),
+                        Status = (int) OrderStatusEnum.Processing,
+                        Type = OrderTypeEnum.Summary,
+                        InverseSummaryOrders = transformedData.listNewDbOrders
                         };
                         await this.CreateAsync(summaryOrder);
                         await this.CommitAsync();
@@ -518,7 +521,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public Task<Option<byte[], string>> GetSummaryOrderAsExcelBytesAsync(int summaryOrderId)
         {
-            Expression<Func<Orders, bool>> filterSummaryOrderWithId = (o) => o.Id == summaryOrderId && o.Type == OrderTypeEnum.Summary && o.Status == (int)OrderStatusEnum.Processing;
+            Expression<Func<Orders, bool>> filterSummaryOrderWithId = (o) => o.Id == summaryOrderId && o.Type == OrderTypeEnum.Summary && o.Status == (int) OrderStatusEnum.Processing;
             return summaryOrderId.SomeNotNull()
                 .WithException("Mã của Đơn Tổng không hợp lệ.")
                 .Filter(req => req != 0, "Không tìm thấy mã của Đơn Tổng")
@@ -526,21 +529,13 @@ namespace Doitsu.Ecommerce.Core.Services
                 .MapAsync(async id =>
                 {
                     var summaryOrder = await this.GetAsNoTracking(filterSummaryOrderWithId)
-                        .Include(o => o.InverseSummaryOrders)
-                            .ThenInclude(o => o.OrderItems)
-                                .ThenInclude(oi => oi.ProductVariant)
-                                    .ThenInclude(pv => pv.ProductVariantOptionValues)
-                                        .ThenInclude(pvov => pvov.ProductOptionValue)
-                                            .ThenInclude(pov => pov.ProductOption)
-                        .Include(o => o.InverseSummaryOrders)
-                            .ThenInclude(o => o.User)
-                        .Include(o => o.InverseSummaryOrders)
-                            .ThenInclude(o => o.OrderItems)
-                                .ThenInclude(oi => oi.Product)
+                        .Include(o => o.InverseSummaryOrders).ThenInclude(o => o.OrderItems).ThenInclude(oi => oi.ProductVariant).ThenInclude(pv => pv.ProductVariantOptionValues).ThenInclude(pvov => pvov.ProductOptionValue).ThenInclude(pov => pov.ProductOption)
+                        .Include(o => o.InverseSummaryOrders).ThenInclude(o => o.User)
+                        .Include(o => o.InverseSummaryOrders).ThenInclude(o => o.OrderItems).ThenInclude(oi => oi.Product)
                         .AsNoTracking()
                         .FirstOrDefaultAsync();
 
-                    using (var package = new ExcelPackage())
+                    using(var package = new ExcelPackage())
                     {
                         var sheet = package.Workbook.Worksheets.Add(GetNormalizedOfType(OrderTypeEnum.Summary));
                         var rowIndex = 1;
@@ -584,7 +579,7 @@ namespace Doitsu.Ecommerce.Core.Services
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = $"{o.Discount}%";
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = o.TotalQuantity;
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = o.FinalPrice.GetVietnamDong();
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = GetNormalizedOfStatus((OrderStatusEnum)o.Status);
+                                sheet.Cells[rowIndex, dataColumnIndex++].Value = GetNormalizedOfStatus((OrderStatusEnum) o.Status);
                                 sheet.Cells[rowIndex, dataColumnIndex++].Value = o.Note;
                             }
                         }
@@ -605,24 +600,26 @@ namespace Doitsu.Ecommerce.Core.Services
 
         private string GetNormalizedOfType(OrderTypeEnum typeEnum)
         {
-            return typeEnum switch
+            return typeEnum
+            switch
             {
                 OrderTypeEnum.Summary => "Hóa đơn tổng",
-                OrderTypeEnum.Sale => "Hóa đơn hàng bán",
-                OrderTypeEnum.Desposit => "Hóa đơn nạp tiền",
-                _ => "Hóa đơn rút tiền"
+                    OrderTypeEnum.Sale => "Hóa đơn hàng bán",
+                    OrderTypeEnum.Desposit => "Hóa đơn nạp tiền",
+                    _ => "Hóa đơn rút tiền"
             };
         }
 
         private string GetNormalizedOfStatus(OrderStatusEnum statusEnum)
         {
-            return statusEnum switch
+            return statusEnum
+            switch
             {
                 OrderStatusEnum.New => "Đang chờ nạp",
-                OrderStatusEnum.Processing => "Đang xử lý",
-                OrderStatusEnum.Cancel => "Đã hủy",
-                OrderStatusEnum.Done => "Hoàn thành",
-                _ => "Thất bại"
+                    OrderStatusEnum.Processing => "Đang xử lý",
+                    OrderStatusEnum.Cancel => "Đã hủy",
+                    OrderStatusEnum.Done => "Hoàn thành",
+                    _ => "Thất bại"
             };
         }
 
@@ -636,15 +633,15 @@ namespace Doitsu.Ecommerce.Core.Services
                 else
                 {
                     var messages = orderItems.Select(oi =>
-                    {
-                        var message = "";
-                        if (oi.Product != null)
                         {
-                            message += $"- Sản phẩm: {oi.Product.Name}, giá tiền: {oi.SubTotalFinalPrice.GetVietnamDong()}, giảm giá: {oi.Discount}%, số lượng: {oi.SubTotalQuantity}";
-                        }
-                        return message;
-                    })
-                    .Append($"- Ưu tiên: {order.Priority}");
+                            var message = "";
+                            if (oi.Product != null)
+                            {
+                                message += $"- Sản phẩm: {oi.Product.Name}, giá tiền: {oi.SubTotalFinalPrice.GetVietnamDong()}, giảm giá: {oi.Discount}%, số lượng: {oi.SubTotalQuantity}";
+                            }
+                            return message;
+                        })
+                        .Append($"- Ưu tiên: {order.Priority}");
                     if (!order.Dynamic01.IsNullOrEmpty()) messages = messages.Append($"- {order.Dynamic01}");
                     if (!order.Dynamic02.IsNullOrEmpty()) messages = messages.Append($"- {order.Dynamic02}");
                     if (!order.Dynamic03.IsNullOrEmpty()) messages = messages.Append($"- {order.Dynamic03}");
@@ -663,8 +660,8 @@ namespace Doitsu.Ecommerce.Core.Services
                 .MapAsync(async req =>
                 {
                     var summaryOrder = await this.GetAsTracking(o => o.Id == req && OrderTypeEnum.Summary == o.Type).Include(o => o.InverseSummaryOrders).FirstOrDefaultAsync();
-                    summaryOrder.Status = (int)OrderStatusEnum.Done;
-                    summaryOrder.InverseSummaryOrders.Select(io => { io.Status = (int)OrderStatusEnum.Done; return io; });
+                    summaryOrder.Status = (int) OrderStatusEnum.Done;
+                    summaryOrder.InverseSummaryOrders.Select(io => { io.Status = (int) OrderStatusEnum.Done; return io; });
                     this.Update(summaryOrder);
                     await this.CommitAsync();
                     return this.Mapper.Map<OrderViewModel>(summaryOrder);
@@ -673,26 +670,26 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public async Task<Option<OrderViewModel, string>> MakeCancelSummaryOrderAsync(int summaryOrderId)
         {
-            using (var transaction = await this.CreateTransactionAsync())
+            using(var transaction = await this.CreateTransactionAsync())
             {
                 return await (summaryOrderId).SomeNotNull()
-                   .WithException("Mã của Đơn Tổng không hợp lệ.")
-                   .MapAsync(async req =>
-                   {
-                       var summaryOrder = await this.GetAsTracking(o => o.Id == req && OrderTypeEnum.Summary == o.Type).FirstOrDefaultAsync();
-                       summaryOrder.Status = (int)OrderStatusEnum.Cancel;
-                       this.Update(summaryOrder);
-                       await this.CommitAsync();
+                    .WithException("Mã của Đơn Tổng không hợp lệ.")
+                    .MapAsync(async req =>
+                    {
+                        var summaryOrder = await this.GetAsTracking(o => o.Id == req && OrderTypeEnum.Summary == o.Type).FirstOrDefaultAsync();
+                        summaryOrder.Status = (int) OrderStatusEnum.Cancel;
+                        this.Update(summaryOrder);
+                        await this.CommitAsync();
 
-                       var orderCodeIds = await this.GetAsNoTracking(o => o.SummaryOrderId == summaryOrder.Id && OrderTypeEnum.Sale == o.Type).Select(o => new { o.Code, o.UserId }).ToListAsync();
-                       await Task.WhenAll(orderCodeIds.Select(async cancelData =>
-                       {
-                           return await CancelOrderAsync(cancelData.Code, cancelData.UserId);
-                       }));
+                        var orderCodeIds = await this.GetAsNoTracking(o => o.SummaryOrderId == summaryOrder.Id && OrderTypeEnum.Sale == o.Type).Select(o => new { o.Code, o.UserId }).ToListAsync();
+                        foreach(var orderCodeId in orderCodeIds)
+                        {
+                            await CancelOrderAsync(orderCodeId.Code, orderCodeId.UserId);
+                        }
 
-                       await transaction.CommitAsync();
-                       return this.Mapper.Map<OrderViewModel>(summaryOrder);
-                   });
+                        await transaction.CommitAsync();
+                        return this.Mapper.Map<OrderViewModel>(summaryOrder);
+                    });
             }
         }
     }

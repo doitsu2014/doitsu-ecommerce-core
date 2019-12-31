@@ -1,24 +1,27 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 
 using Doitsu.Ecommerce.Core.Data;
-using Microsoft.EntityFrameworkCore;
 using Doitsu.Ecommerce.Core.Data.Entities;
-using Doitsu.Ecommerce.Core.Tests.Helpers;
-using Xunit;
-using Xunit.Abstractions;
+using Doitsu.Ecommerce.Core.Data.Identities;
+using Doitsu.Ecommerce.Core.IdentitiesExtension;
+using Doitsu.Ecommerce.Core.IdentityManagers;
 using Doitsu.Ecommerce.Core.Services;
+using Doitsu.Ecommerce.Core.Tests.Helpers;
 using Doitsu.Ecommerce.Core.ViewModels;
 using Doitsu.Service.Core.Extensions;
+using Doitsu.Utils;
+
+using Microsoft.EntityFrameworkCore;
+
 using Optional;
 using Optional.Async;
-using System.Collections.Immutable;
-using System.Collections.Generic;
-using Doitsu.Ecommerce.Core.IdentitiesExtension;
-using Doitsu.Ecommerce.Core.Data.Identities;
-using Doitsu.Ecommerce.Core.IdentityManagers;
-using Doitsu.Utils;
+
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Doitsu.Ecommerce.Core.Tests
 {
@@ -41,9 +44,9 @@ namespace Doitsu.Ecommerce.Core.Tests
                 // Add Products
                 var productService = webhost.Services.GetService<IProductService>();
                 var listProductOptionValues = (await productService.Get(pro => pro.Code == _fixture.ProductData.First().Name)
-                    .Include(p => p.ProductOptions)
+                        .Include(p => p.ProductOptions)
                         .ThenInclude(po => po.ProductOptionValues)
-                    .FirstOrDefaultAsync())
+                        .FirstOrDefaultAsync())
                     .ProductOptions
                     .Select(x => productService.Mapper.Map<ProductOptionValueViewModel>(x.ProductOptionValues.First()))
                     .ToImmutableList();
@@ -94,26 +97,26 @@ namespace Doitsu.Ecommerce.Core.Tests
                 // Add Promotion Detail
                 var promotionDetailService = webhost.Services.GetService<IPromotionDetailService>();
                 var listProductVariantOfProduct01 = (await productService.Get(pro => pro.Code == "PRODUCT01")
-                    .Include(p => p.ProductVariants)
-                    .FirstOrDefaultAsync())
+                        .Include(p => p.ProductVariants)
+                        .FirstOrDefaultAsync())
                     .ProductVariants
                     .Select(x => { x.AnotherDiscount = 25; return x; })
                     .ToImmutableList();
                 productVariantService.UpdateRange(listProductVariantOfProduct01);
 
                 var listProductVariantOfProduct02 = (await productService.Get(pro => pro.Code == "PRODUCT02")
-                    .Include(p => p.ProductVariants)
-                    .FirstOrDefaultAsync())
+                        .Include(p => p.ProductVariants)
+                        .FirstOrDefaultAsync())
                     .ProductVariants
                     .Select(x => { x.AnotherDiscount = 25; return x; })
                     .ToImmutableList();
                 productVariantService.UpdateRange(listProductVariantOfProduct02);
 
                 var listProductVariantIdOfProduct03 = (await productService.Get(pro => pro.Code == "PRODUCT03")
-                    .Include(p => p.ProductVariants)
+                        .Include(p => p.ProductVariants)
                         .ThenInclude(p => p.ProductVariantOptionValues)
-                            .ThenInclude(p => p.ProductOptionValue)
-                    .ToListAsync())
+                        .ThenInclude(p => p.ProductOptionValue)
+                        .ToListAsync())
                     .FirstOrDefault()
                     .ProductVariants
                     .Select(x =>
@@ -169,6 +172,91 @@ namespace Doitsu.Ecommerce.Core.Tests
                     TotalQuantity = 1,
                     Discount = 0,
                     Note = "Nạp tiền 100k"
+                });
+
+                Assert.True(true);
+            }
+
+            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            {
+                // Add Products
+                var userManager = webhost.Services.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
+                var orderService = webhost.Services.GetService<IOrderService>();
+                var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
+
+                await orderService.CreateSaleOrderWithOptionAsync(new CreateOrderWithOptionViewModel()
+                {
+                    UserId = user.Id,
+                    DeliveryPhone = "0946680600",
+                    Priority = OrderPriorityEnum.FivePercent,
+                    Dynamic01 = "Mã app ...",
+                    Note = "Ghi chú sản phẩm 01",
+                    OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                    {
+                        new CreateOrderItemWithOptionViewModel()
+                        {
+                            SubTotalQuantity = 1,
+                            SubTotalPrice = 100000,
+                            SubTotalFinalPrice = 100000,
+                            ProductOptionValues = new List<ProductOptionValueViewModel>()
+                            {
+                                new ProductOptionValueViewModel()
+                                {
+                                    Id = 1
+                                },
+                                new ProductOptionValueViewModel()
+                                {
+                                    Id = 5
+                                }
+                            }
+                        }
+                    }
+                });
+
+                await orderService.CreateSaleOrderWithOptionAsync(new CreateOrderWithOptionViewModel()
+                {
+                    UserId = user.Id,
+                    DeliveryPhone = "0946680600",
+                    Dynamic01 = "",
+                    Note = "Ghi chú sản phẩm 02",
+                    OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                    {
+                        new CreateOrderItemWithOptionViewModel()
+                        {
+                            SubTotalQuantity = 1,
+                            SubTotalPrice = 500000,
+                            SubTotalFinalPrice = 500000,
+                            ProductOptionValues = new List<ProductOptionValueViewModel>()
+                            {
+                                new ProductOptionValueViewModel()
+                                {
+                                    Id = 6
+                                }
+                            }
+                        }
+                    }
+                });
+
+                await orderService.CreateSaleOrderWithOptionAsync(new CreateOrderWithOptionViewModel()
+                {
+                    UserId = user.Id,
+                    DeliveryPhone = "0946680600",
+                    Dynamic01 = "VNG DK100 VLTK 04 05",
+                    Note = "Ghi chú sản phẩm 03",
+                    OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                    {
+                        new CreateOrderItemWithOptionViewModel()
+                        {
+                            SubTotalQuantity = 5,
+                            ProductOptionValues = new List<ProductOptionValueViewModel>()
+                            {
+                                new ProductOptionValueViewModel()
+                                {
+                                    Id = 12
+                                }
+                            }
+                        }
+                    }
                 });
 
                 Assert.True(true);
