@@ -83,6 +83,11 @@ namespace Doitsu.Ecommerce.Core.Services
         /// <returns></returns>
         Task<Option<byte[], string>> GetSummaryOrderAsExcelBytesAsync(int summaryOrderId);
 
+        /// <summary>
+        /// Complete the summary order and included different cancelled orders.
+        /// </summary>
+        /// <param name="summaryOrderId">Summary Order Id to Query</param>
+        /// <returns></returns>
         Task<Option<OrderViewModel, string>> MakeCompleteSummaryOrderAsync(int summaryOrderId);
 
         Task<Option<OrderViewModel, string>> MakeCancelSummaryOrderAsync(int summaryOrderId);
@@ -518,7 +523,10 @@ namespace Doitsu.Ecommerce.Core.Services
                 .WithException("Mã của Đơn Tổng không hợp lệ.")
                 .MapAsync(async req =>
                 {
-                    var summaryOrder = await this.GetAsTracking(o => o.Id == req && OrderTypeEnum.Summary == o.Type).Include(o => o.InverseSummaryOrders).FirstOrDefaultAsync();
+                    var summaryOrder = await this.GetAsTracking(o => o.Id == req && OrderTypeEnum.Summary == o.Type)
+                        .Where(o => o.Status != (int)OrderStatusEnum.Cancel)
+                        .Include(o => o.InverseSummaryOrders)
+                        .FirstOrDefaultAsync();
                     summaryOrder.Status = (int)OrderStatusEnum.Done;
                     summaryOrder.InverseSummaryOrders.Select(io => { io.Status = (int)OrderStatusEnum.Done; return io; });
                     this.Update(summaryOrder);

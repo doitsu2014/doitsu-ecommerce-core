@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20191228150618_SummaryOrder")]
-    partial class SummaryOrder
+    [Migration("20200105165125_SummaryOrderAndEditLength")]
+    partial class SummaryOrderAndEditLength
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -670,6 +670,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
+                    b.Property<string>("CancelNote")
+                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(255);
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)")
@@ -681,16 +685,16 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasDefaultValueSql("(getutcdate())");
 
                     b.Property<string>("DeliveryAddress")
-                        .HasColumnType("nvarchar(300)")
-                        .HasMaxLength(300);
+                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(255);
 
                     b.Property<string>("DeliveryEmail")
-                        .HasColumnType("nvarchar(255)")
-                        .HasMaxLength(255);
+                        .HasColumnType("nvarchar(125)")
+                        .HasMaxLength(125);
 
                     b.Property<string>("DeliveryName")
-                        .HasColumnType("nvarchar(255)")
-                        .HasMaxLength(255);
+                        .HasColumnType("nvarchar(125)")
+                        .HasMaxLength(125);
 
                     b.Property<string>("DeliveryPhone")
                         .HasColumnType("nvarchar(20)")
@@ -716,8 +720,8 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasMaxLength(255);
 
                     b.Property<string>("Dynamic05")
-                        .HasColumnType("nvarchar(1000)")
-                        .HasMaxLength(1000);
+                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(255);
 
                     b.Property<decimal>("FinalPrice")
                         .HasColumnType("money");
