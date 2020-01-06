@@ -57,6 +57,7 @@ namespace Doitsu.Ecommerce.Core.Services
             DateTime? toDate,
             string userPhone,
             string orderCode,
+            string productCode,
             OrderTypeEnum orderType);
 
         Task<Option<OrderViewModel, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum);
@@ -366,12 +367,19 @@ namespace Doitsu.Ecommerce.Core.Services
                 });
         }
 
-        public async Task<ImmutableList<OrderDetailViewModel>> GetOrderDetailByParams(OrderStatusEnum? orderStatus, DateTime? fromDate, DateTime? toDate, string userPhone, string orderCode, OrderTypeEnum orderType)
+        public async Task<ImmutableList<OrderDetailViewModel>> GetOrderDetailByParams(OrderStatusEnum? orderStatus,
+                                                                                      DateTime? fromDate,
+                                                                                      DateTime? toDate,
+                                                                                      string userPhone,
+                                                                                      string orderCode,
+                                                                                      string productCode,
+                                                                                      OrderTypeEnum orderType)
         {
-            var query = this.GetAllAsNoTracking();
+            var query = this.GetAllAsNoTracking().Include(o => o.OrderItems).ThenInclude(oi => oi.Product).AsQueryable();
             if (orderStatus.HasValue) query = query.Where(x => x.Status == (int)orderStatus.Value);
             if (!userPhone.IsNullOrEmpty()) query = query.Where(x => x.User.PhoneNumber.Contains(userPhone));
             if (!orderCode.IsNullOrEmpty()) query = query.Where(x => x.Code.Contains(orderCode));
+            if (!productCode.IsNullOrEmpty()) query = query.Where(x => x.OrderItems.Select(oi => oi.Product.Code).Any(pc => pc == productCode));
             if (fromDate.HasValue && fromDate != DateTime.MinValue)
             {
                 query = query.Where(x => x.CreatedDate >= fromDate.Value.StartOfDay());
