@@ -58,6 +58,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string Dynamic05 { get; set; }
         [JsonProperty("note")]
         public string Note { get; set; }
+        [JsonProperty("cancelNote")]
+        public string CancelNote { get; set; }
         [JsonProperty("priority")]
         public OrderPriorityEnum? Priority { get; set; }
         [JsonProperty("type")]
@@ -113,6 +115,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string Dynamic05 { get; set; }
         [JsonProperty("note")]
         public string Note { get; set; }
+        [JsonProperty("cancelNote")]
+        public string CancelNote { get; set; }
         [JsonProperty("priority")]
         public OrderPriorityEnum? Priority { get; set; }
         [JsonProperty("type")]

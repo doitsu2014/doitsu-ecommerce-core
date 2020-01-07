@@ -62,7 +62,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         Task<Option<OrderViewModel, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum);
 
-        Task<Option<OrderViewModel, string>> CancelOrderAsync(string orderCode, int userId);
+        Task<Option<OrderViewModel, string>> CancelOrderAsync(string orderCode, int userId, string cancelNote = "");
 
         Task<Option<OrderViewModel, string>> CreateSaleOrderWithOptionAsync(CreateOrderWithOptionViewModel request);
 
@@ -91,7 +91,7 @@ namespace Doitsu.Ecommerce.Core.Services
         /// <returns></returns>
         Task<Option<OrderViewModel, string>> MakeCompleteSummaryOrderAsync(int summaryOrderId);
 
-        Task<Option<OrderViewModel, string>> MakeCancelSummaryOrderAsync(int summaryOrderId);
+        Task<Option<OrderViewModel, string>> MakeCancelSummaryOrderAsync(int summaryOrderId, string cancelNote = "");
 
     }
 
@@ -413,14 +413,14 @@ namespace Doitsu.Ecommerce.Core.Services
                         // Get New Order Ids From Client
                         var newOIds = data.Where(o => o.Status == (int)OrderStatusEnum.New).Select(o => o.Id).ToImmutableList();
                         // Filter on Db
-                        var newOEntities = (await this.GetAsTracking(dbO => newOIds.Contains(dbO.Id) 
-                            && dbO.Status == (int)OrderStatusEnum.New 
+                        var newOEntities = (await this.GetAsTracking(dbO => newOIds.Contains(dbO.Id)
+                            && dbO.Status == (int)OrderStatusEnum.New
                             && dbO.SummaryOrderId == null).ToListAsync()).Select(o =>
                         {
                             o.Status = (int)OrderStatusEnum.Processing;
                             return o;
                         }).ToImmutableList();
-                        if(newOEntities.Count == 0) return Option.None<(ImmutableList<Orders> listNewDbOrders, int uId), string>("Các đơn hàng bạn chọn, không có đơn hàng nào phù hợp để tạo Đơn Tổng.");
+                        if (newOEntities.Count == 0) return Option.None<(ImmutableList<Orders> listNewDbOrders, int uId), string>("Các đơn hàng bạn chọn, không có đơn hàng nào phù hợp để tạo Đơn Tổng.");
                         return Option.Some<(ImmutableList<Orders> listNewDbOrders, int uId), string>((listNewDbOrders: newOEntities, uId: req.userId));
                     })
                     .MapAsync(async transformedData =>
@@ -543,7 +543,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 });
         }
 
-        public async Task<Option<OrderViewModel, string>> MakeCancelSummaryOrderAsync(int summaryOrderId)
+        public async Task<Option<OrderViewModel, string>> MakeCancelSummaryOrderAsync(int summaryOrderId, string cancelNote = "")
         {
             using (var transaction = await this.CreateTransactionAsync())
             {
@@ -553,13 +553,14 @@ namespace Doitsu.Ecommerce.Core.Services
                     {
                         var summaryOrder = await this.GetAsTracking(o => o.Id == req && OrderTypeEnum.Summary == o.Type).FirstOrDefaultAsync();
                         summaryOrder.Status = (int)OrderStatusEnum.Cancel;
+                        summaryOrder.CancelNote = $"{cancelNote}";
                         this.Update(summaryOrder);
                         await this.CommitAsync();
 
                         var orderCodeIds = await this.GetAsNoTracking(o => o.SummaryOrderId == summaryOrder.Id && OrderTypeEnum.Sale == o.Type).Select(o => new { o.Code, o.UserId }).ToListAsync();
                         foreach (var orderCodeId in orderCodeIds)
                         {
-                            await CancelOrderAsync(orderCodeId.Code, orderCodeId.UserId);
+                            await CancelOrderAsync(orderCodeId.Code, orderCodeId.UserId, cancelNote);
                         }
 
                         await transaction.CommitAsync();
@@ -622,7 +623,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 });
         }
 
-        public async Task<Option<OrderViewModel, string>> CancelOrderAsync(string orderCode, int userId)
+        public async Task<Option<OrderViewModel, string>> CancelOrderAsync(string orderCode, int userId, string cancelNote = "")
         {
             return await (orderCode, userId).SomeNotNull()
                 .WithException(string.Empty)
@@ -650,6 +651,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     else
                     {
                         order.Status = (int)OrderStatusEnum.Cancel;
+                        order.CancelNote = $"{cancelNote}.";
                         this.Update(order);
 
                         var userTransaction = this.userTransactionService.PrepareUserTransaction(order, ImmutableList<ProductVariantViewModel>.Empty, user, UserTransactionTypeEnum.Rollback);
@@ -662,8 +664,8 @@ namespace Doitsu.Ecommerce.Core.Services
         }
 
         #endregion
-    
-    
+
+
         #region Utilization 
 
         private string GetNormalizedOfType(OrderTypeEnum typeEnum)
@@ -716,7 +718,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     if (!order.Dynamic04.IsNullOrEmpty()) messages = messages.Append($"- {order.Dynamic04}");
                     if (!order.Dynamic05.IsNullOrEmpty()) messages = messages.Append($"- {order.Dynamic05}");
 
-                    return messages.Aggregate((x, y) => $"{x}\n{y}");
+                    return $"'{messages.Aggregate((x, y) => $"{x}\n{y}")}";
                 }
             }
         }

@@ -130,6 +130,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                         else if (x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK100") x.AnotherPrice = 100000;
                         else if (x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK200") x.AnotherPrice = 200000;
                         else if (x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK500") x.AnotherPrice = 500000;
+                        x.AnotherDiscount = 25;
                         return x;
                     })
                     .ToImmutableList();
