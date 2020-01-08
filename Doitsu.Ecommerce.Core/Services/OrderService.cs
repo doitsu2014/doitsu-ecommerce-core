@@ -60,9 +60,6 @@ namespace Doitsu.Ecommerce.Core.Services
             string productCode,
             OrderTypeEnum orderType);
 
-        Task<Option<OrderViewModel, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum);
-
-        Task<Option<OrderViewModel, string>> CancelOrderAsync(string orderCode, int userId, string cancelNote = "");
 
         Task<Option<OrderViewModel, string>> CreateSaleOrderWithOptionAsync(CreateOrderWithOptionViewModel request);
 
@@ -89,10 +86,22 @@ namespace Doitsu.Ecommerce.Core.Services
         /// </summary>
         /// <param name="summaryOrderId">Summary Order Id to Query</param>
         /// <returns></returns>
-        Task<Option<OrderViewModel, string>> MakeCompleteSummaryOrderAsync(int summaryOrderId);
+        Task<Option<OrderViewModel, string>> CompleteSummaryOrderAsync(int summaryOrderId);
 
-        Task<Option<OrderViewModel, string>> MakeCancelSummaryOrderAsync(int summaryOrderId, string cancelNote = "");
+        Task<Option<OrderViewModel, string>> CancelSummaryOrderAsync(int summaryOrderId, string cancelNote = "");
 
+        Task<Option<OrderViewModel, string>> CancelOrderAsync(string orderCode, int userId, string cancelNote = "");
+
+        Task<Option<OrderViewModel, string>> CompleteOrderAsync(string orderCode, int userId);
+
+        /// <summary>
+        /// Superpower function, to work correctly we have to complete TODO
+        /// TODO: Wrap all logic change order status
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <param name="statusEnum"></param>
+        /// <returns></returns>
+        Task<Option<OrderViewModel, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum);
     }
 
     public class OrderService : BaseService<Orders>, IOrderService
@@ -525,7 +534,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
 
         #region Status Order
-        public async Task<Option<OrderViewModel, string>> MakeCompleteSummaryOrderAsync(int summaryOrderId)
+        public async Task<Option<OrderViewModel, string>> CompleteSummaryOrderAsync(int summaryOrderId)
         {
             return await (summaryOrderId).SomeNotNull()
                 .WithException("Mã của Đơn Tổng không hợp lệ.")
@@ -535,15 +544,18 @@ namespace Doitsu.Ecommerce.Core.Services
                         .Where(o => o.Status != (int)OrderStatusEnum.Cancel)
                         .Include(o => o.InverseSummaryOrders)
                         .FirstOrDefaultAsync();
+
                     summaryOrder.Status = (int)OrderStatusEnum.Done;
-                    summaryOrder.InverseSummaryOrders.Select(io => { io.Status = (int)OrderStatusEnum.Done; return io; });
+                    summaryOrder.InverseSummaryOrders
+                        .Select(io => { io.Status = (int)OrderStatusEnum.Done; return io; });
+
                     this.Update(summaryOrder);
                     await this.CommitAsync();
                     return this.Mapper.Map<OrderViewModel>(summaryOrder);
                 });
         }
 
-        public async Task<Option<OrderViewModel, string>> MakeCancelSummaryOrderAsync(int summaryOrderId, string cancelNote = "")
+        public async Task<Option<OrderViewModel, string>> CancelSummaryOrderAsync(int summaryOrderId, string cancelNote = "")
         {
             using (var transaction = await this.CreateTransactionAsync())
             {
@@ -663,6 +675,22 @@ namespace Doitsu.Ecommerce.Core.Services
                 });
         }
 
+        public async Task<Option<OrderViewModel, string>> CompleteOrderAsync(string orderCode, int userId)
+        {
+            return await (orderCode).SomeNotNull()
+                .WithException("Mã của Đơn Tổng không hợp lệ.")
+                .MapAsync(async req =>
+                {
+                    var order = await this.GetAsTracking(o => o.Code == orderCode && OrderTypeEnum.Sale == o.Type)
+                        .Where(o => o.Status != (int)OrderStatusEnum.Cancel)
+                        .FirstOrDefaultAsync();
+                    order.Status = (int)OrderStatusEnum.Done;
+                    this.Update(order);
+                    await this.CommitAsync();
+                    return this.Mapper.Map<OrderViewModel>(order);
+                });
+        }
+
         #endregion
 
 
@@ -722,6 +750,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 }
             }
         }
+
         #endregion
     }
 }
