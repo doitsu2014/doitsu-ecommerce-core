@@ -108,8 +108,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string CategorySlug { get; set; }
         [JsonProperty("categoryName")]
         public string CategoryName { get; set; }
-        [JsonProperty("productOption")]
-        public ProductOptionViewModel ProductOption { get; set; }
+        [JsonProperty("productOptions")]
+        public ICollection<ProductOptionViewModel> ProductOptions { get; set; }
         [JsonProperty("categoryRecursive")]
         public CategoryWithParentViewModel Cate { get; set; }
     }

@@ -169,10 +169,10 @@ namespace Doitsu.Ecommerce.Core.Services
 
             var productList = await productsQuery
                 .OrderByDescending(x => x.Id)
+                .ProjectTo<ProductOverviewViewModel>(this.Mapper.ConfigurationProvider)
                 .ToListAsync();
 
-            var result = productList.Select(x => Mapper.Map<ProductOverviewViewModel>(x));
-            return result.ToImmutableList();
+            return productList.ToImmutableList();
         }
 
         private async Task<IQueryable<Products>> QueryAllOriginProductsInSuperParentCategoryAsync(string superParentCateSlug)
