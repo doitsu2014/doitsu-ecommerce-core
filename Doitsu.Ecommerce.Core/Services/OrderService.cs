@@ -546,10 +546,11 @@ namespace Doitsu.Ecommerce.Core.Services
                         .FirstOrDefaultAsync();
 
                     summaryOrder.Status = (int)OrderStatusEnum.Done;
-                    summaryOrder.InverseSummaryOrders
-                        .Select(io => { io.Status = (int)OrderStatusEnum.Done; return io; });
-
                     this.Update(summaryOrder);
+
+                    var updatedInverseOrders = summaryOrder.InverseSummaryOrders.Select(io => { io.Status = (int)OrderStatusEnum.Done; return io; }).ToList();
+                    this.UpdateRange(updatedInverseOrders);
+
                     await this.CommitAsync();
                     return this.Mapper.Map<OrderViewModel>(summaryOrder);
                 });
@@ -569,7 +570,9 @@ namespace Doitsu.Ecommerce.Core.Services
                         this.Update(summaryOrder);
                         await this.CommitAsync();
 
-                        var orderCodeIds = await this.GetAsNoTracking(o => o.SummaryOrderId == summaryOrder.Id && OrderTypeEnum.Sale == o.Type).Select(o => new { o.Code, o.UserId }).ToListAsync();
+                        var orderCodeIds = await this
+                            .GetAsNoTracking(o => o.SummaryOrderId == summaryOrder.Id && OrderTypeEnum.Sale == o.Type)
+                            .Select(o => new { o.Code, o.UserId }).ToListAsync();
                         foreach (var orderCodeId in orderCodeIds)
                         {
                             await CancelOrderAsync(orderCodeId.Code, orderCodeId.UserId, cancelNote);
@@ -656,9 +659,10 @@ namespace Doitsu.Ecommerce.Core.Services
                     {
                         return Option.None<OrderViewModel, string>("Không tìm thấy đơn hàng phù hợp để hủy đơn.");
                     }
-                    else if (!isInRoleAdmin && (OrderStatusEnum)order.Status != OrderStatusEnum.New)
+                    else if ((!isInRoleAdmin && (OrderStatusEnum)order.Status != OrderStatusEnum.New) ||
+                            (OrderStatusEnum)order.Status != OrderStatusEnum.Done)
                     {
-                        return Option.None<OrderViewModel, string>("Không phải đơn hàng mới nên không thể xóa.");
+                        return Option.None<OrderViewModel, string>($"Đơn hàng {orderCode} không phải là đơn hàng mới nên không thể xóa.");
                     }
                     else
                     {

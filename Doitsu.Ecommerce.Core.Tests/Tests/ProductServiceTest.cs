@@ -325,6 +325,15 @@ namespace Doitsu.Ecommerce.Core.Tests
                         }
                     }
                 };
+
+                foreach (var order in listOrders)
+                {
+                    await orderService.CreateSaleOrderWithOptionAsync(order);
+                }
+                foreach (var order in listOrders)
+                {
+                    await orderService.CreateSaleOrderWithOptionAsync(order);
+                }
                 foreach (var order in listOrders)
                 {
                     await orderService.CreateSaleOrderWithOptionAsync(order);
