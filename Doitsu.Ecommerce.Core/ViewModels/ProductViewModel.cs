@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using Doitsu.Ecommerce.Core.Data.Entities;
@@ -22,8 +22,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string ImageUrls { get; set; }
         public decimal Price { get; set; }
         public string Slug { get; set; }
-        public int? Sku { get; set; }
-        public ProductOptionViewModel ProductOption { get; set; }
+        public int? Sku { get; set; } 
+        public ICollection<ProductOptionViewModel> ProductOptions { get; set; }
     }
 
     public class ProductDetailWrapperViewModel
