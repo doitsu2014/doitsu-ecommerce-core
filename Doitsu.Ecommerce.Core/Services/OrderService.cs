@@ -57,7 +57,7 @@ namespace Doitsu.Ecommerce.Core.Services
             DateTime? toDate,
             string userPhone,
             string orderCode,
-            string productCode,
+            ProductFilterParamViewModel[] productFilter,
             OrderTypeEnum orderType);
 
 
@@ -72,7 +72,7 @@ namespace Doitsu.Ecommerce.Core.Services
         /// <param name="inverseOrders"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        Task<Option<OrderViewModel, string>> CreateSummaryOrderAsync(List<OrderViewModel> inverseOrders, int userId);
+        Task<Option<OrderViewModel, string>> CreateSummaryOrderAsync(CreateSummaryOrderViewModel inverseOrders, int userId);
 
         /// <summary>
         /// Get bytes array of Export Summary Excel
@@ -381,14 +381,17 @@ namespace Doitsu.Ecommerce.Core.Services
                                                                                       DateTime? toDate,
                                                                                       string userPhone,
                                                                                       string orderCode,
-                                                                                      string productCode,
+                                                                                      ProductFilterParamViewModel[] productFilter,
                                                                                       OrderTypeEnum orderType)
         {
-            var query = this.GetAllAsNoTracking().Include(o => o.OrderItems).ThenInclude(oi => oi.Product).AsQueryable();
+            var query = this.GetAllAsNoTracking()
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .AsQueryable();
+
             if (orderStatus.HasValue) query = query.Where(x => x.Status == (int)orderStatus.Value);
             if (!userPhone.IsNullOrEmpty()) query = query.Where(x => x.User.PhoneNumber.Contains(userPhone));
             if (!orderCode.IsNullOrEmpty()) query = query.Where(x => x.Code.Contains(orderCode));
-            if (!productCode.IsNullOrEmpty()) query = query.Where(x => x.OrderItems.Select(oi => oi.Product.Code).Any(pc => pc == productCode));
             if (fromDate.HasValue && fromDate != DateTime.MinValue)
             {
                 query = query.Where(x => x.CreatedDate >= fromDate.Value.StartOfDay());
@@ -397,8 +400,37 @@ namespace Doitsu.Ecommerce.Core.Services
                     query = query.Where(x => x.CreatedDate <= toDate.Value.EndOfDay());
                 }
             }
+
             query = query.Where(x => x.Type == orderType);
-            if (orderType == OrderTypeEnum.Summary) query.Include(o => o.InverseSummaryOrders);
+
+            if (orderType == OrderTypeEnum.Summary) query = query.Include(o => o.InverseSummaryOrders);
+
+            if (productFilter != null && productFilter.Length > 0)
+            {
+                var productIds = productFilter.Select(pf => pf.Id);
+                query = query.Where(o => o.OrderItems.Select(oi => oi.ProductId).Any(pi => productIds.Contains(pi)));
+
+                var productVariants = await this.DbContext
+                                                .ProductVariants
+                                                .Include(pv => pv.ProductVariantOptionValues)
+                                                .Where(pv => productIds.Contains(pv.ProductId))
+                                                .ToListAsync();
+
+                var productVariantIds = productVariants.Where(pv =>
+                {
+                    var productFilterParam = productFilter.First(pf => pf.Id == pv.ProductId);
+                    var selectedValueIds = productFilterParam.ProductOptions.Select(po => po.SelectedValueId).ToArray();
+                    var pvovIds = pv.ProductVariantOptionValues.Select(pvov => pvov.ProductOptionValueId).ToArray();
+                    return selectedValueIds.Length == 0 || selectedValueIds.All(svId => pvovIds.Contains(svId));
+                })
+                .Select(pv => (int?)pv.Id)
+                .ToImmutableArray();
+
+                if (productVariantIds != null && productVariantIds.Length > 0)
+                {
+                    query = query.Where(o => o.OrderItems.Select(oi => oi.ProductVariantId).Any(pvId => productVariantIds.Contains(pvId)));
+                }
+            }
 
             var result = await query
                 .ProjectTo<OrderDetailViewModel>(Mapper.ConfigurationProvider)
@@ -408,17 +440,17 @@ namespace Doitsu.Ecommerce.Core.Services
             return result.ToImmutableList();
         }
 
-        public async Task<Option<OrderViewModel, string>> CreateSummaryOrderAsync(List<OrderViewModel> inverseOrders, int userId)
+        public async Task<Option<OrderViewModel, string>> CreateSummaryOrderAsync(CreateSummaryOrderViewModel summaryOrder, int userId)
         {
             using (var transaction = await this.CreateTransactionAsync())
             {
-                return await (inverseOrders, userId).SomeNotNull()
+                return await (summaryOrder, userId).SomeNotNull()
                     .WithException(string.Empty)
                     .Filter(req => req.userId != 0, "Không tìm thấy thông tin người sử dụng tính năng tạo Đơn Tổng")
-                    .Filter(req => req.inverseOrders != null && req.inverseOrders.Count > 0, "Không tìm thấy dữ liệu để tạo Đơn Tổng")
+                    .Filter(req => req.summaryOrder != null && req.summaryOrder.Orders != null && req.summaryOrder.Orders.Count > 0, "Không tìm thấy dữ liệu để tạo Đơn Tổng")
                     .FlatMapAsync(async req =>
                     {
-                        var data = req.inverseOrders;
+                        var data = req.summaryOrder.Orders;
                         // Get New Order Ids From Client
                         var newOIds = data.Where(o => o.Status == (int)OrderStatusEnum.New).Select(o => o.Id).ToImmutableList();
                         // Filter on Db
@@ -429,8 +461,8 @@ namespace Doitsu.Ecommerce.Core.Services
                             o.Status = (int)OrderStatusEnum.Processing;
                             return o;
                         }).ToImmutableList();
-                        if (newOEntities.Count == 0) return Option.None<(ImmutableList<Orders> listNewDbOrders, int uId), string>("Các đơn hàng bạn chọn, không có đơn hàng nào phù hợp để tạo Đơn Tổng.");
-                        return Option.Some<(ImmutableList<Orders> listNewDbOrders, int uId), string>((listNewDbOrders: newOEntities, uId: req.userId));
+                        if (newOEntities.Count == 0) return Option.None<(ImmutableList<Orders> listNewDbOrders, int uId, string note), string>("Các đơn hàng bạn chọn, không có đơn hàng nào phù hợp để tạo Đơn Tổng.");
+                        return Option.Some<(ImmutableList<Orders> listNewDbOrders, int uId, string note), string>((listNewDbOrders: newOEntities, uId: req.userId, req.summaryOrder.Note));
                     })
                     .MapAsync(async transformedData =>
                     {
@@ -442,6 +474,7 @@ namespace Doitsu.Ecommerce.Core.Services
                             FinalPrice = transformedData.listNewDbOrders.Sum(newDbO => newDbO.FinalPrice),
                             TotalPrice = transformedData.listNewDbOrders.Sum(newDbO => newDbO.FinalPrice),
                             Status = (int)OrderStatusEnum.Processing,
+                            Note = transformedData.note,
                             Type = OrderTypeEnum.Summary,
                             InverseSummaryOrders = transformedData.listNewDbOrders
                         };

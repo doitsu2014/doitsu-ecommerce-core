@@ -22,7 +22,7 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string ImageUrls { get; set; }
         public decimal Price { get; set; }
         public string Slug { get; set; }
-        public int? Sku { get; set; } 
+        public int? Sku { get; set; }
         public ICollection<ProductOptionViewModel> ProductOptions { get; set; }
     }
 
@@ -204,5 +204,20 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public ProductOptionValueViewModel ProductOptionValue { get; set; }
     }
 
+    public class ProductFilterParamViewModel
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+        [JsonProperty("productOptions")]
+        public ProductOptionFilterParamViewModel[] ProductOptions { get; set; }
+    }
+
+    public class ProductOptionFilterParamViewModel
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+        [JsonProperty("selectedValueId")]
+        public int? SelectedValueId { get; set; }
+    }
 }
 

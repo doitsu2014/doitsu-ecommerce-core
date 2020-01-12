@@ -8,6 +8,11 @@ using Newtonsoft.Json;
 
 namespace Doitsu.Ecommerce.Core.ViewModels
 {
+    public class CreateSummaryOrderViewModel
+    {
+        public string Note { get; set; }
+        public List<OrderViewModel> Orders { get; set; }
+    }
     public class OrderViewModel : BaseViewModel<Orders>
     {
         public OrderViewModel()
