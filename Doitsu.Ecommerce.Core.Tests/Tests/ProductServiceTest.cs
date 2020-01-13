@@ -64,7 +64,6 @@ namespace Doitsu.Ecommerce.Core.Tests
             {
                 // Truncate data
                 var dbContext = webhost.Services.GetService<EcommerceDbContext>();
-                await dbContext.Database.EnsureCreatedAsync();
                 await dbContext.Database.MigrateAsync();
                 DatabaseHelper.TruncateAllTable(webhost, _poolKey);
                 DatabaseHelper.ReseedAllTable(webhost, _poolKey);
