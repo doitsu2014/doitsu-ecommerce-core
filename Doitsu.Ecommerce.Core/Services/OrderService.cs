@@ -345,9 +345,9 @@ namespace Doitsu.Ecommerce.Core.Services
                             orderItem.ProductId = productVariant.ProductId;
                             orderItem.Discount = productVariant.AnotherDiscount;
                             var subTotalPrice = DetectSubTotalPrice(productVariant, orderItem.SubTotalPrice);
-                            var subTotalQuantity = orderItem.SubTotalQuantity;
+                            orderItem.SubTotalPrice = subTotalPrice;
                             var discount = orderItem.Discount ?? 0;
-                            var price = subTotalPrice * subTotalQuantity;
+                            var price = subTotalPrice * orderItem.SubTotalQuantity;
                             orderItem.SubTotalFinalPrice = price - (price * ((decimal)discount) / 100);
                             orderItem.ProductId = productVariant.ProductId;
                             orderItem.ProductVariant = productVariant;
@@ -505,61 +505,100 @@ namespace Doitsu.Ecommerce.Core.Services
                     using (var package = new ExcelPackage())
                     {
                         var sheet = package.Workbook.Worksheets.Add(GetNormalizedOfType(OrderTypeEnum.Summary));
-                        var rowIndex = 1;
-                        sheet.Cells[rowIndex, 1].Value = $"Mã {GetNormalizedOfType(OrderTypeEnum.Summary)}";
-                        sheet.Cells[rowIndex++, 2].Value = summaryOrder.Code;
-                        sheet.Cells[rowIndex, 1].Value = "Tổng tiền";
-                        sheet.Cells[rowIndex++, 2].Value = summaryOrder.FinalPrice.GetVietnamDong();
-                        sheet.Cells[rowIndex, 1].Value = $"Ngày tạo";
-                        sheet.Cells[rowIndex++, 2].Value = summaryOrder.CreatedDate.ToString(Constants.DateTimeFormat.Default);
+                        var currentRowIndex = 1;
+                        sheet.Cells[currentRowIndex, 1].Value = $"Mã {GetNormalizedOfType(OrderTypeEnum.Summary)}";
+                        sheet.Cells[currentRowIndex++, 2].Value = summaryOrder.Code;
+                        sheet.Cells[currentRowIndex, 1].Value = "Tổng tiền";
+                        sheet.Cells[currentRowIndex++, 2].Value = summaryOrder.FinalPrice.GetVietnamDong();
+                        sheet.Cells[currentRowIndex, 1].Value = $"Ngày tạo";
+                        sheet.Cells[currentRowIndex++, 2].Value = summaryOrder.CreatedDate.ToString(Constants.DateTimeFormat.Default);
                         var excelRangeTitle = sheet.Cells[1, 1, 3, 2];
                         excelRangeTitle.Style.Font.Bold = true;
                         excelRangeTitle.Style.Font.Size = 14;
                         excelRangeTitle.AutoFitColumns();
 
-                        var headerColumnIndex = 1;
-                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Mã Đơn";
-                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Ngày tạo";
-                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Chi tiết";
-                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Người đặt hàng";
-                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Số điện thoại";
-                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Loại đơn hàng";
-                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Số tiền tạm tính";
-                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Giảm giá trên đơn hàng";
-                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Số lượng";
-                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Số tiền đã trả";
-                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Trạng thái";
-                        sheet.Cells[rowIndex, headerColumnIndex++].Value = "Ghi chú";
                         if (summaryOrder != null && summaryOrder.InverseSummaryOrders != null && summaryOrder.InverseSummaryOrders.Count > 0)
                         {
                             foreach (var o in summaryOrder.InverseSummaryOrders)
                             {
-                                ++rowIndex;
+                                // draw current summary order
+                                var firstRowIndex = currentRowIndex;
+                                var headerColumnIndex = 1;
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Mã Đơn";
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Loại đơn hàng";
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Ngày tạo";
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Trạng thái";
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Số điện thoại";
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Người đặt hàng";
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Thông tin thêm";
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Số tiền tạm tính";
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Giảm giá trên đơn hàng";
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Số lượng";
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Số tiền thực tế";
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Ghi chú";
+                                sheet.Cells[currentRowIndex, headerColumnIndex].Value = "Lý do hủy";
+                                var excelRangeHeader = sheet.Cells[currentRowIndex, 1, currentRowIndex, headerColumnIndex];
+                                excelRangeHeader.Style.Font.Bold = true;
+                                excelRangeHeader.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+
+                                ++currentRowIndex;
                                 var dataColumnIndex = 1;
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.Code;
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.CreatedDate.ToString(Constants.DateTimeFormat.Default);
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = GetNormalizedDescriptionOrder(o);
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.User.Fullname;
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.DeliveryPhone;
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = GetNormalizedOfType(o.Type);
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.TotalPrice.GetVietnamDong();
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = $"{o.Discount}%";
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.TotalQuantity;
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.FinalPrice.GetVietnamDong();
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = GetNormalizedOfStatus((OrderStatusEnum)o.Status);
-                                sheet.Cells[rowIndex, dataColumnIndex++].Value = o.Note;
+                                sheet.Cells[currentRowIndex, dataColumnIndex++].Value = o.Code;
+                                sheet.Cells[currentRowIndex, dataColumnIndex++].Value = GetNormalizedOfType(o.Type);
+                                sheet.Cells[currentRowIndex, dataColumnIndex++].Value = o.CreatedDate.ToString(Constants.DateTimeFormat.Default);
+                                sheet.Cells[currentRowIndex, dataColumnIndex++].Value = GetNormalizedOfStatus((OrderStatusEnum)o.Status);
+                                sheet.Cells[currentRowIndex, dataColumnIndex++].Value = o.DeliveryPhone;
+                                sheet.Cells[currentRowIndex, dataColumnIndex++].Value = o.User.Fullname;
+                                sheet.Cells[currentRowIndex, dataColumnIndex++].Value = GetNormalizedDynamicDescriptionOrder(o);
+                                sheet.Cells[currentRowIndex, dataColumnIndex++].Value = o.TotalPrice.GetVietnamDong();
+                                sheet.Cells[currentRowIndex, dataColumnIndex++].Value = $"{o.Discount}%";
+                                sheet.Cells[currentRowIndex, dataColumnIndex++].Value = o.TotalQuantity;
+                                sheet.Cells[currentRowIndex, dataColumnIndex++].Value = o.FinalPrice.GetVietnamDong();
+                                sheet.Cells[currentRowIndex, dataColumnIndex++].Value = o.Note;
+                                sheet.Cells[currentRowIndex, dataColumnIndex++].Value = o.CancelNote;
+
+                                var excelRangeAll = sheet.Cells[firstRowIndex, 1, currentRowIndex, headerColumnIndex];
+                                excelRangeAll.AutoFitColumns();
+                                excelRangeAll.Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                                excelRangeAll.Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                                excelRangeAll.Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                                excelRangeAll.Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+
+                                // draw inverse summary orders
+                                ++currentRowIndex;
+                                firstRowIndex = currentRowIndex;
+                                headerColumnIndex = 1;
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Tên sản phẩm";
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Sku";
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Đặc tính sản phẩm";
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Giá trị sản phẩm";
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Giảm giá trên sản phẩm";
+                                sheet.Cells[currentRowIndex, headerColumnIndex++].Value = "Số lượng";
+                                sheet.Cells[currentRowIndex, headerColumnIndex].Value = "Số tiền thực tế";
+                                excelRangeHeader = sheet.Cells[currentRowIndex, 1, currentRowIndex, headerColumnIndex];
+                                excelRangeHeader.Style.Font.Bold = true;
+                                excelRangeHeader.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                                foreach (var item in o.OrderItems)
+                                {
+                                    ++currentRowIndex;
+                                    dataColumnIndex = 1;
+                                    sheet.Cells[currentRowIndex, dataColumnIndex++].Value = item.Product.Name;
+                                    sheet.Cells[currentRowIndex, dataColumnIndex++].Value = item.ProductVariant?.Sku;
+                                    sheet.Cells[currentRowIndex, dataColumnIndex++].Value = GetNormalizedOptionValueDescriptionOrder(item);
+                                    sheet.Cells[currentRowIndex, dataColumnIndex++].Value = item.SubTotalPrice.GetVietnamDong();
+                                    sheet.Cells[currentRowIndex, dataColumnIndex++].Value = $"{item.Discount}%";
+                                    sheet.Cells[currentRowIndex, dataColumnIndex++].Value = item.SubTotalQuantity;
+                                    sheet.Cells[currentRowIndex, dataColumnIndex].Value = item.SubTotalFinalPrice.GetVietnamDong();
+                                }
+                                excelRangeAll = sheet.Cells[firstRowIndex, 1, currentRowIndex, headerColumnIndex];
+                                excelRangeAll.AutoFitColumns();
+                                excelRangeAll.Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                                excelRangeAll.Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                                excelRangeAll.Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                                excelRangeAll.Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                                currentRowIndex += 2;
                             }
                         }
-
-                        var excelRangeHeader = sheet.Cells[4, 1, 4, headerColumnIndex - 1];
-                        excelRangeHeader.Style.Font.Bold = true;
-                        excelRangeHeader.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
-                        var excelRangeAll = sheet.Cells[4, 1, rowIndex, headerColumnIndex - 1];
-                        excelRangeAll.AutoFitColumns();
-                        excelRangeAll.Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
-                        excelRangeAll.Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
-                        excelRangeAll.Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
-                        excelRangeAll.Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
                         return package.GetAsByteArray();
                     }
                 });
@@ -758,34 +797,34 @@ namespace Doitsu.Ecommerce.Core.Services
             };
         }
 
-        private string GetNormalizedDescriptionOrder(Orders order)
+        private string GetNormalizedDynamicDescriptionOrder(Orders order)
         {
-            if (order == null) return "";
+            if (order == null) return string.Empty;
             else
             {
-                var orderItems = order.OrderItems;
-                if (orderItems == null || orderItems.Count() <= 0) return "";
-                else
-                {
-                    var messages = orderItems.Select(oi =>
-                        {
-                            var message = "";
-                            if (oi.Product != null)
-                            {
-                                message += $"- Sản phẩm: {oi.Product.Name}, giá tiền: {oi.SubTotalFinalPrice.GetVietnamDong()}, giảm giá: {oi.Discount}%, số lượng: {oi.SubTotalQuantity}";
-                            }
-                            return message;
-                        })
-                        .Append($"- Ưu tiên: {order.Priority}");
-                    if (!order.Dynamic01.IsNullOrEmpty()) messages = messages.Append($"- {order.Dynamic01}");
-                    if (!order.Dynamic02.IsNullOrEmpty()) messages = messages.Append($"- {order.Dynamic02}");
-                    if (!order.Dynamic03.IsNullOrEmpty()) messages = messages.Append($"- {order.Dynamic03}");
-                    if (!order.Dynamic04.IsNullOrEmpty()) messages = messages.Append($"- {order.Dynamic04}");
-                    if (!order.Dynamic05.IsNullOrEmpty()) messages = messages.Append($"- {order.Dynamic05}");
-
-                    return $"'{messages.Aggregate((x, y) => $"{x}\n{y}")}";
-                }
+                var messages = new List<string>();
+                if (!order.Dynamic01.IsNullOrEmpty()) messages.Add($"{order.Dynamic01}");
+                if (!order.Dynamic02.IsNullOrEmpty()) messages.Add($"{order.Dynamic02}");
+                if (!order.Dynamic03.IsNullOrEmpty()) messages.Add($"{order.Dynamic03}");
+                if (!order.Dynamic04.IsNullOrEmpty()) messages.Add($"{order.Dynamic04}");
+                if (!order.Dynamic05.IsNullOrEmpty()) messages.Add($"{order.Dynamic05}");
+                return messages.Count > 0 ? messages.Aggregate((x, y) => $"{x}, {y}") : string.Empty;
             }
+        }
+
+        private string GetNormalizedOptionValueDescriptionOrder(OrderItems item)
+        {
+            if (item.ProductVariant?.ProductVariantOptionValues != null
+                    && item.ProductVariant?.ProductVariantOptionValues?.Count > 0)
+            {
+                var optionValues = new List<string>();
+                foreach (var ov in item.ProductVariant.ProductVariantOptionValues)
+                {
+                    optionValues.Add($"{ov.ProductOptionValue.ProductOption.Name}: {ov.ProductOptionValue.Value}");
+                }
+                return optionValues.Count > 0 ? optionValues.Aggregate((x, y) => $"{x}\n {y}") : string.Empty;
+            }
+            return string.Empty;
         }
 
         #endregion

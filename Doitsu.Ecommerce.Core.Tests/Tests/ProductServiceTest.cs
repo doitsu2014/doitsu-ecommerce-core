@@ -324,16 +324,20 @@ namespace Doitsu.Ecommerce.Core.Tests
                         }
                     }
                 };
-
-                foreach (var order in listOrders)
+                
+       
+                var orders1 = listOrders.ToImmutableList();
+                foreach (var order in orders1)
                 {
                     await orderService.CreateSaleOrderWithOptionAsync(order);
                 }
-                foreach (var order in listOrders)
+                var orders2 = listOrders.ToImmutableList();
+                foreach (var order in orders2)
                 {
                     await orderService.CreateSaleOrderWithOptionAsync(order);
                 }
-                foreach (var order in listOrders)
+                var orders3 = listOrders.ToImmutableList();
+                foreach (var order in orders3)
                 {
                     await orderService.CreateSaleOrderWithOptionAsync(order);
                 }
