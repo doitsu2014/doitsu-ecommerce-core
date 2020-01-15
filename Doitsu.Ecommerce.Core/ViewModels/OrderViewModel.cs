@@ -8,6 +8,21 @@ using Newtonsoft.Json;
 
 namespace Doitsu.Ecommerce.Core.ViewModels
 {
+    public class ExportOrderToExcel
+    {
+        public static ExportOrderToExcel CreateInstance(byte[] content, string fileDownloadName)
+        {
+            return new ExportOrderToExcel
+            {
+                Content = content,
+                FileDownloadName = fileDownloadName
+            };
+        }
+
+        public byte[] Content { get; set; }
+        public string FileDownloadName { get; set; }
+        public string ContentType { get => Constants.FileExtension.EXCEL; }
+    }
     public class CreateSummaryOrderViewModel
     {
         public string Note { get; set; }

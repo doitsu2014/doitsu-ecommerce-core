@@ -79,7 +79,7 @@ namespace Doitsu.Ecommerce.Core.Services
         /// </summary>
         /// <param name="summaryOrderId"></param>
         /// <returns></returns>
-        Task<Option<byte[], string>> GetSummaryOrderAsExcelBytesAsync(int summaryOrderId);
+        Task<Option<ExportOrderToExcel, string>> GetSummaryOrderAsExcelBytesAsync(int summaryOrderId);
 
         /// <summary>
         /// Complete the summary order and included different cancelled orders.
@@ -486,7 +486,7 @@ namespace Doitsu.Ecommerce.Core.Services
             }
         }
 
-        public Task<Option<byte[], string>> GetSummaryOrderAsExcelBytesAsync(int summaryOrderId)
+        public Task<Option<ExportOrderToExcel, string>> GetSummaryOrderAsExcelBytesAsync(int summaryOrderId)
         {
             Expression<Func<Orders, bool>> filterSummaryOrderWithId = (o) => o.Id == summaryOrderId && o.Type == OrderTypeEnum.Summary && o.Status == (int)OrderStatusEnum.Processing;
             return summaryOrderId.SomeNotNull()
@@ -597,7 +597,7 @@ namespace Doitsu.Ecommerce.Core.Services
                                 currentRowIndex += 2;
                             }
                         }
-                        return package.GetAsByteArray();
+                        return ExportOrderToExcel.CreateInstance(package.GetAsByteArray(), $"Phone-{summaryOrder.CreatedDate.ToString("dd_MM_yyyy")}-{summaryOrder.Code}.xlsx");
                     }
                 });
         }
