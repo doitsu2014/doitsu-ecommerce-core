@@ -16,10 +16,10 @@ using Doitsu.Service.Core.Extensions;
 using Doitsu.Utils;
 
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.Extensions.Logging;
 using Optional;
 using Optional.Async;
-
+using Serilog;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -33,6 +33,38 @@ namespace Doitsu.Ecommerce.Core.Tests
         public ProductServiceTest(ProductServiceFixture fixture, ITestOutputHelper testOutputHelper) : base(fixture, testOutputHelper)
         {
             _poolKey = _fixture.ServicePoolKey;
+        }
+
+        [System.Obsolete]
+        [Fact]
+        private async Task Test_GetProductVariantIdsFromFilterParamsAsync()
+        {
+            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            {
+                // Add Products
+                var productService = webhost.Services.GetService<IProductService>();
+                var logger = webhost.Services.GetService<ILogger<ProductServiceTest>>();
+                var productFilterParams = new List<ProductFilterParamViewModel>()
+                {
+                    new ProductFilterParamViewModel()
+                    {
+                        Id = 1,
+                        ProductOptions = (new List<ProductOptionFilterParamViewModel>()
+                        {
+                            new ProductOptionFilterParamViewModel() {
+                                Id = 1,
+                                SelectedValueId = 1
+                            },
+                            new ProductOptionFilterParamViewModel() {
+                                Id = 2,
+                                SelectedValueId = 4
+                            }
+                        }).ToArray()
+                    }
+                }.ToArray();
+                var result = await productService.GetProductVariantIdsFromProductFilterParamsAsync(productFilterParams);
+                Assert.True(result.Count() == 1);
+            }
         }
 
         [System.Obsolete]

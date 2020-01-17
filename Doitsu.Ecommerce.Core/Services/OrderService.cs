@@ -410,22 +410,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 var productIds = productFilter.Select(pf => pf.Id);
                 query = query.Where(o => o.OrderItems.Select(oi => oi.ProductId).Any(pi => productIds.Contains(pi)));
 
-                var productVariants = await this.DbContext
-                                                .ProductVariants
-                                                .Include(pv => pv.ProductVariantOptionValues)
-                                                .Where(pv => productIds.Contains(pv.ProductId))
-                                                .ToListAsync();
-
-                var productVariantIds = productVariants.Where(pv =>
-                {
-                    var productFilterParam = productFilter.First(pf => pf.Id == pv.ProductId);
-                    var selectedValueIds = productFilterParam.ProductOptions.Select(po => po.SelectedValueId).ToArray();
-                    var pvovIds = pv.ProductVariantOptionValues.Select(pvov => pvov.ProductOptionValueId).ToArray();
-                    return selectedValueIds.Length == 0 || selectedValueIds.All(svId => pvovIds.Contains(svId));
-                })
-                .Select(pv => (int?)pv.Id)
-                .ToImmutableArray();
-
+                var productVariantIds = await productService.GetProductVariantIdsFromProductFilterParamsAsync(productFilter);
                 if (productVariantIds != null && productVariantIds.Length > 0)
                 {
                     query = query.Where(o => o.OrderItems.Select(oi => oi.ProductVariantId).Any(pvId => productVariantIds.Contains(pvId)));

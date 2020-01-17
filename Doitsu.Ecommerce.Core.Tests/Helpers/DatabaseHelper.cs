@@ -119,7 +119,6 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
             ");
         }
 
-
         public static int ExecuteNonQuery(string connectionString, string command)
         {
             using (var myConn = new SqlConnection(connectionString))
