@@ -336,7 +336,43 @@ namespace Doitsu.Ecommerce.Core.Tests
                                     },
                                     new ProductOptionValueViewModel()
                                     {
+                                        Id = 4
+                                    },
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 6
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    new CreateOrderWithOptionViewModel()
+                    {
+                        UserId = userId,
+                        DeliveryPhone = "0946680600",
+                        Priority = OrderPriorityEnum.FivePercent,
+                        Dynamic01 = "Mã app ...",
+                        Note = "Ghi chú sản phẩm 01",
+                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                        {
+                            new CreateOrderItemWithOptionViewModel()
+                            {
+                                SubTotalQuantity = 1,
+                                SubTotalPrice = 100000,
+                                SubTotalFinalPrice = 100000,
+                                ProductOptionValues = new List<ProductOptionValueViewModel>()
+                                {
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 2
+                                    },
+                                    new ProductOptionValueViewModel()
+                                    {
                                         Id = 5
+                                    },
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 6
                                     }
                                 }
                             }
@@ -359,7 +395,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                                 {
                                     new ProductOptionValueViewModel()
                                     {
-                                        Id = 6
+                                        Id = 9
                                     }
                                 }
                             }
@@ -402,7 +438,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                                 {
                                     new ProductOptionValueViewModel()
                                     {
-                                        Id = 6
+                                        Id = 8
                                     }
                                 }
                             }
@@ -425,7 +461,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                                 {
                                     new ProductOptionValueViewModel()
                                     {
-                                        Id = 6
+                                        Id = 8
                                     }
                                 }
                             }
@@ -445,7 +481,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                                 {
                                     new ProductOptionValueViewModel()
                                     {
-                                        Id = 12
+                                        Id = 16
                                     }
                                 }
                             }

@@ -94,6 +94,21 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                             Value = "Trả sau"
                         }
                     }
+                },
+                new ProductOptionViewModel()
+                {
+                    Name = "Có mật khẩu ứng dụng",
+                    ProductOptionValues = new List<ProductOptionValueViewModel>()
+                    {
+                        new  ProductOptionValueViewModel()
+                        {
+                            Value = "Có"
+                        },
+                        new  ProductOptionValueViewModel()
+                        {
+                            Value = "Không"
+                        }
+                    }
                 }
             };
 
