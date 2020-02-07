@@ -128,7 +128,7 @@ namespace Doitsu.Ecommerce.Core.Tests
 
                 // Add Promotion Detail
                 var promotionDetailService = webhost.Services.GetService<IPromotionDetailService>();
-                var listProductVariantOfProduct01 = (await productService.Get(pro => pro.Code == "PRODUCT01")
+                var listProductVariantOfProduct01 = (await productService.Get(pro => pro.Code == "GACH-CUOC")
                         .Include(p => p.ProductVariants)
                         .FirstOrDefaultAsync())
                     .ProductVariants
@@ -136,7 +136,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                     .ToImmutableList();
                 productVariantService.UpdateRange(listProductVariantOfProduct01);
 
-                var listProductVariantOfProduct02 = (await productService.Get(pro => pro.Code == "PRODUCT02")
+                var listProductVariantOfProduct02 = (await productService.Get(pro => pro.Code == "BTK")
                         .Include(p => p.ProductVariants)
                         .FirstOrDefaultAsync())
                     .ProductVariants
@@ -144,7 +144,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                     .ToImmutableList();
                 productVariantService.UpdateRange(listProductVariantOfProduct02);
 
-                var listProductVariantIdOfProduct03 = (await productService.Get(pro => pro.Code == "PRODUCT03")
+                var listProductVariantIdOfProduct03 = (await productService.Get(pro => pro.Code == "SMS")
                         .Include(p => p.ProductVariants)
                         .ThenInclude(p => p.ProductVariantOptionValues)
                         .ThenInclude(p => p.ProductOptionValue)
