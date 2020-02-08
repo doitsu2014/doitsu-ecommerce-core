@@ -16,10 +16,10 @@ using Doitsu.Service.Core.Extensions;
 using Doitsu.Utils;
 
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.Extensions.Logging;
 using Optional;
 using Optional.Async;
-
+using Serilog;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -33,6 +33,38 @@ namespace Doitsu.Ecommerce.Core.Tests
         public ProductServiceTest(ProductServiceFixture fixture, ITestOutputHelper testOutputHelper) : base(fixture, testOutputHelper)
         {
             _poolKey = _fixture.ServicePoolKey;
+        }
+
+        [System.Obsolete]
+        [Fact]
+        private async Task Test_GetProductVariantIdsFromFilterParamsAsync()
+        {
+            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            {
+                // Add Products
+                var productService = webhost.Services.GetService<IProductService>();
+                var logger = webhost.Services.GetService<ILogger<ProductServiceTest>>();
+                var productFilterParams = new List<ProductFilterParamViewModel>()
+                {
+                    new ProductFilterParamViewModel()
+                    {
+                        Id = 1,
+                        ProductOptions = (new List<ProductOptionFilterParamViewModel>()
+                        {
+                            new ProductOptionFilterParamViewModel() {
+                                Id = 1,
+                                SelectedValueId = 1
+                            },
+                            new ProductOptionFilterParamViewModel() {
+                                Id = 2,
+                                SelectedValueId = 4
+                            }
+                        }).ToArray()
+                    }
+                }.ToArray();
+                var result = await productService.GetProductVariantIdsFromProductFilterParamsAsync(productFilterParams);
+                Assert.True(result.Count() == 1);
+            }
         }
 
         [System.Obsolete]
@@ -96,7 +128,7 @@ namespace Doitsu.Ecommerce.Core.Tests
 
                 // Add Promotion Detail
                 var promotionDetailService = webhost.Services.GetService<IPromotionDetailService>();
-                var listProductVariantOfProduct01 = (await productService.Get(pro => pro.Code == "PRODUCT01")
+                var listProductVariantOfProduct01 = (await productService.Get(pro => pro.Code == "GACH-CUOC")
                         .Include(p => p.ProductVariants)
                         .FirstOrDefaultAsync())
                     .ProductVariants
@@ -104,7 +136,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                     .ToImmutableList();
                 productVariantService.UpdateRange(listProductVariantOfProduct01);
 
-                var listProductVariantOfProduct02 = (await productService.Get(pro => pro.Code == "PRODUCT02")
+                var listProductVariantOfProduct02 = (await productService.Get(pro => pro.Code == "BTK")
                         .Include(p => p.ProductVariants)
                         .FirstOrDefaultAsync())
                     .ProductVariants
@@ -112,7 +144,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                     .ToImmutableList();
                 productVariantService.UpdateRange(listProductVariantOfProduct02);
 
-                var listProductVariantIdOfProduct03 = (await productService.Get(pro => pro.Code == "PRODUCT03")
+                var listProductVariantIdOfProduct03 = (await productService.Get(pro => pro.Code == "SMS")
                         .Include(p => p.ProductVariants)
                         .ThenInclude(p => p.ProductVariantOptionValues)
                         .ThenInclude(p => p.ProductOptionValue)
@@ -129,6 +161,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                         else if (x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK100") x.AnotherPrice = 100000;
                         else if (x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK200") x.AnotherPrice = 200000;
                         else if (x.ProductVariantOptionValues.FirstOrDefault().ProductOptionValue.Value == "DK500") x.AnotherPrice = 500000;
+                        x.AnotherDiscount = 25;
                         return x;
                     })
                     .ToImmutableList();
@@ -183,147 +216,19 @@ namespace Doitsu.Ecommerce.Core.Tests
                 var userManager = webhost.Services.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
                 var orderService = webhost.Services.GetService<IOrderService>();
                 var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
-                var listOrders = new List<CreateOrderWithOptionViewModel>()
+
+                var orders1 = PrepareOrders(user.Id);
+                foreach (var order in orders1)
                 {
-                    new CreateOrderWithOptionViewModel()
-                    {
-                        UserId = user.Id,
-                        DeliveryPhone = "0946680600",
-                        Priority = OrderPriorityEnum.FivePercent,
-                        Dynamic01 = "Mã app ...",
-                        Note = "Ghi chú sản phẩm 01",
-                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
-                        {
-                            new CreateOrderItemWithOptionViewModel()
-                            {
-                                SubTotalQuantity = 1,
-                                SubTotalPrice = 100000,
-                                SubTotalFinalPrice = 100000,
-                                ProductOptionValues = new List<ProductOptionValueViewModel>()
-                                {
-                                    new ProductOptionValueViewModel()
-                                    {
-                                        Id = 1
-                                    },
-                                    new ProductOptionValueViewModel()
-                                    {
-                                        Id = 5
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    new CreateOrderWithOptionViewModel()
-                    {
-                        UserId = user.Id,
-                        DeliveryPhone = "0946680600",
-                        Dynamic01 = "",
-                        Note = "Ghi chú sản phẩm 02",
-                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
-                        {
-                            new CreateOrderItemWithOptionViewModel()
-                            {
-                                SubTotalQuantity = 1,
-                                SubTotalPrice = 500000,
-                                SubTotalFinalPrice = 500000,
-                                ProductOptionValues = new List<ProductOptionValueViewModel>()
-                                {
-                                    new ProductOptionValueViewModel()
-                                    {
-                                        Id = 6
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    new CreateOrderWithOptionViewModel()
-                    {
-                        UserId = user.Id,
-                        Dynamic01 = "VNG DK100 VLTK 04 05",
-                        Note = "Ghi chú sản phẩm 03",
-                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
-                        {
-                            new CreateOrderItemWithOptionViewModel()
-                            {
-                                SubTotalQuantity = 5,
-                                ProductOptionValues = new List<ProductOptionValueViewModel>()
-                                {
-                                    new ProductOptionValueViewModel()
-                                    {
-                                        Id = 12
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    new CreateOrderWithOptionViewModel()
-                    {
-                        UserId = user.Id,
-                        DeliveryPhone = "0946680600",
-                        Dynamic01 = "",
-                        Note = "Ghi chú sản phẩm 02",
-                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
-                        {
-                            new CreateOrderItemWithOptionViewModel()
-                            {
-                                SubTotalQuantity = 1,
-                                SubTotalPrice = 400000,
-                                SubTotalFinalPrice = 400000,
-                                ProductOptionValues = new List<ProductOptionValueViewModel>()
-                                {
-                                    new ProductOptionValueViewModel()
-                                    {
-                                        Id = 6
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    new CreateOrderWithOptionViewModel()
-                    {
-                        UserId = user.Id,
-                        DeliveryPhone = "0946680600",
-                        Dynamic01 = "",
-                        Note = "Ghi chú sản phẩm 02",
-                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
-                        {
-                            new CreateOrderItemWithOptionViewModel()
-                            {
-                                SubTotalQuantity = 1,
-                                SubTotalPrice = 300000,
-                                SubTotalFinalPrice = 300000,
-                                ProductOptionValues = new List<ProductOptionValueViewModel>()
-                                {
-                                    new ProductOptionValueViewModel()
-                                    {
-                                        Id = 6
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    new CreateOrderWithOptionViewModel()
-                    {
-                        UserId = user.Id,
-                        Dynamic01 = "VNG DK100 VLTK 03 06",
-                        Note = "Ghi chú sản phẩm 03",
-                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
-                        {
-                            new CreateOrderItemWithOptionViewModel()
-                            {
-                                SubTotalQuantity = 10,
-                                ProductOptionValues = new List<ProductOptionValueViewModel>()
-                                {
-                                    new ProductOptionValueViewModel()
-                                    {
-                                        Id = 12
-                                    }
-                                }
-                            }
-                        }
-                    }
-                };
-                foreach (var order in listOrders)
+                    await orderService.CreateSaleOrderWithOptionAsync(order);
+                }
+                var orders2 = PrepareOrders(user.Id);
+                foreach (var order in orders2)
+                {
+                    await orderService.CreateSaleOrderWithOptionAsync(order);
+                }
+                var orders3 = PrepareOrders(user.Id);
+                foreach (var order in orders3)
                 {
                     await orderService.CreateSaleOrderWithOptionAsync(order);
                 }
@@ -404,6 +309,186 @@ namespace Doitsu.Ecommerce.Core.Tests
                 await productService.DeleteProductOptionByKeyAsync(firstProduct.Id, firstProduct.ProductOptions.First().Id);
                 Assert.True(true);
             }
+        }
+        private List<CreateOrderWithOptionViewModel> PrepareOrders(int userId)
+        {
+            var listOrders = new List<CreateOrderWithOptionViewModel>()
+                {
+                    new CreateOrderWithOptionViewModel()
+                    {
+                        UserId = userId,
+                        DeliveryPhone = "0946680600",
+                        Priority = OrderPriorityEnum.FivePercent,
+                        Dynamic01 = "Mã app ...",
+                        Note = "Ghi chú sản phẩm 01",
+                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                        {
+                            new CreateOrderItemWithOptionViewModel()
+                            {
+                                SubTotalQuantity = 1,
+                                SubTotalPrice = 100000,
+                                SubTotalFinalPrice = 100000,
+                                ProductOptionValues = new List<ProductOptionValueViewModel>()
+                                {
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 1
+                                    },
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 4
+                                    },
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 6
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    new CreateOrderWithOptionViewModel()
+                    {
+                        UserId = userId,
+                        DeliveryPhone = "0946680600",
+                        Priority = OrderPriorityEnum.FivePercent,
+                        Dynamic01 = "Mã app ...",
+                        Note = "Ghi chú sản phẩm 01",
+                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                        {
+                            new CreateOrderItemWithOptionViewModel()
+                            {
+                                SubTotalQuantity = 1,
+                                SubTotalPrice = 100000,
+                                SubTotalFinalPrice = 100000,
+                                ProductOptionValues = new List<ProductOptionValueViewModel>()
+                                {
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 2
+                                    },
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 5
+                                    },
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 6
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    new CreateOrderWithOptionViewModel()
+                    {
+                        UserId = userId,
+                        DeliveryPhone = "0946680600",
+                        Dynamic01 = "",
+                        Note = "Ghi chú sản phẩm 02",
+                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                        {
+                            new CreateOrderItemWithOptionViewModel()
+                            {
+                                SubTotalQuantity = 1,
+                                SubTotalPrice = 500000,
+                                SubTotalFinalPrice = 500000,
+                                ProductOptionValues = new List<ProductOptionValueViewModel>()
+                                {
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 9
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    new CreateOrderWithOptionViewModel()
+                    {
+                        UserId = userId,
+                        Dynamic01 = "VNG DK20 VLTK 04 05",
+                        Note = "Ghi chú sản phẩm 03",
+                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                        {
+                            new CreateOrderItemWithOptionViewModel()
+                            {
+                                SubTotalQuantity = 5,
+                                ProductOptionValues = new List<ProductOptionValueViewModel>()
+                                {
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 12
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    new CreateOrderWithOptionViewModel()
+                    {
+                        UserId = userId,
+                        DeliveryPhone = "0946680600",
+                        Dynamic01 = "",
+                        Note = "Ghi chú sản phẩm 02",
+                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                        {
+                            new CreateOrderItemWithOptionViewModel()
+                            {
+                                SubTotalQuantity = 1,
+                                SubTotalPrice = 400000,
+                                SubTotalFinalPrice = 400000,
+                                ProductOptionValues = new List<ProductOptionValueViewModel>()
+                                {
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 8
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    new CreateOrderWithOptionViewModel()
+                    {
+                        UserId = userId,
+                        DeliveryPhone = "0946680600",
+                        Dynamic01 = "",
+                        Note = "Ghi chú sản phẩm 02",
+                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                        {
+                            new CreateOrderItemWithOptionViewModel()
+                            {
+                                SubTotalQuantity = 1,
+                                SubTotalPrice = 300000,
+                                SubTotalFinalPrice = 300000,
+                                ProductOptionValues = new List<ProductOptionValueViewModel>()
+                                {
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 8
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    new CreateOrderWithOptionViewModel()
+                    {
+                        UserId = userId,
+                        Dynamic01 = "VNG DK500 VLTK 03 06",
+                        Note = "Ghi chú sản phẩm 03",
+                        OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                        {
+                            new CreateOrderItemWithOptionViewModel()
+                            {
+                                SubTotalQuantity = 10,
+                                ProductOptionValues = new List<ProductOptionValueViewModel>()
+                                {
+                                    new ProductOptionValueViewModel()
+                                    {
+                                        Id = 16
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+            return listOrders;
         }
     }
 }

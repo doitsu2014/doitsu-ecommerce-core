@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using Doitsu.Ecommerce.Core.Data.Entities;
@@ -23,7 +23,7 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public decimal Price { get; set; }
         public string Slug { get; set; }
         public int? Sku { get; set; }
-        public ProductOptionViewModel ProductOption { get; set; }
+        public ICollection<ProductOptionViewModel> ProductOptions { get; set; }
     }
 
     public class ProductDetailWrapperViewModel
@@ -108,8 +108,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string CategorySlug { get; set; }
         [JsonProperty("categoryName")]
         public string CategoryName { get; set; }
-        [JsonProperty("productOption")]
-        public ProductOptionViewModel ProductOption { get; set; }
+        [JsonProperty("productOptions")]
+        public ICollection<ProductOptionViewModel> ProductOptions { get; set; }
         [JsonProperty("categoryRecursive")]
         public CategoryWithParentViewModel Cate { get; set; }
     }
@@ -204,5 +204,20 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public ProductOptionValueViewModel ProductOptionValue { get; set; }
     }
 
+    public class ProductFilterParamViewModel
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+        [JsonProperty("productOptions")]
+        public ProductOptionFilterParamViewModel[] ProductOptions { get; set; }
+    }
+
+    public class ProductOptionFilterParamViewModel
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+        [JsonProperty("selectedValueId")]
+        public int? SelectedValueId { get; set; }
+    }
 }
 

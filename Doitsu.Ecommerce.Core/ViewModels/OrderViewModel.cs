@@ -8,6 +8,26 @@ using Newtonsoft.Json;
 
 namespace Doitsu.Ecommerce.Core.ViewModels
 {
+    public class ExportOrderToExcel
+    {
+        public static ExportOrderToExcel CreateInstance(byte[] content, string fileDownloadName)
+        {
+            return new ExportOrderToExcel
+            {
+                Content = content,
+                FileDownloadName = fileDownloadName
+            };
+        }
+
+        public byte[] Content { get; set; }
+        public string FileDownloadName { get; set; }
+        public string ContentType { get => Constants.FileExtension.EXCEL; }
+    }
+    public class CreateSummaryOrderViewModel
+    {
+        public string Note { get; set; }
+        public List<OrderViewModel> Orders { get; set; }
+    }
     public class OrderViewModel : BaseViewModel<Orders>
     {
         public OrderViewModel()
@@ -58,6 +78,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string Dynamic05 { get; set; }
         [JsonProperty("note")]
         public string Note { get; set; }
+        [JsonProperty("cancelNote")]
+        public string CancelNote { get; set; }
         [JsonProperty("priority")]
         public OrderPriorityEnum? Priority { get; set; }
         [JsonProperty("type")]
@@ -113,6 +135,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string Dynamic05 { get; set; }
         [JsonProperty("note")]
         public string Note { get; set; }
+        [JsonProperty("cancelNote")]
+        public string CancelNote { get; set; }
         [JsonProperty("priority")]
         public OrderPriorityEnum? Priority { get; set; }
         [JsonProperty("type")]

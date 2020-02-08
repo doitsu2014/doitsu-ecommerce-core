@@ -94,12 +94,27 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                             Value = "Trả sau"
                         }
                     }
+                },
+                new ProductOptionViewModel()
+                {
+                    Name = "Có mật khẩu ứng dụng",
+                    ProductOptionValues = new List<ProductOptionValueViewModel>()
+                    {
+                        new  ProductOptionValueViewModel()
+                        {
+                            Value = "Có"
+                        },
+                        new  ProductOptionValueViewModel()
+                        {
+                            Value = "Không"
+                        }
+                    }
                 }
             };
 
             var product1 = new CreateProductViewModel()
             {
-                Code = "PRODUCT01",
+                Code = "GACH-CUOC",
                 Name = "NẠP TRẢ TRƯỚC & TRẢ SAU",
                 Slug = "nap-the-tra-truoc-va-tra-sau",
                 Price = 0,
@@ -132,7 +147,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
 
             var product2 = new CreateProductViewModel()
             {
-                Code = "PRODUCT02",
+                Code = "BTK",
                 Name = "NẠP TIỀN NHANH",
                 Slug = "nap-tien-nhanh",
                 Price = 0,
@@ -177,7 +192,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
 
             var product3 = new CreateProductViewModel()
             {
-                Code = "PRODUCT03",
+                Code = "SMS",
                 Name = "NẠP GAME SMS",
                 Slug = "nap-game-sms",
                 Price = 0,
