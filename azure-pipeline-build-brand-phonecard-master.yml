@@ -1,0 +1,41 @@
+# ASP.NET Core
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+trigger:
+    - brand/phonecard/master
+    
+pool:
+    name: 'Doitsu Technology Linux Pipeplies'
+    vmImage: 'Doitsu.Technology.Ubuntu.Agent'
+
+variables:
+    buildConfiguration: 'Release'
+
+steps:
+- task: DotNetCoreCLI@2
+    displayName: 'dotnet build'
+    inputs:
+    command: 'build'
+    arguments: '--configuration $(buildConfiguration)'
+    projects: 'Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj'
+
+- task: DotNetCoreCLI@2
+    displayName: "dotnet pack"
+    inputs:
+    command: 'pack'
+    arguments: '--configuration $(buildConfiguration)'
+    packagesToPack: 'Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj'
+    nobuild: true
+    versioningScheme: 'off'
+
+- task: NuGetCommand@2
+    displayName: 'nuget push'
+    inputs:
+    command: 'push'
+    feedsToUse: 'select'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: 'Doitsu.Technology'
+    versioningScheme: 'off'
+    allowPackageConflicts: true
