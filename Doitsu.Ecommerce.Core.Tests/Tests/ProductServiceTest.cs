@@ -404,7 +404,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                     new CreateOrderWithOptionViewModel()
                     {
                         UserId = userId,
-                        Dynamic01 = "VNG DK100 VLTK 04 05",
+                        Dynamic01 = "VNG DK20 VLTK 04 05",
                         Note = "Ghi chú sản phẩm 03",
                         OrderItems = new List<CreateOrderItemWithOptionViewModel>()
                         {
@@ -470,7 +470,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                     new CreateOrderWithOptionViewModel()
                     {
                         UserId = userId,
-                        Dynamic01 = "VNG DK100 VLTK 03 06",
+                        Dynamic01 = "VNG DK500 VLTK 03 06",
                         Note = "Ghi chú sản phẩm 03",
                         OrderItems = new List<CreateOrderItemWithOptionViewModel>()
                         {

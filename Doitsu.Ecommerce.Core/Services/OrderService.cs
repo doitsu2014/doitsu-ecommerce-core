@@ -60,7 +60,6 @@ namespace Doitsu.Ecommerce.Core.Services
             ProductFilterParamViewModel[] productFilter,
             OrderTypeEnum orderType);
 
-
         Task<Option<OrderViewModel, string>> CreateSaleOrderWithOptionAsync(CreateOrderWithOptionViewModel request);
 
         Task<Option<OrderViewModel, string>> CreateDepositOrderAsync(OrderViewModel request);
@@ -315,6 +314,12 @@ namespace Doitsu.Ecommerce.Core.Services
                 });
         }
 
+        /// <summary>
+        /// If system can not detect or detect on 0 Price, system will using the client price @orderItemSubTotalPrice.
+        /// </summary>
+        /// <param name="productVariant">The product variant values to detect product</param>
+        /// <param name="orderItemSubTotalPrice">The sub total price, what price is typed from client side</param>
+        /// <returns></returns>
         private decimal DetectSubTotalPrice(ProductVariantDetailViewModel productVariant, decimal orderItemSubTotalPrice)
         {
             if (productVariant.AnotherPrice > 0)
@@ -344,8 +349,10 @@ namespace Doitsu.Ecommerce.Core.Services
                         {
                             orderItem.ProductId = productVariant.ProductId;
                             orderItem.Discount = productVariant.AnotherDiscount;
+                            
                             var subTotalPrice = DetectSubTotalPrice(productVariant, orderItem.SubTotalPrice);
                             orderItem.SubTotalPrice = subTotalPrice;
+
                             var discount = orderItem.Discount ?? 0;
                             var price = subTotalPrice * orderItem.SubTotalQuantity;
                             orderItem.SubTotalFinalPrice = price - (price * ((decimal)discount) / 100);
