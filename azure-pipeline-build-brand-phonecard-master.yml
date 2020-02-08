@@ -14,15 +14,14 @@ variables:
 
 steps:
 - task: DotNetCoreCLI@2
-    displayName: 'dotnet build'
-    inputs:
+  displayName: "Building Process"
+  inputs:
     command: 'build'
-    arguments: '--configuration $(buildConfiguration)'
     projects: 'Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj'
-
+    arguments: '--configuration $(buildConfiguration)'
 - task: DotNetCoreCLI@2
-    displayName: "dotnet pack"
-    inputs:
+  displayName: "Packing Process"
+  inputs:
     command: 'pack'
     arguments: '--configuration $(buildConfiguration)'
     packagesToPack: 'Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj'
@@ -30,8 +29,7 @@ steps:
     versioningScheme: 'off'
 
 - task: NuGetCommand@2
-    displayName: 'nuget push'
-    inputs:
+  inputs:
     command: 'push'
     feedsToUse: 'select'
     packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
