@@ -3,7 +3,7 @@
   <PropertyGroup>
     <LangVersion>8.0</LangVersion>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <PackageVersion>3.1.100.9</PackageVersion>
+    <PackageVersion>3.1.100.10</PackageVersion>
     <Title>Doitsu.Ecommerce.Core</Title>
     <PackageId>Doitsu.Ecommerce.Core</PackageId>
     <Authors>Doitsu Technology</Authors>
@@ -22,7 +22,7 @@
     <PackageProjectUrl>https://dev.azure.com/doitsutechnology/Doitsu.Technology.Core</PackageProjectUrl>
     <PackageIconUrl>https://dev.azure.com/doitsutechnology/_apis/GraphProfile/MemberAvatars/faa2f78a-c648-4d7d-8307-b8beeb82fe12?overrideDisplayName=Doitsu.Technology.Core&amp;size=2</PackageIconUrl>
     <RepositoryType>Azure Repos</RepositoryType>
-    <PackageReleaseNotes>[AB#84] add some function to support create withdrawl orders</PackageReleaseNotes>
+    <PackageReleaseNotes>[AB#84] Fix Version</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="4.5.3.2" />
