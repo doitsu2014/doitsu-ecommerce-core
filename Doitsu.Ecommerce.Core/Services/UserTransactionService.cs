@@ -79,6 +79,12 @@ namespace Doitsu.Ecommerce.Core.Services
                         ? $"HOÀN TIỀN từ đơn hàng {orders.Code}" 
                         : userTransaction.Description;
                     break;
+
+                case UserTransactionTypeEnum.Withdrawal:
+                    userTransaction.Description = userTransaction.Description.IsNullOrEmpty()
+                        ? $"RÚT TIỀN từ đơn hàng {orders.Code}"
+                        : userTransaction.Description;
+                    break;
             }
 
             return userTransaction;
