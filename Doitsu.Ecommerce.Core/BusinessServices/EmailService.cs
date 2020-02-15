@@ -116,7 +116,7 @@ namespace Doitsu.Ecommerce.Core.Services
                         }
 
                         var smtpMailServerOptions = smtpMailServerOptionsMonitor.CurrentValue;
-                        await this.smtpEmailServerHandler.SendEmailOldAsync(smtpMailServerOptions, messagePayloads, CancellationToken.None);
+                        await this.smtpEmailServerHandler.SendEmailMultiplePayloadAsync(smtpMailServerOptions, messagePayloads, CancellationToken.None);
                         return true;
                     }
                     catch (Exception ex)
