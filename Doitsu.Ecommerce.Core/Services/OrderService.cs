@@ -684,13 +684,15 @@ namespace Doitsu.Ecommerce.Core.Services
                 .MapAsync(async req =>
                 {
                     var summaryOrder = await this.GetAsTracking(o => o.Id == req && OrderTypeEnum.Summary == o.Type)
-                        .Include(o => o.InverseSummaryOrders.Where(inverseOrder => inverseOrder.Status != (int)OrderStatusEnum.Cancel))
+                        .Include(o => o.InverseSummaryOrders)
                         .FirstOrDefaultAsync();
-
                     summaryOrder.Status = (int)OrderStatusEnum.Done;
                     this.Update(summaryOrder);
 
-                    var updatedInverseOrders = summaryOrder.InverseSummaryOrders.Select(io => { io.Status = (int)OrderStatusEnum.Done; return io; }).ToList();
+                    var updatedInverseOrders = summaryOrder.InverseSummaryOrders
+                        .Where(inverseOrder => inverseOrder.Status != (int)OrderStatusEnum.Cancel)
+                        .Select(io => { io.Status = (int)OrderStatusEnum.Done; return io; })
+                        .ToImmutableList();
                     this.UpdateRange(updatedInverseOrders);
 
                     await this.CommitAsync();
@@ -706,18 +708,21 @@ namespace Doitsu.Ecommerce.Core.Services
                     .WithException("Mã của Đơn Tổng không hợp lệ.")
                     .MapAsync(async req =>
                     {
-                        var summaryOrder = await this.GetAsTracking(o => o.Id == req && OrderTypeEnum.Summary == o.Type).FirstOrDefaultAsync();
+                        var summaryOrder = await this.GetAsTracking(o => o.Id == req && o.Type == OrderTypeEnum.Summary)
+                            .FirstOrDefaultAsync();
                         summaryOrder.Status = (int)OrderStatusEnum.Cancel;
                         summaryOrder.CancelNote = $"{cancelNote}";
                         this.Update(summaryOrder);
 
-                        var listOrderCode = await this
-                            .GetAsNoTracking(o => o.SummaryOrderId == summaryOrder.Id && OrderTypeEnum.Sale == o.Type)
-                            .Select(o => o.Code).ToListAsync();
+                        var listUpdatingInverseOrderCode = (await this.GetAsNoTracking(o => o.SummaryOrderId == summaryOrder.Id && o.Type == OrderTypeEnum.Sale)
+                            .Where(inverseOrder => inverseOrder.Status != (int)OrderStatusEnum.Done)
+                            .Select(io => io.Code)
+                            .ToListAsync())
+                            .ToImmutableList();
 
-                        foreach (var orderCode in listOrderCode)
+                        foreach (var updatingOrderCode in listUpdatingInverseOrderCode)
                         {
-                            await CancelOrderAsync(orderCode, auditUserId, cancelNote);
+                            await CancelOrderInternalAsync(updatingOrderCode, auditUserId, cancelNote);
                         }
 
                         await this.CommitAsync();
@@ -783,6 +788,27 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public async Task<Option<OrderViewModel, string>> CancelOrderAsync(string orderCode, int auditUserId, string cancelNote = "")
         {
+            using (var transaction = await this.CreateTransactionAsync())
+            {
+                return await CancelOrderInternalAsync(orderCode, auditUserId, cancelNote)
+                    .MapAsync(async res => {
+                        await this.CommitAsync();
+                        await transaction.CommitAsync();
+                        return res;
+                    });
+            }
+
+        }
+
+        /// <summary>
+        /// You should commit when using this method.
+        /// </summary>
+        /// <param name="orderCode"></param>
+        /// <param name="auditUserId"></param>
+        /// <param name="cancelNote"></param>
+        /// <returns></returns>
+        private async Task<Option<OrderViewModel, string>> CancelOrderInternalAsync(string orderCode, int auditUserId, string cancelNote = "")
+        {
             return await (orderCode, auditUserId).SomeNotNull()
                 .WithException(string.Empty)
                 .Filter(d => !d.orderCode.IsNullOrEmpty(), "Mã đơn hàng gửi lên rỗng.")
@@ -821,7 +847,6 @@ namespace Doitsu.Ecommerce.Core.Services
                         var userTransaction = this.userTransactionService.PrepareUserTransaction(order, ImmutableList<ProductVariantViewModel>.Empty, orderOwner, UserTransactionTypeEnum.Rollback);
                         await this.userTransactionService.UpdateUserBalanceAsync(userTransaction, orderOwner);
                         await userTransactionService.CreateAsync(userTransaction);
-                        await this.CommitAsync();
                         return Option.Some<OrderViewModel, string>(Mapper.Map<OrderViewModel>(order));
                     }
                 });
