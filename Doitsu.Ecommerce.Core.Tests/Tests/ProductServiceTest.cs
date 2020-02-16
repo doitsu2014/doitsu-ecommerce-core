@@ -319,7 +319,6 @@ namespace Doitsu.Ecommerce.Core.Tests
                         UserId = userId,
                         DeliveryPhone = "0946680600",
                         Priority = OrderPriorityEnum.FivePercent,
-                        Dynamic01 = "Mã app ...",
                         Note = "Ghi chú sản phẩm 01",
                         OrderItems = new List<CreateOrderItemWithOptionViewModel>()
                         {
@@ -351,7 +350,6 @@ namespace Doitsu.Ecommerce.Core.Tests
                         UserId = userId,
                         DeliveryPhone = "0946680600",
                         Priority = OrderPriorityEnum.FivePercent,
-                        Dynamic01 = "Mã app ...",
                         Note = "Ghi chú sản phẩm 01",
                         OrderItems = new List<CreateOrderItemWithOptionViewModel>()
                         {
