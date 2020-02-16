@@ -233,7 +233,6 @@ namespace Doitsu.Ecommerce.Core.Tests
                     await orderService.CreateSaleOrderWithOptionAsync(order);
                 }
 
-
                 Assert.True(true);
             }
         }
@@ -318,8 +317,8 @@ namespace Doitsu.Ecommerce.Core.Tests
                     {
                         UserId = userId,
                         DeliveryPhone = "0946680600",
-                        Priority = OrderPriorityEnum.FivePercent,
                         Note = "Ghi chú sản phẩm 01",
+                        Dynamic03 = "APP8239123756",
                         OrderItems = new List<CreateOrderItemWithOptionViewModel>()
                         {
                             new CreateOrderItemWithOptionViewModel()
@@ -349,8 +348,8 @@ namespace Doitsu.Ecommerce.Core.Tests
                     {
                         UserId = userId,
                         DeliveryPhone = "0946680600",
-                        Priority = OrderPriorityEnum.FivePercent,
                         Note = "Ghi chú sản phẩm 01",
+                        Dynamic03 = "APP839027192",
                         OrderItems = new List<CreateOrderItemWithOptionViewModel>()
                         {
                             new CreateOrderItemWithOptionViewModel()

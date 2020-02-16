@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using System.Transactions;
 
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -50,15 +48,10 @@ namespace Doitsu.Ecommerce.Core.Services
             DateTime? fromDate,
             DateTime? toDate,
             string userPhone,
-            string orderCode);
-
-        Task<ImmutableList<OrderDetailViewModel>> GetOrderDetailByParams(OrderStatusEnum? orderStatus,
-            DateTime? fromDate,
-            DateTime? toDate,
-            string userPhone,
             string orderCode,
             ProductFilterParamViewModel[] productFilter,
-            OrderTypeEnum orderType);
+            OrderTypeEnum? orderType,
+            int? summaryOrderId);
 
         /// <summary>
         /// Create a sale order
@@ -91,11 +84,18 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<Option<OrderViewModel, string>> CreateSummaryOrderAsync(CreateSummaryOrderViewModel inverseOrders, int userId);
 
         /// <summary>
-        /// Get bytes array of Export Summary Excel
+        /// Get bytes array of Export Summary Excel (detail style)
         /// </summary>
         /// <param name="summaryOrderId"></param>
         /// <returns></returns>
-        Task<Option<ExportOrderToExcel, string>> GetSummaryOrderAsExcelBytesAsync(int summaryOrderId);
+        Task<Option<ExportOrderToExcel, string>> GetSummaryOrderDetailStyleAsExcelBytesAsync(int summaryOrderId);
+
+        /// <summary>
+        /// Get bytes array of Export Summary Excel (phonecard website style)
+        /// </summary>
+        /// <param name="summaryOrderId"></param>
+        /// <returns></returns>
+        Task<Option<ExportOrderToExcel, string>> GetSummaryOrderPhoneCardWebsiteStyleAsExcelBytesAsync(int summaryOrderId);
 
         /// <summary>
         /// Complete the summary order and included different cancelled orders.
@@ -245,46 +245,6 @@ namespace Doitsu.Ecommerce.Core.Services
                     await CommitAsync();
                     return Mapper.Map<OrderViewModel>(order);
                 });
-        }
-
-        public async Task<ImmutableList<OrderDetailViewModel>> GetOrderDetailByParams(OrderStatusEnum? orderStatus,
-            DateTime? fromDate,
-            DateTime? toDate,
-            string userPhone,
-            string orderCode)
-        {
-            var query = this.GetAllAsNoTracking();
-
-            if (orderStatus.HasValue)
-            {
-                query = query.Where(x => x.Status == (int)orderStatus.Value);
-            }
-
-            if (!userPhone.IsNullOrEmpty())
-            {
-                query = query.Where(x => x.User.PhoneNumber.Contains(userPhone));
-            }
-
-            if (fromDate.HasValue && fromDate != DateTime.MinValue)
-            {
-                query = query.Where(x => x.CreatedDate >= fromDate.Value.StartOfDay());
-                if (toDate.HasValue && toDate != DateTime.MinValue)
-                {
-                    query = query.Where(x => x.CreatedDate <= toDate.Value.EndOfDay());
-                }
-            }
-
-            if (!orderCode.IsNullOrEmpty())
-            {
-                query = query.Where(x => x.Code.Contains(orderCode));
-            }
-
-            var result = await query
-                .ProjectTo<OrderDetailViewModel>(Mapper.ConfigurationProvider)
-                .OrderByDescending(x => x.CreatedDate)
-                .ToListAsync();
-
-            return result.ToImmutableList();
         }
 
         public async Task<Option<OrderViewModel, string>> CreateSaleOrderWithOptionAsync(CreateOrderWithOptionViewModel request)
@@ -470,7 +430,8 @@ namespace Doitsu.Ecommerce.Core.Services
                                                                                       string userPhone,
                                                                                       string orderCode,
                                                                                       ProductFilterParamViewModel[] productFilter,
-                                                                                      OrderTypeEnum orderType)
+                                                                                      OrderTypeEnum? orderType,
+                                                                                      int? summaryOrderId)
         {
             var query = this.GetAllAsNoTracking()
                 .Include(o => o.OrderItems)
@@ -488,11 +449,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     query = query.Where(x => x.CreatedDate <= toDate.Value.EndOfDay());
                 }
             }
-
-            query = query.Where(x => x.Type == orderType);
-
-            if (orderType == OrderTypeEnum.Summary) query = query.Include(o => o.InverseSummaryOrders);
-
+            if (orderType != null) query = query.Where(x => x.Type == orderType);
             if (productFilter != null && productFilter.Length > 0)
             {
                 var productIds = productFilter.Select(pf => pf.Id);
@@ -504,6 +461,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     query = query.Where(o => o.OrderItems.Select(oi => oi.ProductVariantId).Any(pvId => productVariantIds.Contains(pvId)));
                 }
             }
+            if (summaryOrderId != null) query = query.Where(o => o.SummaryOrderId == summaryOrderId);
 
             var result = await query
                 .ProjectTo<OrderDetailViewModel>(Mapper.ConfigurationProvider)
@@ -560,7 +518,7 @@ namespace Doitsu.Ecommerce.Core.Services
             }
         }
 
-        public Task<Option<ExportOrderToExcel, string>> GetSummaryOrderAsExcelBytesAsync(int summaryOrderId)
+        public Task<Option<ExportOrderToExcel, string>> GetSummaryOrderDetailStyleAsExcelBytesAsync(int summaryOrderId)
         {
             Expression<Func<Orders, bool>> filterSummaryOrderWithId = (o) => o.Id == summaryOrderId && o.Type == OrderTypeEnum.Summary && o.Status == (int)OrderStatusEnum.Processing;
             return summaryOrderId.SomeNotNull()
@@ -582,10 +540,15 @@ namespace Doitsu.Ecommerce.Core.Services
                         var currentRowIndex = 1;
                         sheet.Cells[currentRowIndex, 1].Value = $"Mã {GetNormalizedOfType(OrderTypeEnum.Summary)}";
                         sheet.Cells[currentRowIndex++, 2].Value = summaryOrder.Code;
-                        sheet.Cells[currentRowIndex, 1].Value = "Tổng tiền";
+                        sheet.Cells[currentRowIndex, 1].Value = "Tổng tiền chưa chiết khấu";
+                        sheet.Cells[currentRowIndex++, 2].Value = summaryOrder.TotalPrice.GetVietnamDong();
+                        sheet.Cells[currentRowIndex, 1].Value = "Tổng tiền đã chiết khẩu";
                         sheet.Cells[currentRowIndex++, 2].Value = summaryOrder.FinalPrice.GetVietnamDong();
                         sheet.Cells[currentRowIndex, 1].Value = $"Ngày tạo";
                         sheet.Cells[currentRowIndex++, 2].Value = summaryOrder.CreatedDate.ToString(Constants.DateTimeFormat.Default);
+                        sheet.Cells[currentRowIndex, 1].Value = $"Người tạo đơn tổng";
+                        sheet.Cells[currentRowIndex++, 2].Value = summaryOrder.User.UserName;
+
                         var excelRangeTitle = sheet.Cells[1, 1, 3, 2];
                         excelRangeTitle.Style.Font.Bold = true;
                         excelRangeTitle.Style.Font.Size = 14;
@@ -675,6 +638,101 @@ namespace Doitsu.Ecommerce.Core.Services
                     }
                 });
         }
+
+        public Task<Option<ExportOrderToExcel, string>> GetSummaryOrderPhoneCardWebsiteStyleAsExcelBytesAsync(int summaryOrderId)
+        {
+            Expression<Func<Orders, bool>> filterSummaryOrderWithId = (o) => o.Id == summaryOrderId && o.Type == OrderTypeEnum.Summary;
+            return summaryOrderId.SomeNotNull()
+                .WithException("Mã của Đơn Tổng không hợp lệ.")
+                .Filter(req => req != 0, "Không tìm thấy mã của Đơn Tổng")
+                .FilterAsync(async req => await this.AnyAsync(filterSummaryOrderWithId), "Không tìm thấy bất kỳ Đơn Hàng Tổng nào với mã này.")
+                .MapAsync(async id =>
+                {
+                    var summaryOrder = await this.GetAsNoTracking(filterSummaryOrderWithId)
+                        .Include(o => o.User)
+                        .Include(o => o.InverseSummaryOrders).ThenInclude(o => o.OrderItems).ThenInclude(oi => oi.ProductVariant).ThenInclude(pv => pv.ProductVariantOptionValues).ThenInclude(pvov => pvov.ProductOptionValue).ThenInclude(pov => pov.ProductOption)
+                        .Include(o => o.InverseSummaryOrders).ThenInclude(o => o.User)
+                        .Include(o => o.InverseSummaryOrders).ThenInclude(o => o.OrderItems).ThenInclude(oi => oi.Product)
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync();
+
+                    using (var package = new ExcelPackage())
+                    {
+                        var sheet = package.Workbook.Worksheets.Add(GetNormalizedOfType(OrderTypeEnum.Summary));
+                        var currentRowIndex = 1;
+                        sheet.Cells[currentRowIndex, 1].Value = $"Mã {GetNormalizedOfType(OrderTypeEnum.Summary)}";
+                        sheet.Cells[currentRowIndex++, 2].Value = summaryOrder.Code;
+                        sheet.Cells[currentRowIndex, 1].Value = "Tổng tiền chưa chiết khấu";
+                        sheet.Cells[currentRowIndex++, 2].Value = summaryOrder.TotalPrice.GetVietnamDong();
+                        sheet.Cells[currentRowIndex, 1].Value = "Tổng tiền đã chiết khẩu";
+                        sheet.Cells[currentRowIndex++, 2].Value = summaryOrder.FinalPrice.GetVietnamDong();
+                        sheet.Cells[currentRowIndex, 1].Value = $"Ngày tạo";
+                        sheet.Cells[currentRowIndex++, 2].Value = summaryOrder.CreatedDate.ToString(Constants.DateTimeFormat.Default);
+                        sheet.Cells[currentRowIndex, 1].Value = $"Người tạo đơn tổng";
+                        sheet.Cells[currentRowIndex++, 2].Value = summaryOrder.User.UserName;
+
+                        // Beautify order summary titles
+                        var excelRangeOrderSummaryTitles = sheet.Cells[1, 1, 5, 2];
+                        excelRangeOrderSummaryTitles.Style.Font.Bold = true;
+                        excelRangeOrderSummaryTitles.Style.Font.Size = 14;
+
+                        if (summaryOrder != null && summaryOrder.InverseSummaryOrders != null && summaryOrder.InverseSummaryOrders.Count > 0)
+                        {
+                            // draw current summary order
+                            var firstRowIndex = currentRowIndex;
+                            var lastInverseOrderTblColumnIndex = 1;
+                            sheet.Cells[currentRowIndex, lastInverseOrderTblColumnIndex++].Value = "STT";
+                            sheet.Cells[currentRowIndex, lastInverseOrderTblColumnIndex++].Value = "Mã Đơn";
+                            sheet.Cells[currentRowIndex, lastInverseOrderTblColumnIndex++].Value = "Trạng thái";
+                            sheet.Cells[currentRowIndex, lastInverseOrderTblColumnIndex++].Value = "Tên tài khoản";
+                            sheet.Cells[currentRowIndex, lastInverseOrderTblColumnIndex++].Value = "Loại tài khoản";
+                            sheet.Cells[currentRowIndex, lastInverseOrderTblColumnIndex++].Value = "Thông tin nạp tiền";
+                            sheet.Cells[currentRowIndex, lastInverseOrderTblColumnIndex++].Value = "Số tiền cần nạp";
+                            sheet.Cells[currentRowIndex, lastInverseOrderTblColumnIndex++].Value = "Số lượng";
+                            sheet.Cells[currentRowIndex, lastInverseOrderTblColumnIndex++].Value = "Thành tiền";
+                            sheet.Cells[currentRowIndex, lastInverseOrderTblColumnIndex++].Value = "Tiền thực trả";
+                            sheet.Cells[currentRowIndex, lastInverseOrderTblColumnIndex++].Value = "Ngày tạo";
+                            sheet.Cells[currentRowIndex, lastInverseOrderTblColumnIndex++].Value = "Ghi chú";
+                            sheet.Cells[currentRowIndex, lastInverseOrderTblColumnIndex].Value = "Mã app";
+                            
+                            var excelRangeHeader = sheet.Cells[currentRowIndex, 1, currentRowIndex, lastInverseOrderTblColumnIndex];
+                            excelRangeHeader.Style.Font.Bold = true;
+                            excelRangeHeader.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+
+                            var count = 0;
+                            foreach (var o in summaryOrder.InverseSummaryOrders)
+                            {
+                                ++currentRowIndex;
+                                var lastCurrentRowColumnIndex = 1;
+                                sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = (++count);
+                                sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = o.Code;
+                                sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = GetNormalizedOfStatus((OrderStatusEnum)o.Status);
+                                sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = o.User.UserName;
+                                sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = GetSkusAsString(o.OrderItems.ToList());
+                                sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = o.DeliveryPhone.IsNullOrEmpty() ? o.Dynamic01 : o.DeliveryPhone;
+                                sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = (o.TotalPrice / o.TotalQuantity).GetVietnamDong();
+                                sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = o.TotalQuantity;
+                                sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = o.TotalPrice.GetVietnamDong();
+                                sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = o.FinalPrice.GetVietnamDong();
+                                sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = o.CreatedDate.ToString(Constants.DateTimeFormat.Default);
+                                sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = o.Note;
+                                sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = o.Dynamic03;
+                            }
+
+                            var excelRangeAll = sheet.Cells[firstRowIndex, 1, currentRowIndex, lastInverseOrderTblColumnIndex];
+                            excelRangeAll.Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                            excelRangeAll.Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                            excelRangeAll.Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                            excelRangeAll.Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                            excelRangeAll = sheet.Cells[firstRowIndex, 1, currentRowIndex, lastInverseOrderTblColumnIndex];
+                            
+                            sheet.Cells[sheet.Dimension.Address].AutoFitColumns();
+                        }
+                        return ExportOrderToExcel.CreateInstance(package.GetAsByteArray(), $"Phone-{summaryOrder.CreatedDate.ToString("dd_MM_yyyy")}-{summaryOrder.Code}.xlsx");
+                    }
+                });
+        }
+
 
 
         #region Status Order
@@ -792,7 +850,8 @@ namespace Doitsu.Ecommerce.Core.Services
             using (var transaction = await this.CreateTransactionAsync())
             {
                 return await CancelOrderInternalAsync(orderCode, auditUserId, cancelNote)
-                    .MapAsync(async res => {
+                    .MapAsync(async res =>
+                    {
                         await this.CommitAsync();
                         await transaction.CommitAsync();
                         return res;
@@ -872,6 +931,12 @@ namespace Doitsu.Ecommerce.Core.Services
 
 
         #region Utilization 
+
+        private string GetSkusAsString(IList<OrderItems> listOi)
+        {
+            if(listOi == null || listOi.Count == 0) return "";
+            return listOi.Select(oi => oi.ProductVariant.Sku).Aggregate((x, y) => $"{x}\n{y}");
+        }
 
         private string GetNormalizedOfType(OrderTypeEnum typeEnum)
         {
