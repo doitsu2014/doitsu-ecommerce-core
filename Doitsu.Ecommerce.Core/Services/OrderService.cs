@@ -709,7 +709,7 @@ namespace Doitsu.Ecommerce.Core.Services
                                 sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = GetNormalizedOfStatus((OrderStatusEnum)o.Status);
                                 sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = o.User.UserName;
                                 sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = GetSkusAsString(o.OrderItems.ToList());
-                                sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = o.DeliveryPhone.IsNullOrEmpty() ? o.Dynamic01 : o.DeliveryPhone;
+                                sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = o.DeliveryAddress;
                                 sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = (o.TotalPrice / o.TotalQuantity).GetVietnamDong();
                                 sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = o.TotalQuantity;
                                 sheet.Cells[currentRowIndex, lastCurrentRowColumnIndex++].Value = o.TotalPrice.GetVietnamDong();
