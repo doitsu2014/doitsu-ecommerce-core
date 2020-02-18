@@ -10,20 +10,20 @@ using Doitsu.Ecommerce.Core.Tests.Helpers;
 using Doitsu.Ecommerce.Core.ViewModels;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Doitsu.Ecommerce.Core.Tests
 {
-    [Collection("ProductServiceCollections")]
-    public class ProductServiceTest : BaseServiceTest<ProductServiceFixture>
+    [Collection("EcommerceCoreCollection")]
+    public class ProductServiceTest : BaseServiceTest<EcommerceCoreFixture>
     {
-        private readonly string _poolKey;
+        private readonly string _poolKey = nameof(ProductServiceTest);
 
-        public ProductServiceTest(ProductServiceFixture fixture, ITestOutputHelper testOutputHelper) : base(fixture, testOutputHelper)
+        public ProductServiceTest(EcommerceCoreFixture fixture, ITestOutputHelper testOutputHelper) : base(fixture, testOutputHelper)
         {
-            _poolKey = _fixture.ServicePoolKey;
         }
 
         [System.Obsolete]
