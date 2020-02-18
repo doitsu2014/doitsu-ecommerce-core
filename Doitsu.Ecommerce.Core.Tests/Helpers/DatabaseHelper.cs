@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using Optional;
 using Doitsu.Ecommerce.Core.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Doitsu.Ecommerce.Core.Tests.Helpers
 {
@@ -82,39 +83,82 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 });
         }
 
+        [Obsolete]
         public static void TruncateAllTable(IWebHost host, string poolKey)
         {
-            var connectionString = host.Services.GetService<IConfiguration>().GetConnectionString(nameof(EcommerceDbContext));
-            var generated = GeneratePoolKeyConnectionString(connectionString, poolKey);
-
-            ExecuteNonQuery(generated, @"
+            var dbContext = host.Services.GetService<EcommerceDbContext>();
+            dbContext.Database.ExecuteSqlRaw(@"
                 EXEC sp_MSforeachtable 'SET QUOTED_IDENTIFIER ON; ALTER TABLE ? NOCHECK CONSTRAINT ALL'  
                 EXEC sp_MSforeachtable 'SET QUOTED_IDENTIFIER ON; ALTER TABLE ? DISABLE TRIGGER ALL'  
                 DECLARE @deleteFromAllTable varchar(8000) = '';
                 SELECT @deleteFromAllTable = Concat(@deleteFromAllTable, 'DELETE FROM ', TABLE_SCHEMA, '.',TABLE_NAME, ';') 
                 FROM INFORMATION_SCHEMA.TABLES 
                 WHERE TABLE_NAME NOT LIKE '__EFMigrationsHistory'
-                EXEC(@deleteFromAllTable)	
-                EXEC sp_MSforeachtable 'SET QUOTED_IDENTIFIER ON; ALTER TABLE ? CHECK CONSTRAINT ALL'  
-                EXEC sp_MSforeachtable 'SET QUOTED_IDENTIFIER ON; ALTER TABLE ? ENABLE TRIGGER ALL' 
+                EXEC(@deleteFromAllTable)
+                EXEC sp_MSforeachtable 'SET QUOTED_IDENTIFIER ON; ALTER TABLE ? CHECK CONSTRAINT ALL' 
+                EXEC sp_MSforeachtable 'SET QUOTED_IDENTIFIER ON; ALTER TABLE ? ENABLE TRIGGER ALL'
             ");
         }
 
         public static void ReseedAllTable(IWebHost host, string poolKey)
         {
-            var connectionString = host.Services.GetService<IConfiguration>().GetConnectionString(nameof(EcommerceDbContext));
-            var generated = GeneratePoolKeyConnectionString(connectionString, poolKey);
-
-            ExecuteNonQuery(generated, @"
+            var dbContext = host.Services.GetService<EcommerceDbContext>();
+            dbContext.Database.ExecuteSqlRaw(@"
                 DECLARE @reseedTableQuery NVARCHAR(MAX) = '';
                 SELECT 
-                    @reseedTableQuery = CONCAT(@reseedTableQuery, 'DBCC CHECKIDENT(''[' + TABLE_NAME + ']'', RESEED, 0);')
+                    @reseedTableQuery = CONCAT(@reseedTableQuery, '
+                        IF NOT EXISTS (SELECT 1 FROM [' + TABLE_NAME + '])
+                            BEGIN
+                                DBCC CHECKIDENT ([' + TABLE_NAME + '], RESEED, 1);
+                            END
+                        ELSE
+                            BEGIN
+                                DELETE FROM [' + TABLE_NAME + ']
+                                DBCC CHECKIDENT ([' + TABLE_NAME + '], RESEED, 0);
+                            END
+                    ')
                 FROM 
                     INFORMATION_SCHEMA.TABLES
                 WHERE 
                     OBJECTPROPERTY(OBJECT_ID(TABLE_NAME), 'TableHasIdentity') = 1
                     AND TABLE_TYPE = 'BASE TABLE'
+                EXECUTE (@reseedTableQuery)
+            ");
+        }
 
+        public static async Task MakeEmptyDatabase(IWebHost host, string poolKey)
+        {
+            var dbContext = host.Services.GetService<EcommerceDbContext>();
+            await dbContext.Database.ExecuteSqlRawAsync(@"
+                EXEC sp_MSforeachtable 'SET QUOTED_IDENTIFIER ON; ALTER TABLE ? NOCHECK CONSTRAINT ALL'  
+                EXEC sp_MSforeachtable 'SET QUOTED_IDENTIFIER ON; ALTER TABLE ? DISABLE TRIGGER ALL'  
+                DECLARE @deleteFromAllTable varchar(8000) = '';
+                SELECT @deleteFromAllTable = Concat(@deleteFromAllTable, 'DELETE FROM ', TABLE_SCHEMA, '.',TABLE_NAME, ';') 
+                FROM INFORMATION_SCHEMA.TABLES 
+                WHERE TABLE_NAME NOT LIKE '__EFMigrationsHistory'
+                EXEC(@deleteFromAllTable)
+                EXEC sp_MSforeachtable 'SET QUOTED_IDENTIFIER ON; ALTER TABLE ? CHECK CONSTRAINT ALL' 
+                EXEC sp_MSforeachtable 'SET QUOTED_IDENTIFIER ON; ALTER TABLE ? ENABLE TRIGGER ALL'
+            ");
+            await dbContext.Database.ExecuteSqlRawAsync(@"
+                DECLARE @reseedTableQuery NVARCHAR(MAX) = '';
+                SELECT 
+                    @reseedTableQuery = CONCAT(@reseedTableQuery, '
+                        IF NOT EXISTS (SELECT 1 FROM [' + TABLE_NAME + '])
+                            BEGIN
+                                DBCC CHECKIDENT ([' + TABLE_NAME + '], RESEED, 1);
+                            END
+                        ELSE
+                            BEGIN
+                                DELETE FROM [' + TABLE_NAME + ']
+                                DBCC CHECKIDENT ([' + TABLE_NAME + '], RESEED, 0);
+                            END
+                    ')
+                FROM 
+                    INFORMATION_SCHEMA.TABLES
+                WHERE 
+                    OBJECTPROPERTY(OBJECT_ID(TABLE_NAME), 'TableHasIdentity') = 1
+                    AND TABLE_TYPE = 'BASE TABLE'
                 EXECUTE (@reseedTableQuery)
             ");
         }

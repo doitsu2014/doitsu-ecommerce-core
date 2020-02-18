@@ -7,22 +7,18 @@ using Doitsu.Ecommerce.Core.ViewModels;
 
 namespace Doitsu.Ecommerce.Core.Tests.Helpers
 {
-    public class ProductServiceFixture : IDisposable
+    public class EcommerceCoreFixture : IDisposable
     {
-        public string ServicePoolKey { get; set; }
         public BrandViewModel BrandData { get; }
         public ICollection<CategoryWithInverseParentViewModel> CategoryData { get; }
         public ICollection<CreateProductViewModel> ProductData { get; }
         public ICollection<ProductOptionViewModel> Product1ProductOptionsData { get; }
-        public ICollection<ProductOptionViewModel> Product2ProductOptionsData { get; }
-        public ICollection<ProductOptionViewModel> Product3ProductOptionsData { get; }
 
-        public ProductServiceFixture()
+        public EcommerceCoreFixture()
         {
-            ServicePoolKey = "ProductService";
-
             BrandData = new BrandViewModel()
             {
+                Id = 0,
                 Address = "Kim chỉ nam",
                 AlternativeAddress = "Kim chỉ nam khác",
                 Description = "Nội dung",
@@ -42,6 +38,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
             {
                 new CategoryWithInverseParentViewModel()
                 {
+                    Id = 0,
                     Name = "Sản phẩm",
                     IsFixed = true,
                     ParentCateId = null,
@@ -63,49 +60,59 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
             {
                 new ProductOptionViewModel()
                 {
+                    Id = 0,
                     Name = "Nhà Mạng",
                     ProductOptionValues = new List<ProductOptionValueViewModel>()
                     {
                         new  ProductOptionValueViewModel()
                         {
+                            Id = 0,
                             Value = "Vinaphone"
                         },
                         new  ProductOptionValueViewModel()
                         {
+                            Id = 0,
                             Value = "Viettel"
                         },
                         new  ProductOptionValueViewModel()
                         {
+                            Id = 0,
                             Value = "Mobiphone"
                         }
                     }
                 },
                 new ProductOptionViewModel()
                 {
+                    Id = 0,
                     Name = "Loại tài khoản",
                     ProductOptionValues = new List<ProductOptionValueViewModel>()
                     {
                         new  ProductOptionValueViewModel()
                         {
+                            Id = 0,
                             Value = "Trả trước"
                         },
                         new  ProductOptionValueViewModel()
                         {
+                            Id = 0,
                             Value = "Trả sau"
                         }
                     }
                 },
                 new ProductOptionViewModel()
                 {
+                    Id = 0,
                     Name = "Có mật khẩu ứng dụng",
                     ProductOptionValues = new List<ProductOptionValueViewModel>()
                     {
                         new  ProductOptionValueViewModel()
                         {
+                            Id = 0,
                             Value = "Có"
                         },
                         new  ProductOptionValueViewModel()
                         {
+                            Id = 0,
                             Value = "Không"
                         }
                     }
@@ -114,6 +121,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
 
             var product1 = new CreateProductViewModel()
             {
+                Id = 0,
                 Code = "GACH-CUOC",
                 Name = "NẠP TRẢ TRƯỚC & TRẢ SAU",
                 Slug = "nap-the-tra-truoc-va-tra-sau",
@@ -122,87 +130,9 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 ProductOptions = Product1ProductOptionsData
             };
 
-            Product2ProductOptionsData = new List<ProductOptionViewModel>()
-            {
-                new ProductOptionViewModel()
-                {
-                    Name = "Nhà Mạng",
-                    ProductOptionValues = new List<ProductOptionValueViewModel>()
-                    {
-                        new  ProductOptionValueViewModel()
-                        {
-                            Value = "Vinaphone"
-                        },
-                        new  ProductOptionValueViewModel()
-                        {
-                            Value = "Viettel"
-                        },
-                        new  ProductOptionValueViewModel()
-                        {
-                            Value = "Mobiphone"
-                        }
-                    }
-                }
-            };
-
-            var product2 = new CreateProductViewModel()
-            {
-                Code = "BTK",
-                Name = "NẠP TIỀN NHANH",
-                Slug = "nap-tien-nhanh",
-                Price = 0,
-                Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
-                ProductOptions = Product2ProductOptionsData
-            };
-
-            Product3ProductOptionsData = new List<ProductOptionViewModel>()
-            {
-                new ProductOptionViewModel()
-                {
-                    Name = "Mệnh giá",
-                    ProductOptionValues = new List<ProductOptionValueViewModel>()
-                    {
-                        new  ProductOptionValueViewModel()
-                        {
-                            Value = "DK10"
-                        },
-                        new  ProductOptionValueViewModel()
-                        {
-                            Value = "DK20"
-                        },
-                        new  ProductOptionValueViewModel()
-                        {
-                            Value = "DK50"
-                        },
-                         new  ProductOptionValueViewModel()
-                        {
-                            Value = "DK100"
-                        },
-                        new  ProductOptionValueViewModel()
-                        {
-                            Value = "DK200"
-                        },
-                        new  ProductOptionValueViewModel()
-                        {
-                            Value = "DK500"
-                        }
-                    }
-                }
-            };
-
-            var product3 = new CreateProductViewModel()
-            {
-                Code = "SMS",
-                Name = "NẠP GAME SMS",
-                Slug = "nap-game-sms",
-                Price = 0,
-                Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
-                ProductOptions = Product3ProductOptionsData
-            };
-
             ProductData = new List<CreateProductViewModel>()
             {
-                product1, product2, product3
+                product1
             };
         }
 
@@ -212,9 +142,8 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
         }
     }
 
-
-    [CollectionDefinition("ProductServiceCollections")]
-    public class ProductServiceCollections : ICollectionFixture<ProductServiceFixture>
+    [CollectionDefinition("EcommerceCoreCollection")]
+    public class EcommerceCoreCollection : ICollectionFixture<EcommerceCoreFixture>
     {
     }
 
