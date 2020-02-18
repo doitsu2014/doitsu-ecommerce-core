@@ -26,6 +26,7 @@ using OfficeOpenXml;
 
 using Optional;
 using Optional.Async;
+using Optional.Collections;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -379,14 +380,21 @@ namespace Doitsu.Ecommerce.Core.Services
 
         private async Task<Option<Orders, string>> MappingFromOrderWithOptionToSaleOrder(CreateOrderWithOptionViewModel request)
         {
-            return await request.SomeNotNull()
+            return (await request.SomeNotNull()
                 .WithException("Thông tin đơn hàng rỗng")
-                .MapAsync(async d =>
-                {
-                    d.OrderItems = (await Task.WhenAll(d.OrderItems.Select(async orderItem =>
+                .FlatMapAsync(async d => {
+                    var resultOrderItems = (await Task.WhenAll(d.OrderItems.Select(async orderItem =>
                     {
                         var productVariant = await productService.FindProductVariantFromOptionsAsync(orderItem.ProductOptionValues);
-                        if (productVariant != null)
+                        if (productVariant == null)
+                        {
+                            return Option.None<CreateOrderItemWithOptionViewModel, string>("Không tìm thấy sản phẩm mà bạn muốn đặt hàng.");
+                        }
+                        else if (productVariant.Status == ProductVariantStatusEnum.Unavailable)
+                        {
+                            return Option.None<CreateOrderItemWithOptionViewModel, string>("Sản phẩm mà bạn muốn đặt hàng đang bị khóa. Vui lòng thử lại vào khoản thời gian tiếp theo.");
+                        }
+                        else
                         {
                             orderItem.ProductId = productVariant.ProductId;
                             orderItem.Discount = productVariant.AnotherDiscount;
@@ -404,9 +412,14 @@ namespace Doitsu.Ecommerce.Core.Services
                             d.TotalQuantity += orderItem.SubTotalQuantity;
                             d.FinalPrice += orderItem.SubTotalFinalPrice;
                         }
-                        return orderItem;
+                        return Option.Some<CreateOrderItemWithOptionViewModel, string>(orderItem);
                     }))).ToImmutableList();
-
+                    if (resultOrderItems.Exceptions().Any()) return Option.None<CreateOrderWithOptionViewModel, string>(resultOrderItems.Exceptions().Aggregate((a,b) => $"{a}\n{b}"));
+                    else d.OrderItems = resultOrderItems.Values().ToImmutableList();
+                    return Option.Some<CreateOrderWithOptionViewModel, string>(d);
+                }))
+                .Map(d =>
+                {
                     if (d.Priority.HasValue)
                     {
                         var originPrice = d.TotalPrice * d.TotalQuantity;
@@ -419,7 +432,6 @@ namespace Doitsu.Ecommerce.Core.Services
                     order.CreatedDate = DateTime.UtcNow.ToVietnamDateTime();
                     order.Type = OrderTypeEnum.Sale;
                     order.Status = (int)OrderStatusEnum.New;
-
                     return order;
                 });
         }
@@ -694,7 +706,7 @@ namespace Doitsu.Ecommerce.Core.Services
                             sheet.Cells[currentRowIndex, lastInverseOrderTblColumnIndex++].Value = "Ngày tạo";
                             sheet.Cells[currentRowIndex, lastInverseOrderTblColumnIndex++].Value = "Ghi chú";
                             sheet.Cells[currentRowIndex, lastInverseOrderTblColumnIndex].Value = "Mã app";
-                            
+
                             var excelRangeHeader = sheet.Cells[currentRowIndex, 1, currentRowIndex, lastInverseOrderTblColumnIndex];
                             excelRangeHeader.Style.Font.Bold = true;
                             excelRangeHeader.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
@@ -725,7 +737,7 @@ namespace Doitsu.Ecommerce.Core.Services
                             excelRangeAll.Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
                             excelRangeAll.Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
                             excelRangeAll = sheet.Cells[firstRowIndex, 1, currentRowIndex, lastInverseOrderTblColumnIndex];
-                            
+
                             sheet.Cells[sheet.Dimension.Address].AutoFitColumns();
                         }
                         return ExportOrderToExcel.CreateInstance(package.GetAsByteArray(), $"Phone-{summaryOrder.CreatedDate.ToString("dd_MM_yyyy")}-{summaryOrder.Code}.xlsx");
@@ -934,7 +946,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         private string GetSkusAsString(IList<OrderItems> listOi)
         {
-            if(listOi == null || listOi.Count == 0) return "";
+            if (listOi == null || listOi.Count == 0) return "";
             return listOi.Select(oi => oi.ProductVariant.Sku).Aggregate((x, y) => $"{x}\n{y}");
         }
 
