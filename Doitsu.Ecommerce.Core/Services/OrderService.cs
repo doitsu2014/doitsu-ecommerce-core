@@ -66,7 +66,7 @@ namespace Doitsu.Ecommerce.Core.Services
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        Task<Option<OrderViewModel, string>> CreateWithdrawlOrderWithOptionAsync(CreateOrderWithOptionViewModel request);
+        Task<Option<OrderViewModel, string>> CreateWithdrawalOrderWithOptionAsync(CreateOrderWithOptionViewModel request);
 
         /// <summary>
         /// Create Deposit order
@@ -271,7 +271,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         }
 
-        public async Task<Option<OrderViewModel, string>> CreateWithdrawlOrderWithOptionAsync(CreateOrderWithOptionViewModel request)
+        public async Task<Option<OrderViewModel, string>> CreateWithdrawalOrderWithOptionAsync(CreateOrderWithOptionViewModel request)
         {
             using (var transaction = await this.CreateTransactionAsync())
             {
@@ -288,7 +288,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     order.Code = DataUtils.GenerateCode(Constants.OrderInformation.ORDER_CODE_LENGTH);
                     order.CreatedDate = DateTime.UtcNow.ToVietnamDateTime();
                     order.Type = OrderTypeEnum.Withdrawal;
-                    order.Status = (int)OrderStatusEnum.New;
+                    order.Status = (int)OrderStatusEnum.Processing;
                     // prepare transaction
                     var user = await userManager.FindByIdAsync(order.UserId.ToString());
                     var userTransaction = this.userTransactionService.PrepareUserTransaction(order, ImmutableList<ProductVariantViewModel>.Empty, user, UserTransactionTypeEnum.Withdrawal);
