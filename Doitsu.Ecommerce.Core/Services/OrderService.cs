@@ -109,16 +109,18 @@ namespace Doitsu.Ecommerce.Core.Services
 
         Task<Option<OrderViewModel, string>> CancelOrderAsync(string orderCode, int userId, string cancelNote = "");
 
+
         Task<Option<OrderViewModel, string>> CompleteOrderAsync(string orderCode, int userId);
 
         /// <summary>
-        /// Superpower function, to work correctly we have to complete TODO
+        /// Superpower function, to work correctly we have to complete
         /// TODO: Wrap all logic change order status
+        /// CURRENT: just as a controller pass cancel or done status
         /// </summary>
         /// <param name="orderId"></param>
         /// <param name="statusEnum"></param>
         /// <returns></returns>
-        Task<Option<OrderViewModel, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum);
+        Task<Option<OrderViewModel, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum, int auditUserId, string note = "");
     }
 
     public class OrderService : BaseService<Orders>, IOrderService
@@ -140,19 +142,6 @@ namespace Doitsu.Ecommerce.Core.Services
             this.productService = productService;
             this.userManager = userManager;
             this.userTransactionService = userTransactionService;
-        }
-
-        private string GenerateOrderCode()
-        {
-            var currentDate = DateTime.Now;
-            var year = currentDate.Year.ToString();
-            var orderCode = DataUtils.GenerateOrderCode(6, new Random());
-            var orderCodeFirstPart = orderCode.Substring(0, 3);
-            var orderCodeSecondPart = orderCode.Substring(3);
-            var yearFirstPart = year.Substring(0, 2);
-            var yearSecondPart = year.Substring(2);
-            var result = $"{orderCodeFirstPart}{yearFirstPart}{orderCodeSecondPart}{yearSecondPart}";
-            return result;
         }
 
         public async Task<Option<string, string>> CheckoutCartAsync(CheckoutCartViewModel data, EcommerceIdentityUser user)
@@ -231,21 +220,6 @@ namespace Doitsu.Ecommerce.Core.Services
             var result = await this.FirstOrDefaultAsync<OrderDetailViewModel>(x => x.Code.Equals(orderCode));
             return result;
 
-        }
-
-        public async Task<Option<OrderViewModel, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum)
-        {
-            return await (orderId, statusEnum).SomeNotNull()
-                .WithException(string.Empty)
-                .FilterAsync(async d => await this.SelfRepository.AnyAsync(x => x.Id == d.orderId), "Không thể tim thấy đơn hàng cần đổi trạng thái")
-                .MapAsync(async d =>
-                {
-                    var order = await this.FindByKeysAsync(d.orderId);
-                    order.Status = (int)statusEnum;
-                    this.Update(order);
-                    await CommitAsync();
-                    return Mapper.Map<OrderViewModel>(order);
-                });
         }
 
         public async Task<Option<OrderViewModel, string>> CreateSaleOrderWithOptionAsync(CreateOrderWithOptionViewModel request)
@@ -745,7 +719,59 @@ namespace Doitsu.Ecommerce.Core.Services
                 });
         }
 
+        public async Task<Option<OrderViewModel, string>> CreateDepositOrderAsync(OrderViewModel request)
+        {
+            return await request.SomeNotNull()
+                .WithException("Dữ liệu truyền lên rỗng.")
+                .Filter(d => d.UserId > 0, "Không tìm thấy thông tin người được nạp tiền.")
+                .Map(d =>
+                {
+                    var order = this.Mapper.Map<Orders>(request);
+                    order.Code = DataUtils.GenerateCode(Constants.OrderInformation.ORDER_CODE_LENGTH);
+                    order.CreatedDate = DateTime.UtcNow.ToVietnamDateTime();
+                    order.Type = OrderTypeEnum.Desposit;
+                    order.Status = (int)OrderStatusEnum.Done;
+                    var price = d.TotalPrice * d.TotalQuantity;
+                    order.FinalPrice = price - (price * (decimal)d.Discount);
+                    return order;
+                })
+                .FlatMapAsync(async o =>
+                {
+                    var user = await userManager.FindByIdAsync(o.UserId.ToString());
+                    var userTransaction = this.userTransactionService.PrepareUserTransaction(o, ImmutableList<ProductVariantViewModel>.Empty, user, UserTransactionTypeEnum.Income);
+                    var updateBalanceResult = await userTransactionService.UpdateUserBalanceAsync(userTransaction, user);
+                    return updateBalanceResult.Match<Option<Orders, string>>(
+                        res =>
+                        {
+                            o.User = user;
+                            return Option.Some<Orders, string>(o);
+                        },
+                        error => { return Option.None<Orders, string>(error); }
+                    );
+                })
+                .MapAsync(async o =>
+                {
+                    try
+                    {
+                        var user = await userManager.FindByIdAsync(o.UserId.ToString());
+                        var messagePayloads = new List<MessagePayload>()
+                        {
+                            await emailService.PrepareLeaderOrderMailConfirmAsync(o.User, o),
+                            await emailService.PrepareCustomerOrderMailConfirm(o.User, o)
+                        };
 
+                        var emailResult = await emailService.SendEmailWithBachMocWrapperAsync(messagePayloads);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError(ex, $"Process email for order {o.Code} failure.");
+                    }
+
+                    await this.CreateAsync(o);
+                    await this.CommitAsync();
+                    return this.Mapper.Map<OrderViewModel>(o);
+                });
+        }
 
         #region Status Order
         public async Task<Option<OrderViewModel, string>> CompleteSummaryOrderAsync(int summaryOrderId)
@@ -803,60 +829,6 @@ namespace Doitsu.Ecommerce.Core.Services
             }
         }
 
-        public async Task<Option<OrderViewModel, string>> CreateDepositOrderAsync(OrderViewModel request)
-        {
-            return await request.SomeNotNull()
-                .WithException("Dữ liệu truyền lên rỗng.")
-                .Filter(d => d.UserId > 0, "Không tìm thấy thông tin người được nạp tiền.")
-                .Map(d =>
-                {
-                    var order = this.Mapper.Map<Orders>(request);
-                    order.Code = DataUtils.GenerateCode(Constants.OrderInformation.ORDER_CODE_LENGTH);
-                    order.CreatedDate = DateTime.UtcNow.ToVietnamDateTime();
-                    order.Type = OrderTypeEnum.Desposit;
-                    order.Status = (int)OrderStatusEnum.Done;
-                    var price = d.TotalPrice * d.TotalQuantity;
-                    order.FinalPrice = price - (price * (decimal)d.Discount);
-                    return order;
-                })
-                .FlatMapAsync(async o =>
-                {
-                    var user = await userManager.FindByIdAsync(o.UserId.ToString());
-                    var userTransaction = this.userTransactionService.PrepareUserTransaction(o, ImmutableList<ProductVariantViewModel>.Empty, user, UserTransactionTypeEnum.Income);
-                    var updateBalanceResult = await userTransactionService.UpdateUserBalanceAsync(userTransaction, user);
-                    return updateBalanceResult.Match<Option<Orders, string>>(
-                        res =>
-                        {
-                            o.User = user;
-                            return Option.Some<Orders, string>(o);
-                        },
-                        error => { return Option.None<Orders, string>(error); }
-                    );
-                })
-                .MapAsync(async o =>
-                {
-                    try
-                    {
-                        var user = await userManager.FindByIdAsync(o.UserId.ToString());
-                        var messagePayloads = new List<MessagePayload>()
-                        {
-                            await emailService.PrepareLeaderOrderMailConfirmAsync(o.User, o),
-                            await emailService.PrepareCustomerOrderMailConfirm(o.User, o)
-                        };
-
-                        var emailResult = await emailService.SendEmailWithBachMocWrapperAsync(messagePayloads);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.LogError(ex, $"Process email for order {o.Code} failure.");
-                    }
-
-                    await this.CreateAsync(o);
-                    await this.CommitAsync();
-                    return this.Mapper.Map<OrderViewModel>(o);
-                });
-        }
-
         public async Task<Option<OrderViewModel, string>> CancelOrderAsync(string orderCode, int auditUserId, string cancelNote = "")
         {
             using (var transaction = await this.CreateTransactionAsync())
@@ -886,7 +858,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 .Filter(d => !d.orderCode.IsNullOrEmpty(), "Mã đơn hàng gửi lên rỗng.")
                 .FlatMapAsync(async d =>
                 {
-                    var order = await Get(o => o.Code == d.orderCode).FirstOrDefaultAsync();
+                    var order = await Get(o => o.Code == d.orderCode && OrderTypeEnum.Summary != o.Type).FirstOrDefaultAsync();
                     var auditUser = await userManager.FindByIdAsync(auditUserId.ToString());
                     if (auditUser == null)
                     {
@@ -928,19 +900,49 @@ namespace Doitsu.Ecommerce.Core.Services
         {
             return await (orderCode).SomeNotNull()
                 .WithException("Mã của Đơn Tổng không hợp lệ.")
-                .MapAsync(async req =>
+                .FlatMapAsync(async req =>
                 {
-                    var order = await this.GetAsTracking(o => o.Code == orderCode && OrderTypeEnum.Sale == o.Type)
-                        .Where(o => o.Status != (int)OrderStatusEnum.Cancel)
-                        .FirstOrDefaultAsync();
-                    order.Status = (int)OrderStatusEnum.Done;
-                    this.Update(order);
-                    await this.CommitAsync();
-                    return this.Mapper.Map<OrderViewModel>(order);
+                    var order = await this.GetAsTracking(o => o.Code == orderCode && OrderTypeEnum.Summary != o.Type).Where(o => o.Status != (int)OrderStatusEnum.Cancel).FirstOrDefaultAsync();
+                    var auditUser = await userManager.FindByIdAsync(userId.ToString());
+                    if (auditUser == null)
+                    {
+                        return Option.None<OrderViewModel, string>("Tài khoản đang thao tác hủy đơn hàng không tồn tại hoặc bị xóa.");
+                    }
+                    var isInRoleAdmin = await userManager.IsInRoleAsync(auditUser, Constants.UserRoles.ADMIN);
+                    if (order == null) return Option.None<OrderViewModel, string>("Không tìm thấy đơn hàng phù hợp");
+                    else if(!isInRoleAdmin) return Option.None<OrderViewModel, string>($"Đơn hàng {orderCode} không thể hoàn thành do người thao tác không phải là Admin.");
+                    else if(order.Status == (int)OrderStatusEnum.Cancel) return Option.None<OrderViewModel, string>($"Đơn hàng {orderCode} đã HỦY nên không thể hoàn thành.");
+                    else if(order.Status == (int)OrderStatusEnum.New) return Option.None<OrderViewModel, string>($"Đơn hàng {orderCode} đang là đơn hàng MỚI và chưa được XỬ LÝ nên không thể hoàn thành.");
+                    else
+                    {
+                        order.Status = (int)OrderStatusEnum.Done;
+                        this.Update(order);
+                        await this.CommitAsync();
+                        return Option.Some<OrderViewModel, string>(this.Mapper.Map<OrderViewModel>(order));
+                    }
+                });
+        }
+
+        public async Task<Option<OrderViewModel, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum, int auditUserId, string note = "")
+        {
+            return await (orderId, statusEnum).SomeNotNull()
+                .WithException(string.Empty)
+                .FilterAsync(async d => await this.SelfRepository.AnyAsync(x => x.Id == d.orderId), "Không thể tim thấy đơn hàng cần đổi trạng thái")
+                .FlatMapAsync(async d =>
+                {
+                    var orderCode = await this.Get(o => o.Id == orderId).Select(o => o.Code).FirstOrDefaultAsync();
+                    switch(statusEnum)
+                    {
+                        case OrderStatusEnum.Cancel:
+                            return await CancelOrderAsync(orderCode, auditUserId, note);
+                        case OrderStatusEnum.Done:
+                            return await CompleteOrderAsync(orderCode, auditUserId);
+                        default:
+                            return Option.None<OrderViewModel, string>("Không thể chuyển đơn hàng sang trạng thái này.");
+                    }
                 });
         }
         #endregion
-
 
         #region Utilization 
 
