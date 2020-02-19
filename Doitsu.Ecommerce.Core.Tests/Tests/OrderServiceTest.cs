@@ -117,7 +117,6 @@ namespace Doitsu.Ecommerce.Core.Tests
             }
         }
 
-        [System.Obsolete]
         [Fact]
         private async Task Test_CreateOrderWithProductOption_NormalProducts()
         {
@@ -136,13 +135,113 @@ namespace Doitsu.Ecommerce.Core.Tests
                     foreach (var order in orders1)
                     {
                         (await orderService.CreateSaleOrderWithOptionAsync(order))
-                            .MatchSome(res => Assert.NotNull(res));
+                            .MatchNone(error => Assert.True(error.IsNullOrEmpty()));
                     }
                 }
             }
         }
 
-        [System.Obsolete]
+        [Fact]
+        private async Task Test_ChangeStatusOrder_Done()
+        {
+            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            {
+                await InitialDatabaseAsync(webhost);
+                var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
+                using (var scope = scopeFactory.CreateScope())
+                {
+                    // Add Products
+                    var userManager = scope.ServiceProvider.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
+                    var orderService = scope.ServiceProvider.GetService<IOrderService>();
+                    var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
+
+                    var orders1 = PrepareOrders(user.Id);
+                    foreach (var order in orders1)
+                    {
+                        (await orderService.CreateSaleOrderWithOptionAsync(order))
+                            .MatchNone(error => Assert.True(error.IsNullOrEmpty()));
+                    }
+                }
+
+                using (var scope = scopeFactory.CreateScope())
+                {
+                    var userManager = scope.ServiceProvider.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
+                    var orderService = scope.ServiceProvider.GetService<IOrderService>();
+
+                    // ADMIN USER
+                    var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
+                    var orders = orderService.Get(o => o.Type == OrderTypeEnum.Sale && o.Status == (int)OrderStatusEnum.New)
+                        .Select(o => orderService.Mapper.Map<OrderViewModel>(o))
+                        .ToImmutableList();
+
+                    var summaryOrder = new CreateSummaryOrderViewModel()
+                    {
+                        Note = "Order Summary Testing",
+                        Orders = orders.ToList()
+                    };
+                    (await orderService.CreateSummaryOrderAsync(summaryOrder, user.Id))
+                        .MatchNone(error => Assert.True(error.IsNullOrEmpty()));
+                  
+                }
+
+                using (var scope = scopeFactory.CreateScope())
+                {
+                    var userManager = scope.ServiceProvider.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
+                    var orderService = scope.ServiceProvider.GetService<IOrderService>();
+
+                    // ADMIN USER
+                    var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
+                    var order = await orderService.Get(o => o.Type == OrderTypeEnum.Sale && o.Status == (int)OrderStatusEnum.Processing)
+                        .Select(o => orderService.Mapper.Map<OrderViewModel>(o))
+                        .FirstOrDefaultAsync();
+                   
+                    (await orderService.ChangeOrderStatus(order.Id, OrderStatusEnum.Done, user.Id, "Complete Note"))
+                        .MatchNone(error => 
+                            Assert.True(error.IsNullOrEmpty()));
+                }
+            }
+        }
+
+        [Fact]
+        private async Task Test_ChangeStatusOrder_Cancel()
+        {
+            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            {
+                await InitialDatabaseAsync(webhost);
+                var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
+                using (var scope = scopeFactory.CreateScope())
+                {
+                    // Add Products
+                    var userManager = scope.ServiceProvider.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
+                    var orderService = scope.ServiceProvider.GetService<IOrderService>();
+                    var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
+
+                    var orders1 = PrepareOrders(user.Id);
+                    foreach (var order in orders1)
+                    {
+                        (await orderService.CreateSaleOrderWithOptionAsync(order))
+                            .MatchNone(error => Assert.True(error.IsNullOrEmpty()));
+                    }
+                }
+
+                using (var scope = scopeFactory.CreateScope())
+                {
+                    var userManager = scope.ServiceProvider.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
+                    var orderService = scope.ServiceProvider.GetService<IOrderService>();
+
+                    // ADMIN USER
+                    var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
+                    var orderId = await orderService.Get(o => o.Type == OrderTypeEnum.Sale && o.Status == (int)OrderStatusEnum.New)
+                        .Select(o => o.Id)
+                        .FirstOrDefaultAsync();
+                    (await orderService.ChangeOrderStatus(orderId, OrderStatusEnum.Cancel, user.Id, "Cancel Note"))
+                        .MatchNone(error => Assert.True(error.IsNullOrEmpty()));
+                }
+
+                Assert.True(true);
+            }
+        }
+
         [Fact]
         private async Task Test_CreateOrderWithProductOption_DisabledProducts()
         {
@@ -181,7 +280,8 @@ namespace Doitsu.Ecommerce.Core.Tests
                     foreach (var order in orders1)
                     {
                         (await orderService.CreateSaleOrderWithOptionAsync(order))
-                            .MatchNone(error => Assert.True(!error.IsNullOrEmpty()));
+                            .MatchNone(error => 
+                                Assert.True(!error.IsNullOrEmpty()));
                     }
                 }
             }
