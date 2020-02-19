@@ -61,7 +61,7 @@ namespace Doitsu.Ecommerce.Core.Services
             switch (type)
             {
                 case UserTransactionTypeEnum.Expense:
-                    userTransaction.Description = $"THANH TOÁN đơn hàng {orders.Code}, Số diện thoại {orders.DeliveryPhone}, ";
+                    userTransaction.Description = $"THANH TOÁN đơn hàng {orders.Code}, ";
                     var optionNameValues = productVariants.Select(pv => {
                        return pv.ProductVariantOptionValues.Select(
                            pvov => $"{pvov.ProductOption.Name}: {pvov.ProductOptionValue.Value}"
@@ -77,6 +77,12 @@ namespace Doitsu.Ecommerce.Core.Services
                 case UserTransactionTypeEnum.Rollback:
                     userTransaction.Description = userTransaction.Description.IsNullOrEmpty() 
                         ? $"HOÀN TIỀN từ đơn hàng {orders.Code}" 
+                        : userTransaction.Description;
+                    break;
+
+                case UserTransactionTypeEnum.Withdrawal:
+                    userTransaction.Description = userTransaction.Description.IsNullOrEmpty()
+                        ? $"RÚT TIỀN từ đơn hàng {orders.Code}"
                         : userTransaction.Description;
                     break;
             }
