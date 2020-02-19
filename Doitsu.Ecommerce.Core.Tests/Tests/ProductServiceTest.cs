@@ -29,7 +29,6 @@ namespace Doitsu.Ecommerce.Core.Tests
         {
         }
 
-
         private async Task InitialDatabaseAsync(IWebHost webhost)
         {
             var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
@@ -76,8 +75,6 @@ namespace Doitsu.Ecommerce.Core.Tests
             }
         }
 
-
-        [System.Obsolete]
         [Fact]
         private async Task Test_GetProductVariantIdsFromFilterParamsAsync()
         {
@@ -102,8 +99,12 @@ namespace Doitsu.Ecommerce.Core.Tests
                                     SelectedValueId = 1
                                 },
                                 new ProductOptionFilterParamViewModel() {
-                                    Id = 2,
+                                    Id = 1,
                                     SelectedValueId = 4
+                                },
+                                new ProductOptionFilterParamViewModel() {
+                                    Id = 1,
+                                    SelectedValueId = 6
                                 }
                             }).ToArray()
                         }
@@ -114,21 +115,20 @@ namespace Doitsu.Ecommerce.Core.Tests
             }
         }
 
-        [System.Obsolete]
         [Fact]
         private async Task Test_FindProductFromOptionAsync()
         {
             using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
             {
+                await InitialDatabaseAsync(webhost);
                 var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
                 using (var scope = scopeFactory.CreateScope())
                 {
                     // Add Products
                     var productService = scope.ServiceProvider.GetService<IProductService>();
-                    var logger = scope.ServiceProvider.GetService<ILogger<ProductServiceTest>>();
-                    var listProductOptionValues = (await productService.Get(pro => pro.Code == _fixture.ProductData.First().Name)
+                    var listProductOptionValues = (await productService.Get(pro => pro.Code == _fixture.ProductData.First().Code)
                         .Include(p => p.ProductOptions)
-                        .ThenInclude(po => po.ProductOptionValues)
+                            .ThenInclude(po => po.ProductOptionValues)
                         .FirstOrDefaultAsync())
                     .ProductOptions
                     .Select(x => productService.Mapper.Map<ProductOptionValueViewModel>(x.ProductOptionValues.First()))
@@ -140,7 +140,6 @@ namespace Doitsu.Ecommerce.Core.Tests
             }
         }
 
-        [System.Obsolete]
         [Fact]
         private async Task Test_UpdateProductWithOption()
         {
@@ -148,22 +147,6 @@ namespace Doitsu.Ecommerce.Core.Tests
             {
                 await InitialDatabaseAsync(webhost);
                 var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
-                using (var scope = scopeFactory.CreateScope())
-                {
-                    // Add Products
-                    var productService = scope.ServiceProvider.GetService<IProductService>();
-                    var categoryService = scope.ServiceProvider.GetService<ICategoryService>();
-                    var logger = scope.ServiceProvider.GetService<ILogger<ProductServiceTest>>();
-
-                    await categoryService.CreateAsync<CategoryWithInverseParentViewModel>(_fixture.CategoryData);
-                    await categoryService.CommitAsync();
-
-                    var firstCategory = await categoryService.SelfRepository.AsNoTracking().FirstOrDefaultAsync();
-                    var createData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; });
-                    var firstProduct = createData.First();
-                    (await productService.CreateProductWithOptionAsync(firstProduct)).MatchSome(res => Assert.True(res > 0));
-                }
-
                 using (var scope = scopeFactory.CreateScope())
                 {
                     // Add Products
@@ -185,7 +168,6 @@ namespace Doitsu.Ecommerce.Core.Tests
             }
         }
 
-        [System.Obsolete]
         [Fact]
         private async Task Test_DeleteProductOptions()
         {
@@ -193,23 +175,6 @@ namespace Doitsu.Ecommerce.Core.Tests
             {
                 var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
                 await InitialDatabaseAsync(webhost);
-                using (var scope = scopeFactory.CreateScope())
-                {
-                    // Add Products
-                    var productService = scope.ServiceProvider.GetService<IProductService>();
-                    var categoryService = scope.ServiceProvider.GetService<ICategoryService>();
-                    var dbContext = scope.ServiceProvider.GetService<EcommerceDbContext>();
-                    var logger = scope.ServiceProvider.GetService<ILogger<ProductServiceTest>>();
-                    await categoryService.CreateAsync<CategoryWithInverseParentViewModel>(_fixture.CategoryData);
-                    await dbContext.SaveChangesAsync();
-
-                    var firstCategory = await dbContext.Set<Categories>().AsNoTracking().FirstOrDefaultAsync();
-                    var createData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; });
-                    var firstProduct = createData.First();
-                    var result = await productService.CreateProductWithOptionAsync(firstProduct);
-                    result.MatchSome(res => Assert.True(res > 0));
-                }
-
                 using (var scope = scopeFactory.CreateScope())
                 {
                     // Add Products
