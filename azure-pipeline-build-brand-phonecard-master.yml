@@ -15,6 +15,13 @@ variables:
 steps:
 
 - task: DotNetCoreCLI@2
+  displayName: "Building Test Process"
+  inputs:
+    command: 'build'
+    projects: 'Doitsu.Ecommerce.Core.Tests/Doitsu.Ecommerce.Core.Tests.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
   displayName: "Building Process"
   inputs:
     command: 'build'
