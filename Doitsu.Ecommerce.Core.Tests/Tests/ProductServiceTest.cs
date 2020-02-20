@@ -4,10 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Doitsu.Ecommerce.Core.Data;
-using Doitsu.Ecommerce.Core.Data.Entities;
-using Doitsu.Ecommerce.Core.Data.Identities;
-using Doitsu.Ecommerce.Core.IdentitiesExtension;
-using Doitsu.Ecommerce.Core.IdentityManagers;
 using Doitsu.Ecommerce.Core.Services;
 using Doitsu.Ecommerce.Core.Tests.Helpers;
 using Doitsu.Ecommerce.Core.ViewModels;
