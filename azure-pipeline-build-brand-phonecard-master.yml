@@ -13,21 +13,6 @@ variables:
     buildConfiguration: 'Release'
 
 steps:
-- task: DotNetCoreCLI@2
-  displayName: "Building Test Process"
-  inputs:
-    command: 'build'
-    projects: 'Doitsu.Ecommerce.Core.Tests/Doitsu.Ecommerce.Core.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration)'
-
-- task: VSTest@2
-  inputs:
-    testSelector: 'testAssemblies'
-    testAssemblyVer2: |
-      **\*test*.dll
-      !**\*TestAdapter.dll
-      !**\obj\**
-    searchFolder: '$(System.DefaultWorkingDirectory)'
 
 - task: DotNetCoreCLI@2
   displayName: "Building Process"
