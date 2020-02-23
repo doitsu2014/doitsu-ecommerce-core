@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
-    public partial class ProductVariantPromotion : Migration
+    public partial class ProdVariant_UserTransaction_SummaryOrder : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -35,6 +35,50 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 name: "Sku",
                 table: "Products");
 
+            migrationBuilder.AlterColumn<int>(
+                name: "Status",
+                table: "Orders",
+                nullable: false,
+                defaultValue: 0,
+                oldClrType: typeof(int),
+                oldType: "int");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "DeliveryName",
+                table: "Orders",
+                maxLength: 125,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(255)",
+                oldMaxLength: 255,
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "DeliveryEmail",
+                table: "Orders",
+                maxLength: 125,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(255)",
+                oldMaxLength: 255,
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "DeliveryAddress",
+                table: "Orders",
+                maxLength: 255,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(300)",
+                oldMaxLength: 300,
+                oldNullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "CancelNote",
+                table: "Orders",
+                maxLength: 255,
+                nullable: true);
+
             migrationBuilder.AddColumn<string>(
                 name: "Dynamic01",
                 table: "Orders",
@@ -62,7 +106,7 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "Dynamic05",
                 table: "Orders",
-                maxLength: 1000,
+                maxLength: 255,
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
@@ -75,6 +119,17 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 name: "Priority",
                 table: "Orders",
                 nullable: true);
+
+            migrationBuilder.AddColumn<int>(
+                name: "SummaryOrderId",
+                table: "Orders",
+                nullable: true);
+
+            migrationBuilder.AddColumn<int>(
+                name: "Type",
+                table: "Orders",
+                nullable: false,
+                defaultValue: 0);
 
             migrationBuilder.AddColumn<string>(
                 name: "Note",
@@ -147,12 +202,15 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Description = table.Column<string>(maxLength: 500, nullable: true),
-                    Type = table.Column<int>(nullable: false, defaultValue: 1),
+                    Type = table.Column<int>(nullable: false),
                     CreatedTime = table.Column<DateTime>(nullable: false, defaultValueSql: "(getutcdate())"),
                     OrderId = table.Column<int>(nullable: false),
                     UserId = table.Column<int>(nullable: false),
                     Amount = table.Column<decimal>(nullable: false, defaultValue: 0m),
+                    Sign = table.Column<int>(nullable: false),
+                    DestinationBalance = table.Column<decimal>(nullable: false),
+                    CurrentBalance = table.Column<decimal>(nullable: false),
+                    Description = table.Column<string>(maxLength: 500, nullable: true),
                     Active = table.Column<bool>(nullable: false, defaultValue: true),
                     Vers = table.Column<byte[]>(rowVersion: true, nullable: false)
                 },
@@ -181,6 +239,7 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProductOptionId = table.Column<int>(nullable: false),
                     Value = table.Column<string>(maxLength: 256, nullable: true),
+                    IsSpecial = table.Column<bool>(nullable: false, defaultValue: false),
                     Vers = table.Column<byte[]>(rowVersion: true, nullable: false),
                     Active = table.Column<bool>(nullable: false, defaultValue: true),
                     Status = table.Column<int>(nullable: false, defaultValue: 1)
@@ -202,11 +261,12 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductVariantId = table.Column<int>(nullable: false),
-                    DiscountPercent = table.Column<float>(nullable: false, defaultValue: 0f),
-                    Name = table.Column<string>(maxLength: 255, nullable: true),
+                    DiscountPercent = table.Column<float>(nullable: false),
+                    Name = table.Column<string>(nullable: true),
                     Active = table.Column<bool>(nullable: false, defaultValue: true),
-                    Vers = table.Column<byte[]>(rowVersion: true, nullable: false)
+                    CreatedDateTime = table.Column<DateTime>(nullable: false),
+                    Vers = table.Column<byte[]>(rowVersion: true, nullable: false),
+                    ProductVariantId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -216,7 +276,7 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         column: x => x.ProductVariantId,
                         principalTable: "ProductVariants",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -253,6 +313,11 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_SummaryOrderId",
+                table: "Orders",
+                column: "SummaryOrderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderItems_ProductVariantId",
@@ -351,6 +416,14 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
+                name: "FK_Orders_Orders_SummaryOrderId",
+                table: "Orders",
+                column: "SummaryOrderId",
+                principalTable: "Orders",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.AddForeignKey(
                 name: "FK__ProductTa__Produ__14270015",
                 table: "ProductTags",
                 column: "ProductId",
@@ -390,6 +463,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 table: "OrderItems");
 
             migrationBuilder.DropForeignKey(
+                name: "FK_Orders_Orders_SummaryOrderId",
+                table: "Orders");
+
+            migrationBuilder.DropForeignKey(
                 name: "FK__ProductTa__Produ__14270015",
                 table: "ProductTags");
 
@@ -416,8 +493,16 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 name: "ProductOptions");
 
             migrationBuilder.DropIndex(
+                name: "IX_Orders_SummaryOrderId",
+                table: "Orders");
+
+            migrationBuilder.DropIndex(
                 name: "IX_OrderItems_ProductVariantId",
                 table: "OrderItems");
+
+            migrationBuilder.DropColumn(
+                name: "CancelNote",
+                table: "Orders");
 
             migrationBuilder.DropColumn(
                 name: "Dynamic01",
@@ -448,6 +533,14 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 table: "Orders");
 
             migrationBuilder.DropColumn(
+                name: "SummaryOrderId",
+                table: "Orders");
+
+            migrationBuilder.DropColumn(
+                name: "Type",
+                table: "Orders");
+
+            migrationBuilder.DropColumn(
                 name: "Note",
                 table: "OrderItems");
 
@@ -464,6 +557,44 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 table: "Products",
                 type: "int",
                 nullable: true);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "Status",
+                table: "Orders",
+                type: "int",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldDefaultValue: 0);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "DeliveryName",
+                table: "Orders",
+                type: "nvarchar(255)",
+                maxLength: 255,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldMaxLength: 125,
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "DeliveryEmail",
+                table: "Orders",
+                type: "nvarchar(255)",
+                maxLength: 255,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldMaxLength: 125,
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "DeliveryAddress",
+                table: "Orders",
+                type: "nvarchar(300)",
+                maxLength: 300,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldMaxLength: 255,
+                oldNullable: true);
 
             migrationBuilder.AddForeignKey(
                 name: "FK__BlogTags__BlogId__07C12930",
