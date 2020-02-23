@@ -15,12 +15,15 @@ using Doitsu.Service.Core;
 using Doitsu.Service.Core.Abstraction;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using static Doitsu.Ecommerce.Core.Constants;
+
 namespace Doitsu.Ecommerce.Core.Services
 {
     public interface IBlogService : IBaseService<Blogs>
     {
-        Task<DoitsuPaginatedList<BlogOverviewViewModel>> GetAllDetailBlogsByCategoryWithPaging(string blogCategorySlug, int page = 0, int limit = 4);
+        Task<DoitsuPaginatedList<BlogOverviewViewModel>> GetAllDetailBlogsByCategoryWithPagingAsync(string blogCategorySlug, int page = 0, int limit = 4);
         Task<BlogDetailViewModel> GetBlogDetailBySlugAsync(string slug);
+        Task<DoitsuPaginatedList<BlogDetailViewModel>> GetPromotionBlogDetails(int page = 0, int limit = 10);
         Task<ImmutableList<BlogOverviewViewModel>> GetRandomOverviewAsync(int take = 5);
         Task<int> UpdateWithConstraintAsync(BlogDetailViewModel data, EcommerceIdentityUser publisher);
         Task<int> CreateWithConstraintAsync(BlogDetailViewModel data, EcommerceIdentityUser publisher, EcommerceIdentityUser creater);
@@ -28,7 +31,6 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public class BlogService : BaseService<Blogs>, IBlogService
     {
-
         private readonly IBlogTagService blogTagService;
 
         public BlogService(EcommerceDbContext dbContext,
@@ -53,7 +55,7 @@ namespace Doitsu.Ecommerce.Core.Services
             return listShuffleOverview.ToImmutableList();
         }
 
-        public async Task<DoitsuPaginatedList<BlogOverviewViewModel>> GetAllDetailBlogsByCategoryWithPaging(string blogCategorySlug, int page = 0, int limit = 4)
+        public async Task<DoitsuPaginatedList<BlogOverviewViewModel>> GetAllDetailBlogsByCategoryWithPagingAsync(string blogCategorySlug, int page = 0, int limit = 4)
         {
             var blogsQuery = this
                 .Get(x => x.BlogCategory.Slug == blogCategorySlug);
@@ -138,6 +140,17 @@ namespace Doitsu.Ecommerce.Core.Services
                     });
                 }
             }
+        }
+
+        public async Task<DoitsuPaginatedList<BlogDetailViewModel>> GetPromotionBlogDetails(int page = 0, int limit = 10)
+        {
+            var result = (await this.SelfRepository.Include(b => b.BlogCategory).AsNoTracking()
+                .Where(b => b.BlogCategory.Slug == SuperFixedBlogCategorySlug.PROMOTION)
+                .Skip(page * limit)
+                .Take(limit)
+                .ProjectTo<BlogDetailViewModel>(this.Mapper.ConfigurationProvider)
+                .ToListAsync());
+           return new DoitsuPaginatedList<BlogDetailViewModel>(result, result.Count, page, limit); 
         }
     }
 }
