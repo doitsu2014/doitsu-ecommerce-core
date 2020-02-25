@@ -251,8 +251,8 @@ namespace Doitsu.Ecommerce.Core.Services
                             var user = await userManager.FindByIdAsync(o.UserId.ToString());
                             var messagePayloads = new List<MessagePayload>()
                             {
-                            await emailService.PrepareLeaderOrderMailConfirmAsync(o.User, o),
-                            await emailService.PrepareCustomerOrderMailConfirm(o.User, o)
+                                await emailService.PrepareLeaderOrderMailConfirmAsync(o.User, o),
+                                await emailService.PrepareCustomerOrderMailConfirm(o.User, o)
                             };
 
                             var emailResult = await emailService.SendEmailWithBachMocWrapperAsync(messagePayloads);
