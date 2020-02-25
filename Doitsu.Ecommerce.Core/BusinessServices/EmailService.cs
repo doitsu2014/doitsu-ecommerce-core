@@ -185,7 +185,7 @@ namespace Doitsu.Ecommerce.Core.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Cannot send email to confirm Order Code {order.Code} of {user.Fullname} with id {user.Id}");
+                logger.LogError(ex, $"PrepareLeaderOrderMailConfirmAsync: cannot prepare mail to confirm Order Code {order.Code} of {user.Fullname} with id {user.Id}");
                 return null;
             }
         }
@@ -217,7 +217,7 @@ namespace Doitsu.Ecommerce.Core.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Cannot send email to confirm Customer Feedback");
+                logger.LogError(ex, $"PrepareLeaderOrderMailConfirmAsync:Cannot send email to confirm Customer Feedback");
                 return null;
             }
         }
