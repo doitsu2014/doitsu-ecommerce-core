@@ -381,7 +381,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public async Task<ProductVariantDetailViewModel> FindProductVariantFromOptionsAsync(ICollection<ProductOptionValueViewModel> listProductOptions)
         {
-            var poIds = listProductOptions.Select(po => po.Id);
+            var poIds = listProductOptions.Where(po => po != null).Select(po => po.Id);
             var totalIds = poIds.Count();
 
             return await this.DbContext.ProductVariants.AsNoTracking()
