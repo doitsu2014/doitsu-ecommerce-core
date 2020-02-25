@@ -40,11 +40,16 @@ namespace Doitsu.Ecommerce.Core.Tests
                 var dbContext = scope.ServiceProvider.GetService<EcommerceDbContext>();
                 var categoryService = scope.ServiceProvider.GetService<ICategoryService>();
                 var productService = scope.ServiceProvider.GetService<IProductService>();
+                var brandService = scope.ServiceProvider.GetService<IBrandService>();
                 var productVariantService = scope.ServiceProvider.GetService<IProductVariantService>();
 
                 await dbContext.Database.EnsureDeletedAsync();
                 await dbContext.Database.MigrateAsync();
                 await DatabaseHelper.MakeEmptyDatabase(webhost, _poolKey);
+
+                // Add Brand
+                await brandService.CreateAsync(_fixture.BrandData);
+                await brandService.CommitAsync();
 
                 // Add Category
                 await categoryService.CreateAsync<CategoryWithInverseParentViewModel>(_fixture.CategoryData);
