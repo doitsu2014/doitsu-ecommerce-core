@@ -20,6 +20,7 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
 
             builder.Property(x => x.Value).HasMaxLength(256);
             builder.Property(x => x.Status).HasDefaultValue(ProductOptionValueStatusEnum.Available);
+            builder.Property(x => x.IsSpecial).HasDefaultValue(false);
         }
     }
 }

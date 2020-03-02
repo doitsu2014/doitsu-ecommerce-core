@@ -863,6 +863,11 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
+                    b.Property<bool>("IsSpecial")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<int>("ProductOptionId")
                         .HasColumnType("int");
 

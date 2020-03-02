@@ -3,7 +3,7 @@
   <PropertyGroup>
     <LangVersion>8.0</LangVersion>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <PackageVersion>3.1.100.18</PackageVersion>
+    <PackageVersion>3.1.100.23</PackageVersion>
     <Title>Doitsu.Ecommerce.Core</Title>
     <PackageId>Doitsu.Ecommerce.Core</PackageId>
     <Authors>Doitsu Technology</Authors>
@@ -21,22 +21,20 @@
     <PackageProjectUrl>https://dev.azure.com/doitsutechnology/Doitsu.Technology.Core</PackageProjectUrl>
     <PackageIconUrl>https://dev.azure.com/doitsutechnology/_apis/GraphProfile/MemberAvatars/faa2f78a-c648-4d7d-8307-b8beeb82fe12?overrideDisplayName=Doitsu.Technology.Core&amp;size=2</PackageIconUrl>
     <RepositoryType>Azure Repos</RepositoryType>
-    <PackageReleaseNotes>
-      - Fix bug spelling.
-    </PackageReleaseNotes>
+    <PackageReleaseNotes>- Fix minor bugs</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="4.5.3.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.2" />
     <PackageReference Include="SixLabors.ImageSharp.Web" Version="1.0.0-beta0007" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.0" />
-    <PackageReference Include="Doitsu.Service.Core" Version="3.1.100.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.2" />
+    <PackageReference Include="Doitsu.Service.Core" Version="3.1.100.9" />
   </ItemGroup>
   <ItemGroup>
     <!-- <ProjectReference Include="../../Doitsu.Technology.Core/Doitsu.Service.Core/Doitsu.Service.Core.csproj" /> -->

@@ -26,6 +26,15 @@ namespace Doitsu.Ecommerce.Core
             public const string GALLERY = "thu-vien";
         }
 
+        public static class SuperFixedBlogCategorySlug
+        {
+            public const string PROMOTION = "khuyen-mai";
+            public const string NEWS = "tin-tuc";
+            public const string WHITE_BOARD = "thong-bao";
+        }
+
+
+
         public static class CacheKey
         {
             public const string MENU_ITEMS = "MENU_ITEMS_CACHE";
@@ -36,6 +45,7 @@ namespace Doitsu.Ecommerce.Core
             public const string RANDOM_BLOGS = "RANDOM_BLOGS";
             public const string SLIDERS = "SLIDERS";
             public const string CATALOGUES = "CATALOGUES";
+            public const string PROMOTION_BLOGS = "PROMOTION_BLOGS";
         }
 
         public static class UserRoles

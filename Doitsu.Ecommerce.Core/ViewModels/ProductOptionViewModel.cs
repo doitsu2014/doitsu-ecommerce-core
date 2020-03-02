@@ -28,6 +28,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public int ProductOptionId { get; set; }
         [JsonProperty("value")]
         public string Value { get; set; }
+        [JsonProperty("isSpecial")]
+        public bool IsSpecial { get; set; }
         [JsonProperty("active")]
         public bool Active { get; set; }
         [JsonProperty("status")]
