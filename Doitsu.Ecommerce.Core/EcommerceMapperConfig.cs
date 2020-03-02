@@ -27,7 +27,7 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<EcommerceIdentityRole, EcommerceIdentityRoleViewModel>();
                 #endregion
                 #region Categories
-                cfg.CreateMap<Categories, CategoryMenuViewModel>();
+                cfg.CreateMap<Categories, CategoryMenuViewModel>().MaxDepth(5);
                 cfg.CreateMap<Categories, CategoryViewModel>();
                 cfg.CreateMap<Categories, CategoryWithProductOverviewViewModel>();
                 cfg.CreateMap<Categories, CategoryWithParentViewModel>().MaxDepth(3);
@@ -76,11 +76,13 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<OrderViewModel, Orders>();
                 cfg.CreateMap<CreateOrderWithOptionViewModel, Orders>();
                 cfg.CreateMap<Orders, OrderViewModel>();
-                cfg.CreateMap<Orders, OrderDetailViewModel>();
+                cfg.CreateMap<Orders, OrderDetailViewModel>().MaxDepth(3);
 
                 cfg.CreateMap<OrderItems, OrderItemViewModel>().ReverseMap();
                 cfg.CreateMap<OrderItemViewModel, OrderItems>();
-                cfg.CreateMap<CreateOrderItemWithOptionViewModel, OrderItems>();
+                cfg.CreateMap<CreateOrderItemWithOptionViewModel, OrderItems>()
+                    .ForMember(o => o.ProductVariant, opt => opt.Ignore())
+                    .ForMember(o => o.Product, opt => opt.Ignore());
                 #endregion
                 cfg.CreateMap<Blogs, BlogDetailViewModel>();
                 cfg.CreateMap<Blogs, BlogOverviewViewModel>();
@@ -119,6 +121,8 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<PromotionDetail, PromotionDetailViewModel>();
                 cfg.CreateMap<PromotionDetailViewModel, PromotionDetail>();
 
+                cfg.CreateMap<UserTransactionViewModel, UserTransaction>();
+                cfg.CreateMap<UserTransaction, UserTransactionViewModel>();
             });
 
             IMapper mapper = autoMapperConfig.CreateMapper();

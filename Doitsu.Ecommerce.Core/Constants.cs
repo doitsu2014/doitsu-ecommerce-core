@@ -5,6 +5,7 @@ namespace Doitsu.Ecommerce.Core
         public static class ClaimTypeConstants
         {
             public const string USER_ID = "UserId";
+            public const string FULL_NAME = "Fullname";
         }
 
         public static class BrandInformation
@@ -25,6 +26,15 @@ namespace Doitsu.Ecommerce.Core
             public const string GALLERY = "thu-vien";
         }
 
+        public static class SuperFixedBlogCategorySlug
+        {
+            public const string PROMOTION = "khuyen-mai";
+            public const string NEWS = "tin-tuc";
+            public const string WHITE_BOARD = "thong-bao";
+        }
+
+
+
         public static class CacheKey
         {
             public const string MENU_ITEMS = "MENU_ITEMS_CACHE";
@@ -35,6 +45,7 @@ namespace Doitsu.Ecommerce.Core
             public const string RANDOM_BLOGS = "RANDOM_BLOGS";
             public const string SLIDERS = "SLIDERS";
             public const string CATALOGUES = "CATALOGUES";
+            public const string PROMOTION_BLOGS = "PROMOTION_BLOGS";
         }
 
         public static class UserRoles
@@ -42,6 +53,26 @@ namespace Doitsu.Ecommerce.Core
             public const string ADMIN = "Administrator";
             public const string ACTIVE_USER = "ActiveUser";
             public const string ALL = "Administrator,ActiveUser";
+        }
+
+        public static class DoitsuAuthenticationSchemes
+        {
+            public const string JWT_SCHEME = "api_jwt";
+        }
+
+        public static class OrderInformation
+        {
+            public const int ORDER_CODE_LENGTH = 12;
+        }
+
+        public static class FileExtension
+        {
+            public const string EXCEL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        }
+
+        public static class DateTimeFormat
+        {
+            public const string Default = "MM/dd/yyyy";
         }
     }
 }

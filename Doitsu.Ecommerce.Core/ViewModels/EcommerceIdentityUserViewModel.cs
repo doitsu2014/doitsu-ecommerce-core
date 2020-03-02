@@ -22,6 +22,13 @@ namespace Doitsu.Ecommerce.Core.ViewModels
             set;
         }
 
+        [JsonProperty("balance")]
+        public decimal Balance
+        {
+            get;
+            set;
+        }
+
         [JsonProperty("gender")]
         public int Gender
         {

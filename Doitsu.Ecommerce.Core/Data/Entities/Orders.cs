@@ -26,12 +26,17 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public string Dynamic03 { get; set; }
         public string Dynamic04 { get; set; }
         public string Dynamic05 { get; set; }
-        public string Note {get;set;}
-        public OrderPriorityEnum? Priority {get;set;}
+        public string Note { get; set; }
+        public string CancelNote { get; set; }
+        public int? SummaryOrderId { get; set; }
+        public OrderTypeEnum Type { get; set; }
+        public OrderPriorityEnum? Priority { get; set; }
         public byte[] Vers { get; set; }
 
         public virtual EcommerceIdentityUser User { get; set; }
         public virtual ICollection<OrderItems> OrderItems { get; set; }
         public virtual ICollection<UserTransaction> UserTransactions { get; set; }
+        public virtual ICollection<Orders> InverseSummaryOrders { get; set; }
+        public virtual Orders SummaryOrder { get; set; }
     }
 }

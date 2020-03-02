@@ -8,6 +8,7 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
     {
         public int ProductOptionId { get; set; }
         public string Value { get; set; }
+        public bool IsSpecial { get; set; }
         public byte[] Vers { get; set; }
         public bool Active  { get; set; }
         public ProductOptionValueStatusEnum Status { get; set; }

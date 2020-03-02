@@ -10,14 +10,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20191130120405_ProductVariantPromotion")]
-    partial class ProductVariantPromotion
+    [Migration("20200223164828_ProdVariant_UserTransaction_SummaryOrder")]
+    partial class ProdVariant_UserTransaction_SummaryOrder
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.0.0")
+                .HasAnnotation("ProductVersion", "3.1.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -670,6 +670,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
+                    b.Property<string>("CancelNote")
+                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(255);
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)")
@@ -681,16 +685,16 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasDefaultValueSql("(getutcdate())");
 
                     b.Property<string>("DeliveryAddress")
-                        .HasColumnType("nvarchar(300)")
-                        .HasMaxLength(300);
+                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(255);
 
                     b.Property<string>("DeliveryEmail")
-                        .HasColumnType("nvarchar(255)")
-                        .HasMaxLength(255);
+                        .HasColumnType("nvarchar(125)")
+                        .HasMaxLength(125);
 
                     b.Property<string>("DeliveryName")
-                        .HasColumnType("nvarchar(255)")
-                        .HasMaxLength(255);
+                        .HasColumnType("nvarchar(125)")
+                        .HasMaxLength(125);
 
                     b.Property<string>("DeliveryPhone")
                         .HasColumnType("nvarchar(20)")
@@ -716,8 +720,8 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasMaxLength(255);
 
                     b.Property<string>("Dynamic05")
-                        .HasColumnType("nvarchar(1000)")
-                        .HasMaxLength(1000);
+                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(255);
 
                     b.Property<decimal>("FinalPrice")
                         .HasColumnType("money");
@@ -730,12 +734,20 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("SummaryOrderId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("money");
 
                     b.Property<int>("TotalQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
@@ -752,6 +764,8 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.HasIndex("Code")
                         .IsUnique()
                         .HasName("UQ_Code");
+
+                    b.HasIndex("SummaryOrderId");
 
                     b.HasIndex("UserId");
 
@@ -850,6 +864,11 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
+
+                    b.Property<bool>("IsSpecial")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<int>("ProductOptionId")
                         .HasColumnType("int");
@@ -1121,16 +1140,16 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
+                    b.Property<DateTime>("CreatedDateTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<float>("DiscountPercent")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("real")
-                        .HasDefaultValue(0f);
+                        .HasColumnType("real");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(255)")
-                        .HasMaxLength(255);
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ProductVariantId")
+                    b.Property<int?>("ProductVariantId")
                         .HasColumnType("int");
 
                     b.Property<byte[]>("Vers")
@@ -1251,17 +1270,24 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("(getutcdate())");
 
+                    b.Property<decimal>("CurrentBalance")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(500)")
                         .HasMaxLength(500);
 
+                    b.Property<decimal>("DestinationBalance")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Sign")
+                        .HasColumnType("int");
+
                     b.Property<int>("Type")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1);
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -1622,6 +1648,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
 
             modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.Orders", b =>
                 {
+                    b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.Orders", "SummaryOrder")
+                        .WithMany("InverseSummaryOrders")
+                        .HasForeignKey("SummaryOrderId");
+
                     b.HasOne("Doitsu.Ecommerce.Core.Data.Identities.EcommerceIdentityUser", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
@@ -1715,10 +1745,8 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
             modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.PromotionDetail", b =>
                 {
                     b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.ProductVariants", "ProductVariant")
-                        .WithMany("PromotionDetails")
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId");
                 });
 
             modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.UserTransaction", b =>

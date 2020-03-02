@@ -42,7 +42,6 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
             return builder;
         }
 
-        [Obsolete]
         public static IWebHostBuilder PoolBuilderDb(string poolKey)
         {
             return StandardWebHostBuilderInternal()
@@ -61,7 +60,6 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 });
         }
 
-        [Obsolete]
         public static IWebHostBuilder StandardBuilderInMemory()
         {
             return StandardWebHostBuilderInternal()

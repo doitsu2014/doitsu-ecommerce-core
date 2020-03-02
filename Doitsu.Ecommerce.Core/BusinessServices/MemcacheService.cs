@@ -2,14 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
-using Doitsu.Service.Core;
 using Doitsu.Ecommerce.Core.ViewModels;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
-using Doitsu.Ecommerce.Core.Abstraction;
 using AutoMapper;
 using Doitsu.Ecommerce.Core.Data.Entities;
 
@@ -25,7 +22,9 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<ImmutableList<SliderViewModel>> GetSlidersAsync(int timeCache = 60);
         Task<ImmutableList<CatalogueViewModel>> GetCataloguesAsync(int timeCache = 60);
         Task<ImmutableList<BlogOverviewViewModel>> GetRandomBlogOverviewAsync(int take, int timeCache = 30);
+        Task<ImmutableList<BlogDetailViewModel>> GetPromotionBlogDetailsAsync(int take, int cachingMinutes = 30);
     }
+
 
     public class MemCacheService : IMemCacheService
     {
@@ -59,7 +58,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 if (!memoryCache.TryGetValue(Constants.CacheKey.BRAND_INFORMATION, out BrandViewModel brand))
                 {
                     var brandE = await brandService.FindByKeysAsync(brandId);
-                    if(brandE == null) brandE = new Brand();
+                    if (brandE == null) brandE = new Brand();
                     brand = mapper.Map<BrandViewModel>(brandE);
                     memoryCache.Set(Constants.CacheKey.BRAND_INFORMATION, brand, TimeSpan.FromMinutes(timeCache));
                 }
@@ -194,6 +193,27 @@ namespace Doitsu.Ecommerce.Core.Services
             {
                 logger.LogError(ex, "Get Sliders Async have a exception");
                 return ImmutableList<SliderViewModel>.Empty;
+            }
+        }
+
+        public async Task<ImmutableList<BlogDetailViewModel>> GetPromotionBlogDetailsAsync(int take, int cachingMinutes = 30)
+        {
+            try
+            {
+                var key = $"{Constants.CacheKey.PROMOTION_BLOGS}";
+
+                if (!memoryCache.TryGetValue(key, out ImmutableList<BlogDetailViewModel> promotionBlogs))
+                {
+                    promotionBlogs = (await blogService.GetPromotionBlogDetails(0, take)).Result;
+                    memoryCache.Set(key, promotionBlogs, TimeSpan.FromMinutes(cachingMinutes));
+                }
+
+                return promotionBlogs;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"{nameof(GetPromotionBlogDetailsAsync)} have a exception");
+                return ImmutableList<BlogDetailViewModel>.Empty;
             }
         }
 

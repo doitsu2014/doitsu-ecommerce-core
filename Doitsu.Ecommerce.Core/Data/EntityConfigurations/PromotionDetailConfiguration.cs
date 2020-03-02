@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 using Doitsu.Ecommerce.Core.Data.Entities;
 using EFCore.Abstractions.EntityConfigurations;
 using Microsoft.EntityFrameworkCore;
@@ -11,14 +12,14 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
         public override void Configure(EntityTypeBuilder<PromotionDetail> builder)
         {
             base.Configure(builder);
-            builder.Property(e => e.Name).HasMaxLength(255);
-            builder.Property(e => e.DiscountPercent).HasDefaultValue(0);
-
-            builder.HasOne(e => e.ProductVariant)
-                .WithMany(e => e.PromotionDetails)
-                .HasForeignKey(e => e.ProductVariantId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
+            // builder.Property(e => e.Name).HasMaxLength(255);
+            // builder.Property(e => e.DiscountPercent).HasDefaultValue(0);
+            // builder.Property(e => e.CreatedDateTime).HasDefaultValue(DateTime.Now.ToVietnamDateTime());
+            // builder
+            // .HasOne(e => e.ProductVariant)
+            //     .WithOne(e => e.PromotionDetail)
+            //     .HasForeignKey<PromotionDetail>(e => e.ProductVariantId)
+            //     .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
