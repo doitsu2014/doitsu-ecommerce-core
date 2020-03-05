@@ -63,7 +63,7 @@ namespace Doitsu.Ecommerce.Core.Tests
             app.UseForwardedHeaders();
             app.UseHttpsRedirection();
             app.UseDefaultFiles();
-            RootConfig.AppHosting(app, env, true);
+            RootConfig.AppHosting(app, true);
             app.UseStaticFiles();
             app.UseMvc(routes =>
             {
