@@ -3,7 +3,7 @@
   <PropertyGroup>
     <LangVersion>8.0</LangVersion>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <PackageVersion>3.1.100.23</PackageVersion>
+    <PackageVersion>3.1.100.24</PackageVersion>
     <Title>Doitsu.Ecommerce.Core</Title>
     <PackageId>Doitsu.Ecommerce.Core</PackageId>
     <Authors>Doitsu Technology</Authors>
@@ -19,9 +19,10 @@
     <Description>Doitsu.Ecommerce.Core is a library implement business logic and code first database for a Ecommerce Platform by AspNetCore. It is using Doitsu.Service.Core library as a helper library to implement abstraction.</Description>
     <RepositoryUrl>https://doitsutechnology@dev.azure.com/doitsutechnology/Doitsu.Technology.Core/_git/Doitsu.Ecommerce.Core</RepositoryUrl>
     <PackageProjectUrl>https://dev.azure.com/doitsutechnology/Doitsu.Technology.Core</PackageProjectUrl>
-    <PackageIconUrl>https://dev.azure.com/doitsutechnology/_apis/GraphProfile/MemberAvatars/faa2f78a-c648-4d7d-8307-b8beeb82fe12?overrideDisplayName=Doitsu.Technology.Core&amp;size=2</PackageIconUrl>
+    <PackageIcon>doitsu-logo.png</PackageIcon>
+    
     <RepositoryType>Azure Repos</RepositoryType>
-    <PackageReleaseNotes>- Fix minor bugs</PackageReleaseNotes>
+    <PackageReleaseNotes>Update SixLabors.ImageSharp.Web</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="4.5.3.2" />
@@ -31,7 +32,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.2" />
-    <PackageReference Include="SixLabors.ImageSharp.Web" Version="1.0.0-beta0007" />
+    <PackageReference Include="SixLabors.ImageSharp.Web" Version="1.0.0-beta0009" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.2" />
     <PackageReference Include="Doitsu.Service.Core" Version="3.1.100.9" />
@@ -41,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+    <None Include="Images\doitsu-logo.png" Pack="true" PackagePath=""/>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Resources\GeneralResource.vn.resx">
