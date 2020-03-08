@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.Globalization;
-using Doitsu.Ecommerce.Core.Abstraction;
-using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.AuthorizeBuilder;
 using Doitsu.Ecommerce.Core.Data;
 using Doitsu.Ecommerce.Core.Data.Identities;
@@ -67,8 +65,7 @@ namespace Doitsu.Ecommerce.Core
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        [System.Obsolete]
-        public static void AppHosting(IApplicationBuilder app, IHostingEnvironment env, bool isConfigImageSharpWeb = false)
+        public static void AppHosting(IApplicationBuilder app, bool isConfigImageSharpWeb = false)
         {
             // Using authorize
             app.UseAuthentication();
@@ -83,7 +80,6 @@ namespace Doitsu.Ecommerce.Core
             app.UseRequestLocalization(LocalizationOptions);
         }
 
-        [System.Obsolete]
         public static void Service(IServiceCollection services, IConfiguration configuration, bool isConfigImageSharpWeb = false)
         {
             #region Identity Database Config
@@ -146,11 +142,11 @@ namespace Doitsu.Ecommerce.Core
             #endregion
         }
         #region Config Image Sharp Methods
-        [System.Obsolete]
         private static void ConfigureCustomServicesAndCustomOptions(IServiceCollection services)
         {
+            // Use the factory methods to configure the PhysicalFileSystemCacheOptions
             services.AddImageSharpCore(
-                    options =>
+                options =>
                     {
                         options.Configuration = Configuration.Default;
                         options.MaxBrowserCacheDays = 7;
@@ -162,17 +158,12 @@ namespace Doitsu.Ecommerce.Core
                         options.OnPrepareResponse = _ => { };
                     })
                 .SetRequestParser<QueryCollectionRequestParser>()
-                .SetMemoryAllocator(provider => ArrayPoolMemoryAllocator.CreateWithAggressivePooling())
-                .SetCache(provider =>
+                .SetMemoryAllocator(provider => ArrayPoolMemoryAllocator.CreateWithMinimalPooling())
+                .Configure<PhysicalFileSystemCacheOptions>(options =>
                 {
-                    var p = new PhysicalFileSystemCache(
-                        provider.GetRequiredService<IHostingEnvironment>(),
-                        provider.GetRequiredService<MemoryAllocator>(),
-                        provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>());
-
-                    p.Settings[PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder;
-                    return p;
+                    options.CacheFolder = "different-cache";
                 })
+                .SetCache<PhysicalFileSystemCache>()
                 .SetCacheHash<CacheHash>()
                 .AddProvider<PhysicalFileSystemProvider>()
                 .AddProcessor<ResizeWebProcessor>()
