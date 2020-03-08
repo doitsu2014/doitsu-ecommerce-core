@@ -1,12 +1,21 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 using System.Threading.Tasks;
+
+using AutoMapper;
+
+using Doitsu.Ecommerce.Core.Abstraction;
+using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
+using Doitsu.Ecommerce.Core.Data;
+using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Ecommerce.Core.ViewModels;
+using Doitsu.Service.Core;
+
 using Microsoft.Extensions.Logging;
+
 using Optional;
 using Optional.Async;
-using Doitsu.Ecommerce.Core.Data.Entities;
-using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
-using Doitsu.Ecommerce.Core.Abstraction;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -17,9 +26,8 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public class BrandService : BaseService<Brand>, IBrandService
     {
-        public BrandService(IUnitOfWork unitOfWork, ILogger<BaseService<Brand>> logger) : base(unitOfWork, logger)
-        {
-        }
+        public BrandService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<Brand, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
+        { }
 
         public async Task<Option<Brand, string>> SettingAsync(BrandViewModel data)
         {
@@ -29,17 +37,17 @@ namespace Doitsu.Ecommerce.Core.Services
                 .Filter(x => !x.Name.IsNullOrEmpty(), "Tên công ty không được bỏ trống.")
                 .MapAsync(async x =>
                 {
-                    var exist = await FirstOrDefaultAsync(comp => comp.Id == x.Id);
+                    var exist = await FindByKeysAsync(x.Id);
                     if (exist != null)
                     {
-                        var result = Update<BrandViewModel>(x);
-                        await this.UnitOfWork.CommitAsync();
+                        var result = Update( this.Mapper.Map(x, exist));
+                        await CommitAsync();
                         return result;
                     }
                     else
                     {
-                        var result = await CreateAsync<BrandViewModel>(data);
-                        await this.UnitOfWork.CommitAsync();
+                        var result = await CreateAsync<BrandViewModel>(x);
+                        await CommitAsync();
                         return result;
                     }
                 });

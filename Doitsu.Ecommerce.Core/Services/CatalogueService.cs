@@ -3,6 +3,9 @@ using Microsoft.Extensions.Logging;
 using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
+using AutoMapper;
+using Doitsu.Ecommerce.Core.Data;
+
 namespace Doitsu.Ecommerce.Core.Services
 {
     public interface ICatalogueService : IBaseService<Catalogues>
@@ -11,7 +14,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public class CatalogueService : BaseService<Catalogues>, ICatalogueService
     {
-        public CatalogueService(IUnitOfWork unitOfWork, ILogger<BaseService<Catalogues>> logger) : base(unitOfWork, logger)
+        public CatalogueService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<Catalogues, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
         {
         }
     }

@@ -7,8 +7,10 @@ using Newtonsoft.Json;
 
 namespace Doitsu.Ecommerce.Core.ViewModels
 {
-    public class UserInforViewModel
+
+    public class UserPublicInforViewModel
     {
+
         [JsonProperty("fullName")]
         public string Fullname
         {
@@ -43,6 +45,51 @@ namespace Doitsu.Ecommerce.Core.ViewModels
             get;
             set;
         }
+
+        [JsonProperty("balance")]
+        public decimal Balance { get; set; }
+
+    }
+
+    public class UserInforViewModel
+    {
+        [JsonProperty("fullName")]
+        public string Fullname
+        {
+            get;
+            set;
+        }
+
+        [JsonProperty("phoneNumber")]
+        public string PhoneNumber
+        {
+            get;
+            set;
+        }
+
+        [JsonProperty("email")]
+        public string Email
+        {
+            get;
+            set;
+        }
+
+        [JsonProperty("address")]
+        public string Address
+        {
+            get;
+            set;
+        }
+
+        [JsonProperty("gender")]
+        public GenderEnum Gender
+        {
+            get;
+            set;
+        }
+
+        [JsonProperty("balance")]
+        public decimal Balance { get; set; }
 
         [Required(ErrorMessage = "Không được bỏ trống")]
         [DataType(DataType.Password)]
@@ -101,6 +148,19 @@ namespace Doitsu.Ecommerce.Core.ViewModels
     public class LoginViewModel
     {
         [Required(ErrorMessage = "Không được bỏ trống")]
+        [DataType(DataType.Password)]
+        [MaxLength(32, ErrorMessage = "Mật khẩu vượt quá 32 ký tự")]
+        [Display(Name = "Mật khẩu", Prompt = "Nhập mật khẩu")]
+        public string Password
+        {
+            get;
+            set;
+        }
+    }
+
+    public class LoginByPhoneViewModel : LoginViewModel
+    {
+        [Required(ErrorMessage = "Không được bỏ trống")]
         [DataType(DataType.PhoneNumber)]
         [RegularExpression(@"^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$", ErrorMessage = "Số điện thoại không đúng mẫu")]
         [Display(Name = "Số điện thoại", Prompt = "Nhập vào số điện thoại")]
@@ -109,12 +169,11 @@ namespace Doitsu.Ecommerce.Core.ViewModels
             get;
             set;
         }
+    }
 
-        [Required(ErrorMessage = "Không được bỏ trống")]
-        [DataType(DataType.Password)]
-        [MaxLength(32, ErrorMessage = "Mật khẩu vượt quá 32 ký tự")]
-        [Display(Name = "Mật khẩu", Prompt = "Nhập mật khẩu")]
-        public string Password
+    public class LoginByEmailViewModel : LoginViewModel
+    {
+        public string Email
         {
             get;
             set;
@@ -240,5 +299,40 @@ namespace Doitsu.Ecommerce.Core.ViewModels
             get;
             set;
         }
+    }
+
+    public class ChangePasswordViewMode
+    {
+
+        [JsonProperty("currentPassword")]
+        public string CurrentPassword
+        {
+            get;
+            set;
+        }
+
+        [JsonProperty("newPassword")]
+        public string NewPassword
+        {
+            get;
+            set;
+        }
+    }
+
+    public class UpdateDetailViewModel
+    {
+        [JsonProperty("phoneNumber")]
+        public string PhoneNumber
+        {
+            get;
+            set;
+        }
+        [JsonProperty("fullName")]
+        public string Fullname
+        {
+            get;
+            set;
+        }
+
     }
 }

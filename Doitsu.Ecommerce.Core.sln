@@ -1,9 +1,10 @@
-
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doitsu.Ecommerce.Core", "Doitsu.Ecommerce.Core\Doitsu.Ecommerce.Core.csproj", "{0143AF97-82AD-428B-8A2E-F2EE46AA9C48}"
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29318.209
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Doitsu.Ecommerce.Core", "Doitsu.Ecommerce.Core\Doitsu.Ecommerce.Core.csproj", "{0143AF97-82AD-428B-8A2E-F2EE46AA9C48}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doitsu.Service.Core", "..\Doitsu.Technology.Core\Doitsu.Technology.Core\Doitsu.Service.Core\Doitsu.Service.Core.csproj", "{6D9D4D38-76E4-4460-8A4B-809884D6571E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doitsu.Ecommerce.Core.Tests", "Doitsu.Ecommerce.Core.Tests\Doitsu.Ecommerce.Core.Tests.csproj", "{C83A79F7-82F2-496F-881A-6E9A11AAA736}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,9 +16,15 @@ Global
 		{0143AF97-82AD-428B-8A2E-F2EE46AA9C48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0143AF97-82AD-428B-8A2E-F2EE46AA9C48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0143AF97-82AD-428B-8A2E-F2EE46AA9C48}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6D9D4D38-76E4-4460-8A4B-809884D6571E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6D9D4D38-76E4-4460-8A4B-809884D6571E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6D9D4D38-76E4-4460-8A4B-809884D6571E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6D9D4D38-76E4-4460-8A4B-809884D6571E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C83A79F7-82F2-496F-881A-6E9A11AAA736}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C83A79F7-82F2-496F-881A-6E9A11AAA736}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C83A79F7-82F2-496F-881A-6E9A11AAA736}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C83A79F7-82F2-496F-881A-6E9A11AAA736}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {66AC9005-03D0-4BEB-A607-6172E1D42244}
 	EndGlobalSection
 EndGlobal

@@ -10,21 +10,25 @@ namespace Doitsu.Ecommerce.Core
     {
         public static IServiceCollection AddFurnitureServices(this IServiceCollection services)
         {
-            services.AddScoped(typeof(IMemCacheService), typeof(MemCacheService));
-            services.AddScoped(typeof(ICategoryService), typeof(CategoryService));
-            services.AddScoped(typeof(IProductService), typeof(ProductService));
-            services.AddScoped(typeof(IBrandService), typeof(BrandService));
-            services.AddScoped(typeof(IOrderService), typeof(OrderService));
-            services.AddScoped(typeof(IOrderItemService), typeof(OrderItemService));
-            services.AddScoped(typeof(IBlogService), typeof(BlogService));
-            services.AddScoped(typeof(IBlogTagService), typeof(BlogTagService));
-            services.AddScoped(typeof(ITagService), typeof(TagService));
-            services.AddScoped(typeof(IMarketingCustomerService), typeof(MarketingCustomerService));
-            services.AddScoped(typeof(ICustomerFeedbackService), typeof(CustomerFeedbackService));
-            services.AddScoped(typeof(IBlogCategoryService), typeof(BlogCategoryService));
-            services.AddScoped(typeof(IEmailService), typeof(EmailService));
-            services.AddScoped(typeof(ISliderService), typeof(SliderService));
-            services.AddScoped(typeof(ICatalogueService), typeof(CatalogueService));
+            services.AddTransient(typeof(IMemCacheService), typeof(MemCacheService));
+            services.AddTransient(typeof(ICategoryService), typeof(CategoryService));
+            services.AddTransient(typeof(IProductService), typeof(ProductService));
+            services.AddTransient(typeof(IBrandService), typeof(BrandService));
+            services.AddTransient(typeof(IOrderService), typeof(OrderService));
+            services.AddTransient(typeof(IOrderItemService), typeof(OrderItemService));
+            services.AddTransient(typeof(IBlogService), typeof(BlogService));
+            services.AddTransient(typeof(IBlogTagService), typeof(BlogTagService));
+            services.AddTransient(typeof(ITagService), typeof(TagService));
+            services.AddTransient(typeof(IMarketingCustomerService), typeof(MarketingCustomerService));
+            services.AddTransient(typeof(ICustomerFeedbackService), typeof(CustomerFeedbackService));
+            services.AddTransient(typeof(IBlogCategoryService), typeof(BlogCategoryService));
+            services.AddTransient(typeof(IEmailService), typeof(EmailService));
+            services.AddTransient(typeof(ISliderService), typeof(SliderService));
+            services.AddTransient(typeof(ICatalogueService), typeof(CatalogueService));
+            services.AddTransient(typeof(IPromotionDetailService), typeof(PromotionDetailService));
+            services.AddTransient(typeof(IUserTransactionService), typeof(UserTransactionService));
+            services.AddTransient(typeof(IProductVariantService), typeof(ProductVariantService));
+            services.AddTransient(typeof(IProductOptionService), typeof(ProductOptionService));
             services.AddHttpContextAccessor();
             return services;
         }

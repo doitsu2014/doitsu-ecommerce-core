@@ -32,10 +32,29 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public bool IsFixed { get; set; }
         [JsonProperty("parentCateId")]
         public int? ParentCateId { get; set; }
-
     }
 
-    public class CategoryRecursiveViewModel
+    public class CategoryWithInverseParentViewModel
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+        [JsonProperty("name")]
+        public string Name { get; set; }
+        [JsonProperty("active")]
+        public bool Active { get; set; }
+        [JsonProperty("slug")]
+        public string Slug { get; set; }
+        [JsonProperty("isFixed")]
+        public bool IsFixed { get; set; }
+        [JsonProperty("parentCateId")]
+        public int? ParentCateId { get; set; }
+        [JsonProperty("parentCateName")]
+        public string ParentCateName { get; set; }
+        [JsonProperty("inverseParentCate")]
+        public ICollection<CategoryWithInverseParentViewModel> InverseParentCate { get; set; }
+    }
+
+    public class CategoryWithParentViewModel
     {
         [JsonProperty("id")]
         public int Id { get; set; }
@@ -46,7 +65,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         [JsonProperty("slug")]
         public string Slug { get; set; }
         [JsonProperty("parentCate")]
-        public CategoryRecursiveViewModel ParentCate { get; set; }
+        public CategoryWithParentViewModel ParentCate { get; set; }
+
     }
 
     public class CategoryMenuViewModel : BaseViewModel<Categories>
@@ -65,7 +85,7 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string Slug { get; set; }
         public bool IsFixed { get; set; }
         public int? ParentCateId { get; set; }
-
+        public string ParentCateName { get; set; }
         public ICollection<CategoryViewModel> InverseParentCate { get; set; }
 
     }

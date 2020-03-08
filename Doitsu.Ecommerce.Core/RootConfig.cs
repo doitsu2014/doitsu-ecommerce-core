@@ -1,5 +1,5 @@
-using Doitsu.Ecommerce.Core.Abstraction;
-using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
+using System.Collections.Generic;
+using System.Globalization;
 using Doitsu.Ecommerce.Core.AuthorizeBuilder;
 using Doitsu.Ecommerce.Core.Data;
 using Doitsu.Ecommerce.Core.Data.Identities;
@@ -11,6 +11,7 @@ using Doitsu.Service.Core.Services.EmailService;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +29,7 @@ using SixLabors.Memory;
 
 namespace Doitsu.Ecommerce.Core
 {
+
     /// <summary>
     /// Is the api endpoint config to help build a web app fastly
     /// The core destination is: 
@@ -43,18 +45,41 @@ namespace Doitsu.Ecommerce.Core
     /// </summary>
     public static class RootConfig
     {
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        [System.Obsolete]
-        public static void AppHosting(IApplicationBuilder app, IHostingEnvironment env, bool isConfigImageSharpWeb = false)
+        private readonly static CultureInfo[] supportedCultures = {
+            new CultureInfo("en-US"),
+            new CultureInfo("vi-VN")
+        };
+
+        private readonly static RequestLocalizationOptions LocalizationOptions = new RequestLocalizationOptions()
         {
+            DefaultRequestCulture = new RequestCulture("vi-VN"),
+            SupportedCultures = supportedCultures,
+            SupportedUICultures = supportedCultures,
+            RequestCultureProviders = new List<IRequestCultureProvider>
+            {
+                new QueryStringRequestCultureProvider { Options = LocalizationOptions },
+                new CookieRequestCultureProvider { Options = LocalizationOptions },
+                new AcceptLanguageHeaderRequestCultureProvider { Options = LocalizationOptions }
+            }
+        };
+
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public static void AppHosting(IApplicationBuilder app, bool isConfigImageSharpWeb = false)
+        {
+            // Using authorize
             app.UseAuthentication();
             app.UseCookiePolicy();
+
+            // Using resource files
             app.UseResponseCompression();
             if (isConfigImageSharpWeb)
                 app.UseImageSharp();
+
+            // Using localization
+            app.UseRequestLocalization(LocalizationOptions);
         }
 
-        [System.Obsolete]
         public static void Service(IServiceCollection services, IConfiguration configuration, bool isConfigImageSharpWeb = false)
         {
             #region Identity Database Config
@@ -65,12 +90,12 @@ namespace Doitsu.Ecommerce.Core
                     .UseSqlServer(configuration.GetConnectionString(nameof(EcommerceDbContext)))
                     .UseLoggerFactory(loggerFactory)
                     .EnableSensitiveDataLogging(),
-                    ServiceLifetime.Transient)
+                    ServiceLifetime.Scoped)
                 .AddIdentity<EcommerceIdentityUser, EcommerceIdentityRole>()
                 .AddEntityFrameworkStores<EcommerceDbContext>()
                 .AddDefaultTokenProviders();
+                
             services.RegisterDefaultEntityChangesHandlers();
-            services.AddTransient(typeof(IUnitOfWork), typeof(UnitOfWork));
             // Inject Identity Manager
             services.AddScoped(typeof(EcommerceIdentityUserManager<EcommerceIdentityUser>));
             services.AddScoped(typeof(EcommerceRoleIntManager<EcommerceIdentityRole>));
@@ -106,13 +131,22 @@ namespace Doitsu.Ecommerce.Core
             services.Configure<LeaderMail>(configuration.GetSection("LeaderEmail"));
             services.AddDoitsuEmailService();
 
+            #region Localization
+            services.AddLocalization(o => { o.ResourcesPath = "Resources"; });
+            services.Configure<RequestLocalizationOptions>(options =>
+            {
+                options.DefaultRequestCulture = LocalizationOptions.DefaultRequestCulture;
+                options.SupportedCultures = LocalizationOptions.SupportedCultures;
+                options.SupportedUICultures = LocalizationOptions.SupportedUICultures;
+            });
+            #endregion
         }
         #region Config Image Sharp Methods
-        [System.Obsolete]
         private static void ConfigureCustomServicesAndCustomOptions(IServiceCollection services)
         {
+            // Use the factory methods to configure the PhysicalFileSystemCacheOptions
             services.AddImageSharpCore(
-                    options =>
+                options =>
                     {
                         options.Configuration = Configuration.Default;
                         options.MaxBrowserCacheDays = 7;
@@ -124,17 +158,12 @@ namespace Doitsu.Ecommerce.Core
                         options.OnPrepareResponse = _ => { };
                     })
                 .SetRequestParser<QueryCollectionRequestParser>()
-                .SetMemoryAllocator(provider => ArrayPoolMemoryAllocator.CreateWithAggressivePooling())
-                .SetCache(provider =>
+                .SetMemoryAllocator(provider => ArrayPoolMemoryAllocator.CreateWithMinimalPooling())
+                .Configure<PhysicalFileSystemCacheOptions>(options =>
                 {
-                    var p = new PhysicalFileSystemCache(
-                        provider.GetRequiredService<IHostingEnvironment>(),
-                        provider.GetRequiredService<MemoryAllocator>(),
-                        provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>());
-
-                    p.Settings[PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder;
-                    return p;
+                    options.CacheFolder = "different-cache";
                 })
+                .SetCache<PhysicalFileSystemCache>()
                 .SetCacheHash<CacheHash>()
                 .AddProvider<PhysicalFileSystemProvider>()
                 .AddProcessor<ResizeWebProcessor>()

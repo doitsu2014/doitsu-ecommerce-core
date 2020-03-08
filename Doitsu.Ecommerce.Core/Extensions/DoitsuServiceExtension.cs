@@ -2,6 +2,7 @@ using System.IO.Compression;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Doitsu.Ecommerce.Core;
 using Doitsu.Ecommerce.Core.AuthorizeBuilder;
 using Doitsu.Service.Core.Services.EmailService;
 
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using static Doitsu.Ecommerce.Core.Constants;
 
 namespace Doitsu.Service.Core.Extensions
 {
@@ -39,7 +41,7 @@ namespace Doitsu.Service.Core.Extensions
         /// <param name="defaultLogoutPath">/nguoi-dung/dang-xuat</param>
         /// <returns></returns>
         public static IServiceCollection AddDoitsuBasicAuthorize(this IServiceCollection services,
-            string jwtBearerScheme = "api_jwt",
+            string jwtBearerScheme = DoitsuAuthenticationSchemes.JWT_SCHEME,
             string jwtBearerSecret = DoitsuJWTValidators.DEFAULT_SECRET_KEY,
             string apiSegment = "/api",
             string defaultLoginPath = "/nguoi-dung/dang-nhap",

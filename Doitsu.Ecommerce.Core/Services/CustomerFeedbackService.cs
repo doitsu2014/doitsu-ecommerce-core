@@ -10,11 +10,20 @@ using Microsoft.Extensions.Options;
 using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Abstraction;
+using AutoMapper;
+using Doitsu.Ecommerce.Core.Data;
+using System.Collections.Immutable;
+using System.Linq;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+
 namespace Doitsu.Ecommerce.Core.Services
 {
     public interface ICustomerFeedbackService : IBaseService<CustomerFeedbacks>
     {
         Task<CustomerFeedbacks> CreateWithConstraintAsync(CustomerFeedbackViewModel data, int userId);
+        Task<ImmutableList<CustomerFeedbackOverviewViewModel>> GetAllByTypeAsync(CustomerFeedBackTypeEnum type);
     }
 
     public class CustomerFeedbackService : BaseService<CustomerFeedbacks>, ICustomerFeedbackService
@@ -23,11 +32,12 @@ namespace Doitsu.Ecommerce.Core.Services
         private readonly IBrandService brandService;
         private readonly LeaderMail leaderMail;
 
-        public CustomerFeedbackService(IUnitOfWork unitOfWork, 
-        ILogger<BaseService<CustomerFeedbacks>> logger, 
-        IEmailService emailService, 
+        public CustomerFeedbackService(EcommerceDbContext dbContext,
+        IMapper mapper,
+        ILogger<BaseService<CustomerFeedbacks>> logger,
+        IEmailService emailService,
         IBrandService brandService,
-        IOptionsMonitor<LeaderMail> leaderMail) : base(unitOfWork, logger)
+        IOptionsMonitor<LeaderMail> leaderMail) : base(dbContext, mapper, logger)
         {
             this.emailService = emailService;
             this.brandService = brandService;
@@ -42,47 +52,27 @@ namespace Doitsu.Ecommerce.Core.Services
             {
                 result.UserId = userId;
             }
-            await this.UnitOfWork.CommitAsync();
-            await Task.WhenAll(SendEmailToCustomer(data), SendEmailToLeader(data));
+            await CommitAsync();
+
+            var messagePayloads = new List<MessagePayload>()
+            {
+                await emailService.PrepareCustomerFeedback(data),
+                await emailService.PrepareLeaderCustomerFeedback(data)
+            };
+
+            await emailService.SendEmailWithBachMocWrapperAsync(messagePayloads);
             return result;
         }
-
-        private async Task SendEmailToCustomer(CustomerFeedbackViewModel data) 
+        public async Task<ImmutableList<CustomerFeedbackOverviewViewModel>> GetAllByTypeAsync(CustomerFeedBackTypeEnum type)
         {
-            var currentBrand = await brandService.FirstOrDefaultAsync();
-            var subject = $"[{currentBrand.Name}] Xác nhận thông tin yêu cầu liên hệ - {DateTime.Now.ToString("dd/MM/yyyy")}";
-            var mailPayloadInfor = new MailPayloadInformation
-            {
-                Mail = data.Email,
-                Name = data.CustomerName
-            };
-            
-            var body = "<p>";
-            body += "Thông tin yêu cầu liên hệ của bạn:<br/>";
-            body += $"Số điện thoại: {data.Phone}<br/>";
-            body += $"Địa chỉ email: {data.Email}<br/>";
-            body += $"{data.Content.Replace("\n", "<br/>")}<br/>";
-            body += "Chúng tôi sẽ xử lý yêu cầu và liên lạc với quý khách.<br/>";
-            body += "</p>";
-            emailService.SendEmailWithBachMocWrapper(subject, body, mailPayloadInfor);
-        }
+            var typeInteger = (int)type;
+            var result = await this
+                  .Get(x => x.Type == typeInteger)
+                  .OrderByDescending(cf => cf.CreatedDate)
+                  .ProjectTo<CustomerFeedbackOverviewViewModel>(Mapper.ConfigurationProvider)
+                  .ToListAsync();
 
-        private async Task SendEmailToLeader(CustomerFeedbackViewModel data) 
-        {
-            var currentBrand = await brandService.FirstOrDefaultAsync();
-            var subject = $"[{currentBrand.Name}] Thông tin yêu cầu liên hệ mới - {data.Phone} - {DateTime.Now.ToString("dd/MM/yyyy")}";
-            var mailPayloadInfor = new MailPayloadInformation
-            {
-                Mail = leaderMail.Mail,
-                Name = leaderMail.Name
-            };
-
-            var body = "<p>";
-            body += $"Có 1 thông tin yêu cầu liên hệ mới.<br/>Thông tin yêu cầu liên hệ của số điện thoại {data.Phone} có nội dung:<br/>";
-            body += $"Địa chỉ email: {data.Email}<br/>";
-            body += $"{data.Content.Replace("\n", "<br/>")}<br/>";
-            body += "</p>";
-            emailService.SendEmailWithBachMocWrapper(subject, body, mailPayloadInfor);
+            return result.ToImmutableList();
         }
     }
 }

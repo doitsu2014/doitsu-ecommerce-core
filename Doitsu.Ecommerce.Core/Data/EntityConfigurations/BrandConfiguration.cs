@@ -45,6 +45,7 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
             builder.Property(e => e.TwitterUrl).HasMaxLength(400);
 
             builder.Property(e => e.YoutubeUrl).HasMaxLength(400);
+            builder.Property(e => e.FaviconUrl).HasMaxLength(1000);
         }
     }
 }
