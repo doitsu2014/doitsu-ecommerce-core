@@ -3,7 +3,7 @@
   <PropertyGroup>
     <LangVersion>8.0</LangVersion>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <PackageVersion>3.1.100.24</PackageVersion>
+    <PackageVersion>3.1.100.26</PackageVersion>
     <Title>Doitsu.Ecommerce.Core</Title>
     <PackageId>Doitsu.Ecommerce.Core</PackageId>
     <Authors>Doitsu Technology</Authors>
@@ -22,7 +22,7 @@
     <PackageIcon>doitsu-logo.png</PackageIcon>
     
     <RepositoryType>Azure Repos</RepositoryType>
-    <PackageReleaseNotes>Update SixLabors.ImageSharp.Web</PackageReleaseNotes>
+    <PackageReleaseNotes>Add something</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="4.5.3.2" />

@@ -147,8 +147,6 @@ namespace Doitsu.Ecommerce.Core.ViewModels
 
     public class LoginViewModel
     {
-
-
         [Required(ErrorMessage = "Không được bỏ trống")]
         [DataType(DataType.Password)]
         [MaxLength(32, ErrorMessage = "Mật khẩu vượt quá 32 ký tự")]

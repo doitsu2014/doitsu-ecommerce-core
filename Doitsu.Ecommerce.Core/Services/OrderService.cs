@@ -912,7 +912,6 @@ namespace Doitsu.Ecommerce.Core.Services
                     if (order == null) return Option.None<OrderViewModel, string>("Không tìm thấy đơn hàng phù hợp");
                     else if(!isInRoleAdmin) return Option.None<OrderViewModel, string>($"Đơn hàng {orderCode} không thể hoàn thành do người thao tác không phải là Admin.");
                     else if(order.Status == (int)OrderStatusEnum.Cancel) return Option.None<OrderViewModel, string>($"Đơn hàng {orderCode} đã HỦY nên không thể hoàn thành.");
-                    else if(order.Status == (int)OrderStatusEnum.New) return Option.None<OrderViewModel, string>($"Đơn hàng {orderCode} đang là đơn hàng MỚI và chưa được XỬ LÝ nên không thể hoàn thành.");
                     else
                     {
                         order.Status = (int)OrderStatusEnum.Done;
