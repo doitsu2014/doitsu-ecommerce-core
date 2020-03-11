@@ -165,6 +165,5 @@ namespace Doitsu.Ecommerce.Core.IdentitiesExtension
             };
         }
 
-        public async Task<ImmutableList<EcommerceIdentityUserViewModel
     }
 }
