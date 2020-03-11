@@ -18,7 +18,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public interface IUserService
     {
-        Task<ImmutableList<EcommerceIdentityUserViewModel>> GetUsers(string name = "", string phone = "");
+        Task<ImmutableList<EcommerceIdentityUserViewModel>> GetUsersAsync(string name = "", string phone = "");
     }
 
     public class UserService : IUserService
@@ -34,17 +34,17 @@ namespace Doitsu.Ecommerce.Core.Services
             this.userService = userService;
             this.mapper = mapper;
         }
-        public async Task<ImmutableList<EcommerceIdentityUserViewModel>> GetUsers(string userName = "", string phoneNumber = "")
+        public async Task<ImmutableList<EcommerceIdentityUserViewModel>> GetUsersAsync(string userName = "", string phoneNumber = "")
         {
             var roleQuery = (await this.roleService.Roles.AsNoTracking().ToListAsync()).ToImmutableList();
             var userQuery = this.userService.Users.Include(u => u.UserRoles).AsNoTracking();
             var listFilterOfUser = new List<(bool filterable, Func<EcommerceIdentityUser, bool> function)>();
-            listFilterOfUser.Add((!string.IsNullOrEmpty(userName), u => u.UserName == userName));
-            listFilterOfUser.Add((!string.IsNullOrEmpty(phoneNumber), u => u.PhoneNumber == phoneNumber));
+            listFilterOfUser.Add((!string.IsNullOrEmpty(userName), u => u.UserName.StartsWith(userName)));
+            listFilterOfUser.Add((!string.IsNullOrEmpty(phoneNumber), u => u.PhoneNumber.StartsWith(phoneNumber)));
             listFilterOfUser.Where(exp => exp.filterable).ToList()
                 .ForEach(exp => userQuery = userQuery.Where(exp.function).AsQueryable());
 
-            return (await userQuery.ToListAsync())
+            return (userQuery.ToList())
             .Select(u =>
             {
                 var userVm = this.mapper.Map<EcommerceIdentityUserViewModel>(u);
