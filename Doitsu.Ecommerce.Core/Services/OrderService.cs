@@ -121,6 +121,9 @@ namespace Doitsu.Ecommerce.Core.Services
         /// <param name="statusEnum"></param>
         /// <returns></returns>
         Task<Option<OrderViewModel, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum, int auditUserId, string note = "");
+
+        Task<Option<OrderViewModel, string>> ChangeOrderNote(int orderId, bool isNormalNote, string note = "");
+
     }
 
     public class OrderService : BaseService<Orders>, IOrderService
@@ -1006,6 +1009,21 @@ namespace Doitsu.Ecommerce.Core.Services
             return string.Empty;
         }
 
+
         #endregion
+        public async Task<Option<OrderViewModel, string>> ChangeOrderNote(int orderId, bool isNormalNote, string note = "")
+        {
+            return await (orderId, note)
+                .SomeNotNull()
+                .WithException(string.Empty)
+                .MapAsync(async data => {
+                    var order = await this.FindByKeysAsync(orderId);
+
+                    if(isNormalNote) order.Note = note;
+                    else order.CancelNote = note;
+
+                    return this.Mapper.Map<OrderViewModel>(order);
+                });
+        }
     }
 }
