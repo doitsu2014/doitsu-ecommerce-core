@@ -122,7 +122,8 @@ namespace Doitsu.Ecommerce.Core.Services
         /// <returns></returns>
         Task<Option<OrderViewModel, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum, int auditUserId, string note = "");
 
-        Task<Option<OrderViewModel, string>> ChangeOrderNote(int orderId, bool isNormalNote, string note = "");
+        Task<Option<OrderViewModel, string>> ChangeOrderNote(int orderId, string note = "");
+        Task<Option<OrderViewModel, string>> ChangeOrderCancelNote(int orderId, string note = "");
 
     }
 
@@ -359,7 +360,8 @@ namespace Doitsu.Ecommerce.Core.Services
         {
             return (await request.SomeNotNull()
                 .WithException("Thông tin đơn hàng rỗng")
-                .FlatMapAsync(async d => {
+                .FlatMapAsync(async d =>
+                {
                     var resultOrderItems = (await Task.WhenAll(d.OrderItems.Select(async orderItem =>
                     {
                         var productVariant = await productService.FindProductVariantFromOptionsAsync(orderItem.ProductOptionValues);
@@ -391,7 +393,7 @@ namespace Doitsu.Ecommerce.Core.Services
                         }
                         return Option.Some<CreateOrderItemWithOptionViewModel, string>(orderItem);
                     }))).ToImmutableList();
-                    if (resultOrderItems.Exceptions().Any()) return Option.None<CreateOrderWithOptionViewModel, string>(resultOrderItems.Exceptions().Aggregate((a,b) => $"{a}\n{b}"));
+                    if (resultOrderItems.Exceptions().Any()) return Option.None<CreateOrderWithOptionViewModel, string>(resultOrderItems.Exceptions().Aggregate((a, b) => $"{a}\n{b}"));
                     else d.OrderItems = resultOrderItems.Values().ToImmutableList();
                     return Option.Some<CreateOrderWithOptionViewModel, string>(d);
                 }))
@@ -913,8 +915,8 @@ namespace Doitsu.Ecommerce.Core.Services
                     }
                     var isInRoleAdmin = await userManager.IsInRoleAsync(auditUser, Constants.UserRoles.ADMIN);
                     if (order == null) return Option.None<OrderViewModel, string>("Không tìm thấy đơn hàng phù hợp");
-                    else if(!isInRoleAdmin) return Option.None<OrderViewModel, string>($"Đơn hàng {orderCode} không thể hoàn thành do người thao tác không phải là Admin.");
-                    else if(order.Status == (int)OrderStatusEnum.Cancel) return Option.None<OrderViewModel, string>($"Đơn hàng {orderCode} đã HỦY nên không thể hoàn thành.");
+                    else if (!isInRoleAdmin) return Option.None<OrderViewModel, string>($"Đơn hàng {orderCode} không thể hoàn thành do người thao tác không phải là Admin.");
+                    else if (order.Status == (int)OrderStatusEnum.Cancel) return Option.None<OrderViewModel, string>($"Đơn hàng {orderCode} đã HỦY nên không thể hoàn thành.");
                     else
                     {
                         order.Status = (int)OrderStatusEnum.Done;
@@ -933,7 +935,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 .FlatMapAsync(async d =>
                 {
                     var orderCode = await this.Get(o => o.Id == orderId).Select(o => o.Code).FirstOrDefaultAsync();
-                    switch(statusEnum)
+                    switch (statusEnum)
                     {
                         case OrderStatusEnum.Cancel:
                             return await CancelOrderAsync(orderCode, auditUserId, note);
@@ -1011,17 +1013,28 @@ namespace Doitsu.Ecommerce.Core.Services
 
 
         #endregion
-        public async Task<Option<OrderViewModel, string>> ChangeOrderNote(int orderId, bool isNormalNote, string note = "")
+        public async Task<Option<OrderViewModel, string>> ChangeOrderNote(int orderId, string note = "")
         {
             return await (orderId, note)
                 .SomeNotNull()
                 .WithException(string.Empty)
-                .MapAsync(async data => {
+                .MapAsync(async data =>
+                {
                     var order = await this.FindByKeysAsync(orderId);
+                    order.Note = note;
+                    return this.Mapper.Map<OrderViewModel>(order);
+                });
+        }
 
-                    if(isNormalNote) order.Note = note;
-                    else order.CancelNote = note;
-
+        public async Task<Option<OrderViewModel, string>> ChangeOrderCancelNote(int orderId, string note = "")
+        {
+            return await (orderId, note)
+                .SomeNotNull()
+                .WithException(string.Empty)
+                .MapAsync(async data =>
+                {
+                    var order = await this.FindByKeysAsync(orderId);
+                    order.CancelNote = note;
                     return this.Mapper.Map<OrderViewModel>(order);
                 });
         }

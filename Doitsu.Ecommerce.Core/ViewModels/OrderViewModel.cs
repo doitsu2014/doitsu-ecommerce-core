@@ -150,4 +150,10 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public virtual ICollection<OrderViewModel> InverseSummaryOrders { get; set; }
     }
 
+    public class RequestChangeOrderNoteViewModel
+    {
+        public bool IsNormalNote { get; set; } = true;
+        public string Note { get; set; }
+    }
+
 }
