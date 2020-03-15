@@ -56,6 +56,14 @@ namespace Doitsu.Ecommerce.Core.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+            
+            builder.Entity<EcommerceIdentityUser>()
+                .HasMany(e => e.UserRoles)
+                .WithOne()
+                .HasForeignKey(e => e.UserId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.ApplyConfigurationsFromAssembly(GetType().Assembly);
         }
 
