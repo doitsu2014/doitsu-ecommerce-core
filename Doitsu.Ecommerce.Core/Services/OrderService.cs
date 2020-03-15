@@ -1018,10 +1018,13 @@ namespace Doitsu.Ecommerce.Core.Services
             return await (orderId, note)
                 .SomeNotNull()
                 .WithException(string.Empty)
+                .FilterAsync(async data => await this.AnyAsync(o => o.Id == data.orderId), "Không tìm thấy đơn hàng cần thay đổi")
                 .MapAsync(async data =>
                 {
                     var order = await this.FindByKeysAsync(orderId);
                     order.Note = note;
+                    this.Update(order);
+                    await this.CommitAsync();
                     return this.Mapper.Map<OrderViewModel>(order);
                 });
         }
@@ -1031,10 +1034,13 @@ namespace Doitsu.Ecommerce.Core.Services
             return await (orderId, note)
                 .SomeNotNull()
                 .WithException(string.Empty)
+                .FilterAsync(async data => await this.AnyAsync(o => o.Id == data.orderId), "Không tìm thấy đơn hàng cần thay đổi")
                 .MapAsync(async data =>
                 {
                     var order = await this.FindByKeysAsync(orderId);
                     order.CancelNote = note;
+                    this.Update(order);
+                    await this.CommitAsync();
                     return this.Mapper.Map<OrderViewModel>(order);
                 });
         }
