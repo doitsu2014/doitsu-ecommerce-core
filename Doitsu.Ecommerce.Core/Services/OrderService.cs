@@ -109,8 +109,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         Task<Option<OrderViewModel, string>> CancelOrderAsync(string orderCode, int userId, string cancelNote = "");
 
-
-        Task<Option<OrderViewModel, string>> CompleteOrderAsync(string orderCode, int userId);
+        Task<Option<OrderViewModel, string>> CompleteOrderAsync(string orderCode, int userId, string note = "");
 
         /// <summary>
         /// Superpower function, to work correctly we have to complete
@@ -901,7 +900,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 });
         }
 
-        public async Task<Option<OrderViewModel, string>> CompleteOrderAsync(string orderCode, int userId)
+        public async Task<Option<OrderViewModel, string>> CompleteOrderAsync(string orderCode, int userId, string note = "")
         {
             return await (orderCode).SomeNotNull()
                 .WithException("Mã của Đơn Tổng không hợp lệ.")
@@ -920,6 +919,10 @@ namespace Doitsu.Ecommerce.Core.Services
                     else
                     {
                         order.Status = (int)OrderStatusEnum.Done;
+                        if(note.IsNotNullOrEmpty())
+                        {
+                            order.Note = note;
+                        }
                         this.Update(order);
                         await this.CommitAsync();
                         return Option.Some<OrderViewModel, string>(this.Mapper.Map<OrderViewModel>(order));
