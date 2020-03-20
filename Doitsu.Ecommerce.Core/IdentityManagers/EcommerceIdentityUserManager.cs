@@ -22,7 +22,6 @@ namespace Doitsu.Ecommerce.Core.IdentitiesExtension
     public class EcommerceIdentityUserManager<T> : UserManager<T>
         where T : EcommerceIdentityUser
     {
-
         public EcommerceIdentityUserManager(IUserStore<T> store, IOptions<IdentityOptions> optionsAccessor, IPasswordHasher<T> passwordHasher, IEnumerable<IUserValidator<T>> userValidators, IEnumerable<IPasswordValidator<T>> passwordValidators, ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, IServiceProvider services, ILogger<UserManager<T>> logger) : base(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
         {
         }
@@ -165,5 +164,6 @@ namespace Doitsu.Ecommerce.Core.IdentitiesExtension
                 ValidFrom = token.ValidFrom
             };
         }
+
     }
 }
