@@ -48,7 +48,7 @@ namespace Doitsu.Ecommerce.Core.Services
         public async Task<ImmutableList<CategoryMenuViewModel>> GetProductCategoryForMenuAsync()
         {
             var listFixedCategory =
-                await this.Get(cate => cate.ParentCate.Slug == Constants.SuperFixedCategorySlug.PRODUCT && cate.IsFixed)
+                await this.Get(cate => cate.ParentCateId != null && cate.ParentCate.Slug == Constants.SuperFixedCategorySlug.PRODUCT && cate.IsFixed)
                 .ProjectTo<CategoryMenuViewModel>(Mapper.ConfigurationProvider)
                 .ToListAsync();
 
