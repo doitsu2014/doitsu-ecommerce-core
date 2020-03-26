@@ -3,7 +3,8 @@
 # Add steps that run tests, create a NuGet package, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 trigger:
-    - brand/phonecard/master
+    - brand/*/master
+    - master
     
 pool:
     name: 'Doitsu Technology Linux Pipeplies'
