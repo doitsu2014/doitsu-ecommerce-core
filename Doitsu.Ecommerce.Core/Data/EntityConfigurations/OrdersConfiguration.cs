@@ -58,6 +58,12 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
             builder.HasOne(o => o.SummaryOrder)
                 .WithMany(o => o.InverseSummaryOrders)
                 .HasForeignKey(o => o.SummaryOrderId);
+
+            builder.HasOne(o => o.RefernceDeliveryInformation)
+                .WithMany(addr => addr.Orders)
+                .HasForeignKey(o => o.RefernceDeliveryInformationId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
         }
     }
 }

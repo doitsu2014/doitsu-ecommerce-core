@@ -15,7 +15,7 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.0")
+                .HasAnnotation("ProductVersion", "3.1.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -478,6 +478,62 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.ToTable("CustomerFeedbacks");
                 });
 
+            modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.DeliveryInformation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(255);
+
+                    b.Property<string>("Country")
+                        .HasColumnType("nvarchar(60)")
+                        .HasMaxLength(60);
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(255);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(125)")
+                        .HasMaxLength(125);
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("nvarchar(20)")
+                        .HasMaxLength(20);
+
+                    b.Property<string>("State")
+                        .HasColumnType("nvarchar(30)")
+                        .HasMaxLength(30);
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("Vers")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("ZipCode")
+                        .HasColumnType("nvarchar(15)")
+                        .HasMaxLength(15);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("DeliveryInformation");
+                });
+
             modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.Galleries", b =>
                 {
                     b.Property<int>("Id")
@@ -686,6 +742,9 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("nvarchar(255)")
                         .HasMaxLength(255);
 
+                    b.Property<string>("DeliveryCountry")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("DeliveryEmail")
                         .HasColumnType("nvarchar(125)")
                         .HasMaxLength(125);
@@ -697,6 +756,9 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<string>("DeliveryPhone")
                         .HasColumnType("nvarchar(20)")
                         .HasMaxLength(20);
+
+                    b.Property<string>("DeliveryState")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("Discount")
                         .HasColumnType("float");
@@ -731,6 +793,9 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<int?>("Priority")
                         .HasColumnType("int");
 
+                    b.Property<int?>("RefernceDeliveryInformationId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
@@ -762,6 +827,8 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.HasIndex("Code")
                         .IsUnique()
                         .HasName("UQ_Code");
+
+                    b.HasIndex("RefernceDeliveryInformationId");
 
                     b.HasIndex("SummaryOrderId");
 
@@ -1598,6 +1665,15 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasConstraintName("FK__CustomerF__UserI__0B27A5C0");
                 });
 
+            modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.DeliveryInformation", b =>
+                {
+                    b.HasOne("Doitsu.Ecommerce.Core.Data.Identities.EcommerceIdentityUser", "User")
+                        .WithMany("DeliveryInformations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.Galleries", b =>
                 {
                     b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.Galleries", "ParentGallery")
@@ -1646,6 +1722,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
 
             modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Entities.Orders", b =>
                 {
+                    b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.DeliveryInformation", "RefernceDeliveryInformation")
+                        .WithMany("Orders")
+                        .HasForeignKey("RefernceDeliveryInformationId");
+
                     b.HasOne("Doitsu.Ecommerce.Core.Data.Entities.Orders", "SummaryOrder")
                         .WithMany("InverseSummaryOrders")
                         .HasForeignKey("SummaryOrderId");
@@ -1796,7 +1876,7 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("Doitsu.Ecommerce.Core.Data.Identities.EcommerceIdentityUser", null)
-                        .WithMany()
+                        .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

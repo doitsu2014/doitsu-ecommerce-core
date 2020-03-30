@@ -17,10 +17,15 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public int Status { get; set; }
         public bool Active { get; set; }
         public DateTime CreatedDate { get; set; }
+
+        public int? RefernceDeliveryInformationId { get; set; }
         public string DeliveryAddress { get; set; }
         public string DeliveryName { get; set; }
         public string DeliveryPhone { get; set; }
         public string DeliveryEmail { get; set; }
+        public string DeliveryCountry { get; set; }
+        public string DeliveryState { get; set; }
+
         public string Dynamic01 { get; set; }
         public string Dynamic02 { get; set; }
         public string Dynamic03 { get; set; }
@@ -38,5 +43,6 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public virtual ICollection<UserTransaction> UserTransactions { get; set; }
         public virtual ICollection<Orders> InverseSummaryOrders { get; set; }
         public virtual Orders SummaryOrder { get; set; }
+        public virtual DeliveryInformation RefernceDeliveryInformation {get;set;}
     }
 }
