@@ -46,6 +46,7 @@ namespace Doitsu.Ecommerce.Core
             public const string SLIDERS = "SLIDERS";
             public const string CATALOGUES = "CATALOGUES";
             public const string PROMOTION_BLOGS = "PROMOTION_BLOGS";
+            public const string INVERSE_CATEGORY = "INVERSE_CATEGORY";
         }
 
         public static class UserRoles

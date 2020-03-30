@@ -13,6 +13,8 @@ using Doitsu.Ecommerce.Core.Abstraction;
 using AutoMapper;
 using Doitsu.Ecommerce.Core.Data;
 using System.Linq;
+using Microsoft.EntityFrameworkCore.Query;
+using Doitsu.Ecommerce.Core.Extensions;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -35,6 +37,7 @@ namespace Doitsu.Ecommerce.Core.Services
         /// <param name="depth">The depth of list including inverse parent category</param>
         /// <returns></returns>
         Task<ImmutableList<CategoryWithInverseParentViewModel>> GetInverseCategory(string slug = Constants.SuperFixedCategorySlug.PRODUCT, int depth = 1);
+        Task<ImmutableList<CategoryWithInverseParentViewModel>> GetAllParentCategoryWithInverseCategory(int depth = 1);
     }
 
     public class CategoryService : BaseService<Categories>, ICategoryService
@@ -86,11 +89,18 @@ namespace Doitsu.Ecommerce.Core.Services
         public async Task<ImmutableList<CategoryWithInverseParentViewModel>> GetInverseCategory(string slug = default, int depth = default)
         {
             var query = this.Get(cate => cate.Slug == slug)
-                .Include(cate => cate.InverseParentCate);
-            for (var i = 0; i < depth; ++i)
-            {
-                query = query.ThenInclude(cate => cate.InverseParentCate);
-            }
+                            .IncludeByDepth(cate => cate.InverseParentCate, depth);
+
+            var result = await query.ToListAsync();
+            var listCategory = result.Select(c => Mapper.Map<CategoryWithInverseParentViewModel>(c)).ToList();
+
+            return listCategory.ToImmutableList();
+        }
+
+        public async Task<ImmutableList<CategoryWithInverseParentViewModel>> GetAllParentCategoryWithInverseCategory( int depth = 1)
+        {
+            var query = this.Get(cate => cate.ParentCateId == null && cate.IsFixed)
+                            .IncludeByDepth(cate => cate.InverseParentCate, depth);
 
             var result = await query.ToListAsync();
             var listCategory = result.Select(c => Mapper.Map<CategoryWithInverseParentViewModel>(c)).ToList();
