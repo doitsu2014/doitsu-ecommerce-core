@@ -29,6 +29,8 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
 
             builder.Property(e => e.DeliveryPhone).HasMaxLength(20);
 
+            builder.Property(e => e.DeliveryCity).HasMaxLength(60);
+
             builder.Property(e => e.FinalPrice).HasColumnType("money");
 
             builder.Property(e => e.TotalPrice).HasColumnType("money");

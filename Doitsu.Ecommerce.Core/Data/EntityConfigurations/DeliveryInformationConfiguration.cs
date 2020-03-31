@@ -20,6 +20,7 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
             builder.Property(di => di.ZipCode).HasMaxLength(15);
             builder.Property(di => di.Country).HasMaxLength(60);
             builder.Property(di => di.Email).HasMaxLength(255);
+            builder.Property(di => di.City).HasMaxLength(60);
 
             builder.HasOne(addr => addr.User)
                 .WithMany(u => u.DeliveryInformations)

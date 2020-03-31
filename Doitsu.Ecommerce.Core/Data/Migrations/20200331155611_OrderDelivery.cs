@@ -8,6 +8,12 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
+                name: "DeliveryCity",
+                table: "Orders",
+                maxLength: 60,
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
                 name: "DeliveryCountry",
                 table: "Orders",
                 nullable: true);
@@ -34,6 +40,7 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     Phone = table.Column<string>(maxLength: 20, nullable: true),
                     Email = table.Column<string>(maxLength: 255, nullable: true),
                     Country = table.Column<string>(maxLength: 60, nullable: true),
+                    City = table.Column<string>(maxLength: 60, nullable: true),
                     State = table.Column<string>(maxLength: 30, nullable: true),
                     ZipCode = table.Column<string>(maxLength: 15, nullable: true),
                     Active = table.Column<bool>(nullable: false, defaultValue: true),
@@ -80,6 +87,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
 
             migrationBuilder.DropIndex(
                 name: "IX_Orders_RefernceDeliveryInformationId",
+                table: "Orders");
+
+            migrationBuilder.DropColumn(
+                name: "DeliveryCity",
                 table: "Orders");
 
             migrationBuilder.DropColumn(

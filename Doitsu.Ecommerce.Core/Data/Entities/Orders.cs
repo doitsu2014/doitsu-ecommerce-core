@@ -25,6 +25,7 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public string DeliveryEmail { get; set; }
         public string DeliveryCountry { get; set; }
         public string DeliveryState { get; set; }
+        public string DeliveryCity { get; set; }
 
         public string Dynamic01 { get; set; }
         public string Dynamic02 { get; set; }

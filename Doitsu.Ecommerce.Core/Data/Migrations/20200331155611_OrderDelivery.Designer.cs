@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20200330165317_OrderDelivery")]
+    [Migration("20200331155611_OrderDelivery")]
     partial class OrderDelivery
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -496,6 +496,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("nvarchar(255)")
                         .HasMaxLength(255);
 
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(60)")
+                        .HasMaxLength(60);
+
                     b.Property<string>("Country")
                         .HasColumnType("nvarchar(60)")
                         .HasMaxLength(60);
@@ -743,6 +747,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<string>("DeliveryAddress")
                         .HasColumnType("nvarchar(255)")
                         .HasMaxLength(255);
+
+                    b.Property<string>("DeliveryCity")
+                        .HasColumnType("nvarchar(60)")
+                        .HasMaxLength(60);
 
                     b.Property<string>("DeliveryCountry")
                         .HasColumnType("nvarchar(max)");

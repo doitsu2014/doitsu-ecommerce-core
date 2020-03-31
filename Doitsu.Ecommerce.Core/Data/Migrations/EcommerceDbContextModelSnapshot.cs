@@ -494,6 +494,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("nvarchar(255)")
                         .HasMaxLength(255);
 
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(60)")
+                        .HasMaxLength(60);
+
                     b.Property<string>("Country")
                         .HasColumnType("nvarchar(60)")
                         .HasMaxLength(60);
@@ -741,6 +745,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<string>("DeliveryAddress")
                         .HasColumnType("nvarchar(255)")
                         .HasMaxLength(255);
+
+                    b.Property<string>("DeliveryCity")
+                        .HasColumnType("nvarchar(60)")
+                        .HasMaxLength(60);
 
                     b.Property<string>("DeliveryCountry")
                         .HasColumnType("nvarchar(max)");
