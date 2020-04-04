@@ -36,6 +36,7 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public string Note { get; set; }
         public string CancelNote { get; set; }
         public int? SummaryOrderId { get; set; }
+        public OrderPaymentTypeEnum? PaymentType { get; set; }
         public OrderTypeEnum Type { get; set; }
         public OrderPriorityEnum? Priority { get; set; }
         public byte[] Vers { get; set; }
@@ -45,6 +46,6 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public virtual ICollection<UserTransaction> UserTransactions { get; set; }
         public virtual ICollection<Orders> InverseSummaryOrders { get; set; }
         public virtual Orders SummaryOrder { get; set; }
-        public virtual DeliveryInformation RefernceDeliveryInformation {get;set;}
+        public virtual DeliveryInformation RefernceDeliveryInformation { get; set; }
     }
 }

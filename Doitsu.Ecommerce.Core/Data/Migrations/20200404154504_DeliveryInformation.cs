@@ -31,6 +31,11 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 nullable: true);
 
             migrationBuilder.AddColumn<int>(
+                name: "PaymentType",
+                table: "Orders",
+                nullable: true);
+
+            migrationBuilder.AddColumn<int>(
                 name: "RefernceDeliveryInformationId",
                 table: "Orders",
                 nullable: true);
@@ -111,6 +116,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
 
             migrationBuilder.DropColumn(
                 name: "DeliveryWard",
+                table: "Orders");
+
+            migrationBuilder.DropColumn(
+                name: "PaymentType",
                 table: "Orders");
 
             migrationBuilder.DropColumn(

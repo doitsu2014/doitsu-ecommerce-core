@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20200402164102_DeliveryInformation")]
+    [Migration("20200404154504_DeliveryInformation")]
     partial class DeliveryInformation
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -808,6 +808,9 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(500)")
                         .HasMaxLength(500);
+
+                    b.Property<int?>("PaymentType")
+                        .HasColumnType("int");
 
                     b.Property<int?>("Priority")
                         .HasColumnType("int");
