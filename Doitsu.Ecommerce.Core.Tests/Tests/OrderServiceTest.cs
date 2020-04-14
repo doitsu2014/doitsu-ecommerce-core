@@ -10,6 +10,7 @@ using Doitsu.Ecommerce.Core.Data.Identities;
 using Doitsu.Ecommerce.Core.IdentitiesExtension;
 using Doitsu.Ecommerce.Core.IdentityManagers;
 using Doitsu.Ecommerce.Core.Services;
+using Doitsu.Ecommerce.Core.Services.Interface;
 using Doitsu.Ecommerce.Core.Tests.Helpers;
 using Doitsu.Ecommerce.Core.ViewModels;
 using Microsoft.AspNetCore.Hosting;
@@ -115,7 +116,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                     TotalPrice = 100000000,
                     TotalQuantity = 1,
                     Discount = 0,
-                    Note = "Nạp tiền 100k"
+                    Note = "Nạp tiền 100.000.000 VND"
                 });
 
                 Assert.True(true);
@@ -123,7 +124,7 @@ namespace Doitsu.Ecommerce.Core.Tests
         }
 
         [Fact]
-        private async Task Test_CreateOrderWithProductOption_NormalProducts()
+        private async Task Test_CreateSaleOrderWithProductOption_NormalProducts()
         {
             using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
             {
@@ -145,6 +146,41 @@ namespace Doitsu.Ecommerce.Core.Tests
                 }
             }
         }
+
+
+        [Fact]
+        private async Task Test_CreateNormalOrderWithProductOption_NormalProducts()
+        {
+            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            {
+                await InitialDatabaseAsync(webhost);
+                var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
+                using (var scope = scopeFactory.CreateScope())
+                {
+                    // Add Products
+                    var userManager = scope.ServiceProvider.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
+                    var orderService = scope.ServiceProvider.GetService<IOrderService>();
+                    var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
+
+                    var orders1 = PrepareOrdersWithManyProductInOne(user.Id);
+                    foreach (var order in orders1)
+                    {
+                        (await orderService.CreateNormalOrderWithOptionAsync(order))
+                            .MatchNone(error => Assert.True(error.IsNullOrEmpty()));
+                    }
+                }
+
+                using (var scope = scopeFactory.CreateScope())
+                {
+                    var userManager = scope.ServiceProvider.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
+                    var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
+                    // Check user balance if not updated is good, else is not good.
+                    Assert.Equal(user.Balance, 100000000);
+                }
+            }
+        }
+
+
 
         [Fact]
         private async Task Test_ChangeStatusOrder_Done()
@@ -186,7 +222,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                     };
                     (await orderService.CreateSummaryOrderAsync(summaryOrder, user.Id))
                         .MatchNone(error => Assert.True(error.IsNullOrEmpty()));
-                  
+
                 }
 
                 using (var scope = scopeFactory.CreateScope())
@@ -199,9 +235,9 @@ namespace Doitsu.Ecommerce.Core.Tests
                     var order = await orderService.Get(o => o.Type == OrderTypeEnum.Sale && o.Status == (int)OrderStatusEnum.Processing)
                         .Select(o => orderService.Mapper.Map<OrderViewModel>(o))
                         .FirstOrDefaultAsync();
-                   
+
                     (await orderService.ChangeOrderStatus(order.Id, OrderStatusEnum.Done, user.Id, "Complete Note"))
-                        .MatchNone(error => 
+                        .MatchNone(error =>
                             Assert.True(error.IsNullOrEmpty()));
                 }
             }
@@ -248,7 +284,7 @@ namespace Doitsu.Ecommerce.Core.Tests
         }
 
         [Fact]
-        private async Task Test_CreateOrderWithProductOption_DisabledProducts()
+        private async Task Test_CreateSaleOrderWithProductOption_DisabledProducts()
         {
             using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
             {
@@ -285,7 +321,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                     foreach (var order in orders1)
                     {
                         (await orderService.CreateSaleOrderWithOptionAsync(order))
-                            .MatchNone(error => 
+                            .MatchNone(error =>
                                 Assert.True(!error.IsNullOrEmpty()));
                     }
                 }
@@ -337,6 +373,67 @@ namespace Doitsu.Ecommerce.Core.Tests
                             Dynamic03 = "APP839027192",
                             OrderItems = new List<CreateOrderItemWithOptionViewModel>()
                             {
+                                new CreateOrderItemWithOptionViewModel()
+                                {
+                                    SubTotalQuantity = 1,
+                                    SubTotalPrice = 100000,
+                                    SubTotalFinalPrice = 100000,
+                                    ProductOptionValues = new List<ProductOptionValueViewModel>()
+                                    {
+                                        new ProductOptionValueViewModel()
+                                        {
+                                            Id = 1
+                                        },
+                                        new ProductOptionValueViewModel()
+                                        {
+                                            Id = 4
+                                        },
+                                        new ProductOptionValueViewModel()
+                                        {
+                                            Id = 6
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    };
+            return listOrders;
+        }
+
+        private List<CreateOrderWithOptionViewModel> PrepareOrdersWithManyProductInOne(int userId)
+        {
+            var listOrders = new List<CreateOrderWithOptionViewModel>()
+                    {
+                        new CreateOrderWithOptionViewModel()
+                        {
+                            UserId = userId,
+                            DeliveryPhone = "0946680600",
+                            DeliveryAddress = "0946680600",
+                            Note = "Ghi chú sản phẩm 01",
+                            Dynamic03 = "APP8239123756",
+                            OrderItems = new List<CreateOrderItemWithOptionViewModel>()
+                            {
+                                new CreateOrderItemWithOptionViewModel()
+                                {
+                                    SubTotalQuantity = 1,
+                                    SubTotalPrice = 100000,
+                                    SubTotalFinalPrice = 100000,
+                                    ProductOptionValues = new List<ProductOptionValueViewModel>()
+                                    {
+                                        new ProductOptionValueViewModel()
+                                        {
+                                            Id = 2
+                                        },
+                                        new ProductOptionValueViewModel()
+                                        {
+                                            Id = 4
+                                        },
+                                        new ProductOptionValueViewModel()
+                                        {
+                                            Id = 6
+                                        }
+                                    }
+                                },
                                 new CreateOrderItemWithOptionViewModel()
                                 {
                                     SubTotalQuantity = 1,

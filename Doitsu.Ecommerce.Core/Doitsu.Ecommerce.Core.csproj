@@ -3,7 +3,7 @@
   <PropertyGroup>
     <LangVersion>8.0</LangVersion>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <PackageVersion>3.1.100.35</PackageVersion>
+    <PackageVersion>3.1.100.36</PackageVersion>
     <Title>Doitsu.Ecommerce.Core</Title>
     <PackageId>Doitsu.Ecommerce.Core</PackageId>
     <Authors>Doitsu Technology</Authors>
@@ -22,7 +22,7 @@
     <PackageIcon>doitsu-logo.png</PackageIcon>
     
     <RepositoryType>Azure Repos</RepositoryType>
-    <PackageReleaseNotes>Complete Order with note.</PackageReleaseNotes>
+    <PackageReleaseNotes>Change structure and fixbug of OrderService.</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="4.5.3.2" />

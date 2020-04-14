@@ -1,7 +1,5 @@
-﻿using System;
-
-using Doitsu.Ecommerce.Core.Services;
-
+﻿using Doitsu.Ecommerce.Core.Services;
+using Doitsu.Ecommerce.Core.Services.Interface;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Doitsu.Ecommerce.Core
