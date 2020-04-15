@@ -84,6 +84,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public OrderPriorityEnum? Priority { get; set; }
         [JsonProperty("type")]
         public OrderTypeEnum Type { get; set; }
+        [JsonProperty("paymentType")]
+        public OrderPaymentTypeEnum? PaymentType { get; set; }
     }
 
     public class CreateOrderWithOptionViewModel : OrderViewModel
