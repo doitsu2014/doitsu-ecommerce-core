@@ -17,7 +17,7 @@ namespace Hris.Data.Identity
             // var connectionString = "Server=garden.dotvndns.vn,1444;Database=bachmoc_ver2_production;Trusted_Connection=False;User Id=bachmoc;Password=zaQ@1234";
             
             // YGFL
-            var connectionString = "Server=garden.dotvndns.vn,1444;Database=bachmoc_net_v2_dev;Trusted_Connection=False;User Id=bachmoc;Password=zaQ@1234";
+            var connectionString = "Server=103.114.104.24,1443;Database=bachmoc_net_v2_dev;Trusted_Connection=False;User Id=bachmoc;Password=zaQ@1234";
             builder.UseSqlServer(connectionString);
             return new EcommerceDbContext(builder.Options);
         }

@@ -19,6 +19,7 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public string ImageUrls { get; set; }
         public decimal Price { get; set; }
         public string Slug { get; set; }
+        public float Weight { get; set; }
 
         public virtual Categories Cate { get; set; }
         public virtual ICollection<OrderItems> OrderItems { get; set; }
