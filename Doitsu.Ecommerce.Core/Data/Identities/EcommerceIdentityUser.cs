@@ -30,6 +30,7 @@ namespace Doitsu.Ecommerce.Core.Data.Identities
         public virtual ICollection<MarketingCustomers> MarketingCustomers { get; set; }
         public virtual ICollection<Orders> Orders { get; set; }
         public virtual ICollection<UserTransaction> UserTransactions { get; set; }
+        public virtual ICollection<DeliveryInformation> DeliveryInformations { get; set; }
 
         public virtual ICollection<IdentityUserRole<int>> UserRoles { get; set; }
     }

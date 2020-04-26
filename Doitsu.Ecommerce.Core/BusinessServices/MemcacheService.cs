@@ -23,6 +23,7 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<ImmutableList<CatalogueViewModel>> GetCataloguesAsync(int timeCache = 60);
         Task<ImmutableList<BlogOverviewViewModel>> GetRandomBlogOverviewAsync(int take, int timeCache = 30);
         Task<ImmutableList<BlogDetailViewModel>> GetPromotionBlogDetailsAsync(int take, int cachingMinutes = 30);
+        Task<ImmutableList<CategoryWithInverseParentViewModel>> GetInverseCategoryMenuAsync(int timeCache = 30);
     }
 
 
@@ -217,5 +218,21 @@ namespace Doitsu.Ecommerce.Core.Services
             }
         }
 
+        public async Task<ImmutableList<CategoryWithInverseParentViewModel>> GetInverseCategoryMenuAsync(int timeCache = 30)
+        {
+            try
+            {
+                if (!memoryCache.TryGetValue(Constants.CacheKey.INVERSE_CATEGORY, out IEnumerable<CategoryWithInverseParentViewModel> inverseMenu))
+                {
+                    inverseMenu = await categoryService.GetAllParentCategoryWithInverseCategory();
+                    memoryCache.Set(Constants.CacheKey.INVERSE_CATEGORY, inverseMenu, TimeSpan.FromMinutes(timeCache));
+                }
+                return inverseMenu.ToImmutableList();
+            }
+            catch
+            {
+                return ImmutableList<CategoryWithInverseParentViewModel>.Empty;
+            }
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using AutoMapper;
 using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Service.Core.Abstraction;

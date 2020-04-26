@@ -95,4 +95,12 @@ namespace Doitsu.Ecommerce.Core
         /// This is a type to help customer create a contact point to receive detail information of No Price Product
         ContactProduct = 1
     }
+
+    public enum OrderPaymentTypeEnum
+    {
+        BANK_FIRST = 0,
+        COD = 1
+    }
+
+
 }

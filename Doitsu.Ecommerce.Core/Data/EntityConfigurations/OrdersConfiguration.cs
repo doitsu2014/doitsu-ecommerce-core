@@ -29,6 +29,12 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
 
             builder.Property(e => e.DeliveryPhone).HasMaxLength(20);
 
+            builder.Property(e => e.DeliveryCity).HasMaxLength(60);
+
+            builder.Property(e => e.DeliveryDistrict).HasMaxLength(30);
+
+            builder.Property(e => e.DeliveryWard).HasMaxLength(30);
+
             builder.Property(e => e.FinalPrice).HasColumnType("money");
 
             builder.Property(e => e.TotalPrice).HasColumnType("money");
@@ -58,6 +64,12 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
             builder.HasOne(o => o.SummaryOrder)
                 .WithMany(o => o.InverseSummaryOrders)
                 .HasForeignKey(o => o.SummaryOrderId);
+
+            builder.HasOne(o => o.RefernceDeliveryInformation)
+                .WithMany(addr => addr.Orders)
+                .HasForeignKey(o => o.RefernceDeliveryInformationId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
         }
     }
 }
