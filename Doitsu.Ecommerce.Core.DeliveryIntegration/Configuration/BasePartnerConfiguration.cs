@@ -1,4 +1,4 @@
-namespace Doitsu.Ecommerce.DeliveryIntegration.Configuration
+namespace Doitsu.Ecommerce.Core.DeliveryIntegration.Configuration
 {
     public abstract class BasePartnerConfiguration
     {

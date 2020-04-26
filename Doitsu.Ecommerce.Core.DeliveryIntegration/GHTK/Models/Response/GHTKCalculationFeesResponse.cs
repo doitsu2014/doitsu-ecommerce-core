@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Doitsu.Ecommerce.DeliveryIntegration.GHTK.Models.Response
+namespace Doitsu.Ecommerce.Core.DeliveryIntegration.GHTK.Models.Response
 {
     public class GHTKCalculationFeesResponse : GHTKBaseResponse
     {

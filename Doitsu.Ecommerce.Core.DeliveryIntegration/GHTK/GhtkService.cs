@@ -1,21 +1,21 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Doitsu.Ecommerce.DeliveryIntegration.Common;
-using Doitsu.Ecommerce.DeliveryIntegration.Configuration;
-using Doitsu.Ecommerce.DeliveryIntegration.GHTK.Models.Response;
-using Doitsu.Ecommerce.DeliveryIntegration.Interfaces;
+using Doitsu.Ecommerce.Core.DeliveryIntegration.Common;
+using Doitsu.Ecommerce.Core.DeliveryIntegration.Configuration;
+using Doitsu.Ecommerce.Core.DeliveryIntegration.GHTK.Models.Response;
+using Doitsu.Ecommerce.Core.DeliveryIntegration.Interfaces;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Optional;
 using Optional.Async;
 
-namespace Doitsu.Ecommerce.DeliveryIntegration.GHTK
+namespace Doitsu.Ecommerce.Core.DeliveryIntegration.GHTK
 {
-    public class GHTKService : IGHTKService
+    public class GhtkService : IGhtkService
     {
-        private GHTKPartnerConfiguration configuration;
-        public GHTKService(IOptions<GHTKPartnerConfiguration> options)
+        private GhtkPartnerConfiguration configuration;
+        public GhtkService(IOptions<GhtkPartnerConfiguration> options)
         {
             configuration = options.Value;
         }
@@ -40,7 +40,7 @@ namespace Doitsu.Ecommerce.DeliveryIntegration.GHTK
                     .FlatMapAsync(async httpResponse =>
                     {
                         var content = await httpResponse.Content.ReadAsStringAsync();
-                        if (httpResponse.IsSuccessStatusCode)
+                        if (!httpResponse.IsSuccessStatusCode)
                         {
                             return Option.None<GHTKCalculationFeesResponse, string>(content);
                         }

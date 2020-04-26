@@ -1,5 +1,5 @@
 using System;
-namespace Doitsu.Ecommerce.DeliveryIntegration.GHTK.Models
+namespace Doitsu.Ecommerce.Core.DeliveryIntegration.GHTK.Models
 {
     public abstract class GHTKBaseResponse
     {

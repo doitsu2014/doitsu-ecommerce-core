@@ -4,8 +4,8 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>8.0</LangVersion>
     <PackageVersion>3.1.100.1</PackageVersion>
-    <Title>Doitsu.Ecommerce.Integration</Title>
-    <PackageId>Doitsu.Ecommerce.Integration</PackageId>
+    <Title>Doitsu.Ecommerce.Core.DeliveryIntegration</Title>
+    <PackageId>Doitsu.Ecommerce.Core.DeliveryIntegration</PackageId>
     <Authors>Doitsu Technology</Authors>
     <Owners>Doitsu Technology</Owners>
     <IsPackable>true</IsPackable>
@@ -14,10 +14,10 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <SynchReleaseVersion>false</SynchReleaseVersion>
     <NeutralLanguage>en</NeutralLanguage>
-    <Summary>Delivery Provider Integrator</Summary>
-    <PackageTags>Delivery Provider Integrator</PackageTags>
+    <Summary>Deliverer Services Integrator</Summary>
+    <PackageTags>Deliverer Services Integrator</PackageTags>
     <Description></Description>
-    <RepositoryUrl>https://doitsutechnology@dev.azure.com/doitsutechnology/Doitsu.Technology.Core/_git/Doitsu.Ecommerce.Integration</RepositoryUrl>
+    <RepositoryUrl>https://doitsutechnology@dev.azure.com/doitsutechnology/Doitsu.Technology.Core/_git/Doitsu.Ecommerce.Core</RepositoryUrl>
     <PackageProjectUrl>https://dev.azure.com/doitsutechnology/Doitsu.Technology.Core</PackageProjectUrl>
     <PackageIcon>doitsu-logo.png</PackageIcon>
     <RepositoryType>Azure Repos</RepositoryType>

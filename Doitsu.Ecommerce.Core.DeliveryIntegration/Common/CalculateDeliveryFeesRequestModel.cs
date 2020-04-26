@@ -1,4 +1,4 @@
-namespace Doitsu.Ecommerce.DeliveryIntegration.Common
+namespace Doitsu.Ecommerce.Core.DeliveryIntegration.Common
 {
     public class CalculateDeliveryFeesRequestModel
     {

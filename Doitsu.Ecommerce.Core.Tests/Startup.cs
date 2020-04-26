@@ -1,4 +1,5 @@
 
+using Doitsu.Ecommerce.Core.DeliveryIntegration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -23,6 +24,7 @@ namespace Doitsu.Ecommerce.Core.Tests
         public void ConfigureServices(IServiceCollection services)
         {
             RootConfig.Service(services, Configuration, true);
+            services.ConfigDevlieryIntegration(Configuration);
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders =

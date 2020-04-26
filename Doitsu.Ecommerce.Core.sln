@@ -6,9 +6,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Doitsu.Ecommerce.Core", "Do
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doitsu.Ecommerce.Core.Tests", "Doitsu.Ecommerce.Core.Tests\Doitsu.Ecommerce.Core.Tests.csproj", "{C83A79F7-82F2-496F-881A-6E9A11AAA736}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doitsu.Ecommerce.DeliveryIntegration", "Doitsu.Ecommerce.DeliveryIntegration\Doitsu.Ecommerce.DeliveryIntegration.csproj", "{E0717928-6B3E-4783-9E32-8B1C90CD339E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doitsu.Ecommerce.DeliveryIntegration.Tests", "Doitsu.Ecommerce.DeliveryIntegration.Tests\Doitsu.Ecommerce.DeliveryIntegration.Tests.csproj", "{12229E54-6D0C-4DD3-9059-814E6147F15C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doitsu.Ecommerce.Core.DeliveryIntegration", "Doitsu.Ecommerce.Core.DeliveryIntegration\Doitsu.Ecommerce.Core.DeliveryIntegration.csproj", "{E0717928-6B3E-4783-9E32-8B1C90CD339E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
