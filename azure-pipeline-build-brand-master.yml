@@ -56,16 +56,6 @@ steps:
 - task: NuGetCommand@2
   inputs:
     command: 'push'
-    feedsToUse: 'select'
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
-    nuGetFeedType: 'internal'
-    publishVstsFeed: 'Doitsu.Technology'
-    versioningScheme: 'off'
-    allowPackageConflicts: true
-
-- task: NuGetCommand@2
-  inputs:
-    command: 'push'
     packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
     nuGetFeedType: 'external'
     publishFeedCredentials: 'Doitsu.Technology.NugetV3'
