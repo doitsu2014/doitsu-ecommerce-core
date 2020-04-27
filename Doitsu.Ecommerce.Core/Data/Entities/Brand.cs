@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Doitsu.Service.Core.Interfaces.EfCore;
 using EFCore.Abstractions.Models;
 
@@ -31,5 +32,6 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public string FaviconUrl { get; set; }
         public bool Active { get; set; }
         public byte[] Vers { get; set; }
+        public ICollection<WareHouse> WareHouses { get; set; }
     }
 }

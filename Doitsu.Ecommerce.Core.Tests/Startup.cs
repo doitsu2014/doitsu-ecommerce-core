@@ -24,7 +24,7 @@ namespace Doitsu.Ecommerce.Core.Tests
         public void ConfigureServices(IServiceCollection services)
         {
             RootConfig.Service(services, Configuration, true);
-            services.ConfigDevlieryIntegration(Configuration);
+            services.ConfigDeliveryIntegration(Configuration);
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders =

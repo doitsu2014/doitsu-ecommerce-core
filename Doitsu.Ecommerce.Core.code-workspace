@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "./Doitsu.Ecommerce.Core"
+		},
+		{
+			"path": "./Doitsu.Ecommerce.Core.Tests"
+		},
+		{
+			"path": "./Doitsu.Ecommerce.Core.DeliveryIntegration"
+		}
+	],
+	"settings": {}
+}
