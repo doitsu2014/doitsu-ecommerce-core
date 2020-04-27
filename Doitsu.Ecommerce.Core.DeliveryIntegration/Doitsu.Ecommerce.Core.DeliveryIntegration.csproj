@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>8.0</LangVersion>
-    <PackageVersion>3.1.100.1</PackageVersion>
+    <PackageVersion>3.1.100.2</PackageVersion>
     <Title>Doitsu.Ecommerce.Core.DeliveryIntegration</Title>
     <PackageId>Doitsu.Ecommerce.Core.DeliveryIntegration</PackageId>
     <Authors>Doitsu Technology</Authors>
@@ -21,7 +21,7 @@
     <PackageProjectUrl>https://dev.azure.com/doitsutechnology/Doitsu.Technology.Core</PackageProjectUrl>
     <PackageIcon>doitsu-logo.png</PackageIcon>
     <RepositoryType>Azure Repos</RepositoryType>
-    <PackageReleaseNotes>Initial</PackageReleaseNotes>
+    <PackageReleaseNotes>Fix services config name</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
