@@ -9,7 +9,7 @@ namespace Doitsu.Ecommerce.Core.DeliveryIntegration
 {
     public static class Extension
     {
-        public static void ConfigDevlieryIntegration(this IServiceCollection services, IConfiguration configuration)
+        public static void ConfigDeliveryIntegration(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<DeliveryIntegrationSetting>(o => configuration.GetSection("DeliveryIntegration").Bind(o));
             services.Configure<GhtkPartnerConfiguration>(o => configuration.GetSection("DeliveryIntegration:Ghtk").Bind(o));
