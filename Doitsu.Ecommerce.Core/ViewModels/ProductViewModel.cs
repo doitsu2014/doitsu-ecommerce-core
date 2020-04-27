@@ -23,6 +23,7 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public decimal Price { get; set; }
         public string Slug { get; set; }
         public int? Sku { get; set; }
+        public float Weight { get; set; }
         public ICollection<ProductOptionViewModel> ProductOptions { get; set; }
     }
 
@@ -79,7 +80,11 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         [Required]
         [JsonProperty("slug")]
         public string Slug { get; set; }
-
+        
+        [Required]
+        [JsonProperty("weight")]
+        public float Weight { get; set; }
+    
         [JsonProperty("vers")]
         public byte[] Vers { get; set; }
 

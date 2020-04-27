@@ -1,9 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
+using System.Security.Claims;
+
 namespace Doitsu.Ecommerce.Core
 {
     public static class EnumHelper<T>
@@ -73,5 +76,19 @@ namespace Doitsu.Ecommerce.Core
         }
     }
 
-    
+    public static class ClaimsPrincipalHelper
+    {
+        public static int TakeUserIdFromClaims(this ClaimsPrincipal claims)
+        {
+            int.TryParse(claims.FindFirstValue(Constants.ClaimTypeConstants.USER_ID), out var userId);
+            return userId;
+        }
+
+        public static string TakeFullNameFromClaims(this ClaimsIdentity claimsIdentity)
+        {
+            var listClaims = claimsIdentity.Claims.ToImmutableList();
+            return listClaims.FirstOrDefault(c => c.Type == Constants.ClaimTypeConstants.FULL_NAME)?.Value ?? string.Empty;
+        }
+    }
+
 }

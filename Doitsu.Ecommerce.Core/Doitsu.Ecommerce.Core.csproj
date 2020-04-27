@@ -3,7 +3,7 @@
   <PropertyGroup>
     <LangVersion>8.0</LangVersion>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <PackageVersion>3.1.100.38</PackageVersion>
+    <PackageVersion>3.1.100.39</PackageVersion>
     <Title>Doitsu.Ecommerce.Core</Title>
     <PackageId>Doitsu.Ecommerce.Core</PackageId>
     <Authors>Doitsu Technology</Authors>
@@ -20,9 +20,8 @@
     <RepositoryUrl>https://doitsutechnology@dev.azure.com/doitsutechnology/Doitsu.Technology.Core/_git/Doitsu.Ecommerce.Core</RepositoryUrl>
     <PackageProjectUrl>https://dev.azure.com/doitsutechnology/Doitsu.Technology.Core</PackageProjectUrl>
     <PackageIcon>doitsu-logo.png</PackageIcon>
-    
     <RepositoryType>Azure Repos</RepositoryType>
-    <PackageReleaseNotes>Update migration and version of library</PackageReleaseNotes>
+    <PackageReleaseNotes>Update model for product management.</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="4.5.3.2" />
