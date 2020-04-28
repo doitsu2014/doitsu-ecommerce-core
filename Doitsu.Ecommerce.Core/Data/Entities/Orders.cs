@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Doitsu.Ecommerce.Core.Data.Identities;
 using Doitsu.Service.Core.Interfaces.EfCore;
 using EFCore.Abstractions.Models;
+using Doitsu.Ecommerce.Core.DeliveryIntegration;
 
 namespace Doitsu.Ecommerce.Core.Data.Entities
 {
@@ -12,6 +13,7 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public double Discount { get; set; }
         public decimal TotalPrice { get; set; }
         public decimal FinalPrice { get; set; }
+
         public int UserId { get; set; }
         public int TotalQuantity { get; set; }
         public int Status { get; set; }
@@ -19,6 +21,7 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public DateTime CreatedDate { get; set; }
 
         public int? RefernceDeliveryInformationId { get; set; }
+
         public string DeliveryAddress { get; set; }
         public string DeliveryName { get; set; }
         public string DeliveryPhone { get; set; }
@@ -27,6 +30,8 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public string DeliveryDistrict { get; set; }
         public string DeliveryCity { get; set; }
         public string DeliveryWard { get; set; }
+        public DeliverEnum? DeliveryProvider { get; set; }
+        public decimal? DeliveryFees { get; set; }
 
         public string Dynamic01 { get; set; }
         public string Dynamic02 { get; set; }

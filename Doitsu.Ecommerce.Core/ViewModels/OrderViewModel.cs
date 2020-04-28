@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AutoMapper;
 using Doitsu.Ecommerce.Core.Data.Entities;
+using Doitsu.Ecommerce.Core.DeliveryIntegration;
 using Doitsu.Service.Core;
 using Doitsu.Service.Core.Abstraction;
 using Newtonsoft.Json;
@@ -66,6 +67,23 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string DeliveryPhone { get; set; }
         [JsonProperty("deliveryEmail")]
         public string DeliveryEmail { get; set; }
+
+        [JsonProperty("deliveryCountry")]
+        public string DeliveryCountry { get; set; }
+
+        [JsonProperty("deliveryDistrict")]
+        public string DeliveryDistrict { get; set; }
+
+        [JsonProperty("deliveryCity")]
+        public string DeliveryCity { get; set; }
+
+        [JsonProperty("deliveryWard")]
+        public string DeliveryWard { get; set; }
+
+        [JsonProperty("deliverProvider")]
+        public DeliverEnum? DeliveryProvider { get; set; }
+        [JsonProperty("deliveryFees")]
+        public decimal? DeliveryFees { get; set; }
         [JsonProperty("dynamic01")]
         public string Dynamic01 { get; set; }
         [JsonProperty("dynamic02")]
@@ -80,6 +98,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string Note { get; set; }
         [JsonProperty("cancelNote")]
         public string CancelNote { get; set; }
+
+
         [JsonProperty("priority")]
         public OrderPriorityEnum? Priority { get; set; }
         [JsonProperty("type")]
@@ -125,6 +145,21 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string DeliveryPhone { get; set; }
         [JsonProperty("deliveryEmail")]
         public string DeliveryEmail { get; set; }
+        [JsonProperty("deliveryCountry")]
+        public string DeliveryCountry { get; set; }
+
+        [JsonProperty("deliveryDistrict")]
+        public string DeliveryDistrict { get; set; }
+
+        [JsonProperty("deliveryCity")]
+        public string DeliveryCity { get; set; }
+
+        [JsonProperty("deliveryWard")]
+        public string DeliveryWard { get; set; }
+        [JsonProperty("deliverProvider")]
+        public DeliverEnum? DeliveryProvider { get; set; }
+        [JsonProperty("deliveryFees")]
+        public decimal? DeliveryFees { get; set; }
         [JsonProperty("dynamic01")]
         public string Dynamic01 { get; set; }
         [JsonProperty("dynamic02")]
