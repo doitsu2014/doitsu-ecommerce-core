@@ -12,6 +12,8 @@ using Doitsu.Ecommerce.Core.Abstraction;
 using Doitsu.Ecommerce.Core.Data;
 using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Ecommerce.Core.Data.Identities;
+using Doitsu.Ecommerce.Core.DeliveryIntegration;
+using Doitsu.Ecommerce.Core.DeliveryIntegration.Common;
 using Doitsu.Ecommerce.Core.IdentitiesExtension;
 using Doitsu.Ecommerce.Core.Services.Interface;
 using Doitsu.Ecommerce.Core.ViewModels;
@@ -38,6 +40,7 @@ namespace Doitsu.Ecommerce.Core.Services
         private readonly IUserTransactionService userTransactionService;
         private readonly EcommerceIdentityUserManager<EcommerceIdentityUser> userManager;
         private readonly IServiceScopeFactory serviceScopeFactory;
+        private readonly IDeliveryIntegrator deliveryIntegrator;
 
         public OrderService(EcommerceDbContext dbContext,
             IMapper mapper,
@@ -46,13 +49,15 @@ namespace Doitsu.Ecommerce.Core.Services
             IProductService productService,
             EcommerceIdentityUserManager<EcommerceIdentityUser> userManager,
             IUserTransactionService userTransactionService,
-            IServiceScopeFactory serviceScopeFactory) : base(dbContext, mapper, logger)
+            IServiceScopeFactory serviceScopeFactory,
+            IDeliveryIntegrator deliveryIntegrator) : base(dbContext, mapper, logger)
         {
             this.emailService = emailService;
             this.productService = productService;
             this.userManager = userManager;
             this.userTransactionService = userTransactionService;
             this.serviceScopeFactory = serviceScopeFactory;
+            this.deliveryIntegrator = deliveryIntegrator;
         }
 
         public async Task<Option<string, string>> CheckoutCartAsync(CheckoutCartViewModel data, EcommerceIdentityUser user)
@@ -298,6 +303,22 @@ namespace Doitsu.Ecommerce.Core.Services
                         }
                     }
                     return Option.Some<CreateOrderWithOptionViewModel, string>(d);
+                })
+                .MapAsync(async o =>
+                {
+                    if (o.DeliveryProvider != null)
+                    {
+                        var deliver = o.DeliveryProvider.Value;
+                        var calculationModel = this.Mapper.Map<CalculateDeliveryFeesRequestModel>(o);
+                        var defaultWareHouse = await this.DbContext.WareHouses.FirstOrDefaultAsync();
+                        calculationModel.PickAddress = defaultWareHouse.Address;
+                        calculationModel.PickProvince = defaultWareHouse.City;
+                        calculationModel.PickWard = defaultWareHouse.Ward;
+                        calculationModel.PickDistrict = defaultWareHouse.District;
+                        (await this.deliveryIntegrator.CalculateShipFeeAsync(deliver, calculationModel))
+                            .Map(fees => o.DeliveryFees = fees);
+                    }
+                    return o;
                 }))
                 .Map(d =>
                 {
