@@ -40,6 +40,5 @@
 
   <ItemGroup>
     <ProjectReference Include="../Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj" />
-    <ProjectReference Include="../Doitsu.Ecommerce.Core.DeliveryIntegration/Doitsu.Ecommerce.Core.DeliveryIntegration.csproj" />
   </ItemGroup>
 </Project>

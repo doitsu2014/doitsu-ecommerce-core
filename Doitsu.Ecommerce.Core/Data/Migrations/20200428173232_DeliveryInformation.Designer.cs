@@ -10,14 +10,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20200426151604_AddProductWeightAndWareHouse")]
-    partial class AddProductWeightAndWareHouse
+    [Migration("20200428173232_DeliveryInformation")]
+    partial class DeliveryInformation
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.2")
+                .HasAnnotation("ProductVersion", "3.1.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -767,6 +767,9 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("nvarchar(125)")
                         .HasMaxLength(125);
 
+                    b.Property<decimal?>("DeliveryFees")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("DeliveryName")
                         .HasColumnType("nvarchar(125)")
                         .HasMaxLength(125);
@@ -774,6 +777,9 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<string>("DeliveryPhone")
                         .HasColumnType("nvarchar(20)")
                         .HasMaxLength(20);
+
+                    b.Property<int?>("DeliveryProvider")
+                        .HasColumnType("int");
 
                     b.Property<string>("DeliveryWard")
                         .HasColumnType("nvarchar(30)")
@@ -1452,7 +1458,7 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.HasIndex("Name")
                         .HasName("IX_Name");
 
-                    b.ToTable("WareHouse");
+                    b.ToTable("WareHouses");
                 });
 
             modelBuilder.Entity("Doitsu.Ecommerce.Core.Data.Identities.EcommerceIdentityRole", b =>

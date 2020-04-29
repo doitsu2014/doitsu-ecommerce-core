@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AutoMapper;
 using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Service.Core.Abstraction;
@@ -36,5 +37,7 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         public string YoutubeUrl { get; set; }
         public int? OpenDayOfWeek { get; set; }
         public int? CloseDayOfWeek { get; set; }
+
+        public ICollection<WareHouseViewModel> WareHouses { get; set; }
     }
 }
