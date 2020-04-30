@@ -89,6 +89,7 @@
             public const string NEW_PASSWORD_REQUIRED = "Mật khẩu xác nhận không được để trống.";
             public const string PHONE_REQUIRED = "Số điện thoại không được bỏ trống.";         
             public const string FULLNAME_REQUIRED = "Tên không được bỏ trống.";
+            public const string REQUEST_REQUIRED = "Dữ liệu truyền lên rỗng.";
 
             //Regex 
             public const string PASSWORD_REGEX_FAIL = "Mật khẩu của bạn phải chứa ít nhất 1 ký tự đặc biệt và 1 ký tự viết hoa.";
@@ -128,6 +129,10 @@
 
             //Update 
             public const string UPDATE_USER_FAIL = "Cập nhật người dùng {0} thât bại!";
+
+            //Delivery
+            public const string DELIVERY_NOT_EXISTED = "Không tìm thấy thông tin địa chỉ.";
+            public const string DELIVERY_EXISTED = "Địa chỉ này đã tồn tại.";
         }
 
         public static class SendEmailProperty

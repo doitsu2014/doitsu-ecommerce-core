@@ -75,7 +75,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
                     if (tmpDi != null)
                     {
-                        return Option.None<DeliveryInformation, string>("Địa chỉ này đã tồn tại.");
+                        return Option.None<DeliveryInformation, string>(UserMessage.DELIVERY_EXISTED);
                     }
 
                     return Option.Some<DeliveryInformation, string>(cm);
@@ -98,7 +98,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
                    if (deliveryInformation == null)
                    {
-                       return Option.None<DeliveryInformation, string>("Không tìm thấy thông tin địa chỉ.");
+                       return Option.None<DeliveryInformation, string>(UserMessage.DELIVERY_NOT_EXISTED);
                    }
 
                    deliveryInformation.Address = um.Address;
@@ -134,7 +134,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
                     if (deliveryInformation == null)
                     {
-                        return Option.None<DeliveryInformation, string>("Không tìm thấy thông tin địa chỉ.");
+                        return Option.None<DeliveryInformation, string>(UserMessage.DELIVERY_NOT_EXISTED);
                     }
 
                     return Option.Some<DeliveryInformation, string>(deliveryInformation);
@@ -149,15 +149,15 @@ namespace Doitsu.Ecommerce.Core.Services
         private Task<Option<DeliveryInformation, string>> ValidateDeliveryInformation(DeliveryInformationViewModel model)
         {
             return model.SomeNotNull()
-                .WithException("Dữ liệu truyền lên rỗng.")
-                .Filter(cm => cm.UserId > 0, "Không tìm thấy dữ liệu người dùng.")
+                .WithException(UserMessage.REQUEST_REQUIRED)
+                .Filter(cm => cm.UserId > 0, UserMessage.USER_NOT_EXISTED)
                 .FlatMapAsync(async cm =>
                 {
                     var user = await this.userService.FindByIdAsync(cm.UserId.ToString());
 
                     if (user == null)
                     {
-                        return Option.None<DeliveryInformation, string>("Không tìm thấy dữ liệu người dùng.");
+                        return Option.None<DeliveryInformation, string>(UserMessage.USER_NOT_EXISTED);
                     }
 
                     var deliveryInformation = this.mapper.Map<DeliveryInformation>(cm);
@@ -201,7 +201,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public async Task<ImmutableList<EcommerceIdentityUserViewModel>> GetUsersAsync(string userName = "", string phoneNumber = "", int id = 0)
         {
-            var userQuery = this.userService.Users.Where(u => u.Active).Include(u => u.UserRoles).Include(u => u.DeliveryInformations).AsNoTracking();
+            var userQuery = this.userService.Users.Where(u => u.Active).Include(u => u.UserRoles).AsNoTracking();
 
             var listFilterOfUser = new List<(bool filterable, Func<EcommerceIdentityUser, bool> function)>();
             listFilterOfUser.Add((!string.IsNullOrEmpty(userName), u => u.UserName.StartsWith(userName)));
@@ -226,7 +226,6 @@ namespace Doitsu.Ecommerce.Core.Services
                    var role = roleQuery.FirstOrDefault(r => r.Id == ur.RoleId);
                    return this.mapper.Map<EcommerceIdentityRoleViewModel>(role);
                }).ToList();
-               userVm.DeliveryInformations = this.mapper.Map<List<DeliveryInformationViewModel>>(u.DeliveryInformations.Where(di => di.Active));
                return userVm;
            }).ToImmutableList();
         }
