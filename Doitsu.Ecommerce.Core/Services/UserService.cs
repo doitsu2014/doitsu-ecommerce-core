@@ -21,6 +21,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Doitsu.Service.Core.Services.EmailService;
 using AutoMapper.QueryableExtensions;
 using Doitsu.Ecommerce.Core.Services.Interface;
+using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
+using Doitsu.Ecommerce.Core.Data.Entities;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -35,37 +37,133 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<Option<EcommerceIdentityUser, string>> FindUserByEmailAndPassword(LoginByEmailViewModel loginData);
         Task<Option<EcommerceIdentityUser, string>> FindUserByPhoneAndPasswordAsync(LoginByPhoneViewModel loginData);
         Task<ClaimsIdentity> CreateClaimIdentityAsync(EcommerceIdentityUser user, int expireDays = 7, string authenticationType = CookieAuthenticationDefaults.AuthenticationScheme);
-        Task<Option<ClaimsPrincipal, string>> RegisterCustomerAccountAsync(RegisterViewModel request);
-        Task<Option<(ClaimsPrincipal cp, string code), string>> RegisterWithOrderAsync(RegisterViewModel request);
-        Task<Option<string, string>> GetResettingPasswordAsync(string userIdentification, string scheme, string host);
+        Task<Option<(ClaimsPrincipal claim, EcommerceIdentityUser user), string>> RegisterCustomerAccountAsync(RegisterViewModel request, bool withOrder);
+        Task<Option<(string subject, string body, MailPayloadInformation mailPayloadInfor), string>> GetResettingPasswordAsync(string userIdentification, string scheme, string host, string brandName);
         Task<Option<string, string>> ResetPasswordAsync(ResetPasswordViewModel resetPasswordViewModel);
         Task<Option<string, string>> ChangePasswordAsync(string userId, ChangePasswordViewMode request);
         Task<Option<string, string>> ChangeDetailsAsync(string userId, UpdateDetailViewModel request);
         Task<Option<EcommerceIdentityUser, string>> CreateNewUserAsync(AdminEditNewUserViewModel request);
         Task<Option<EcommerceIdentityUser, string>> UpdateUserAsync(AdminEditNewUserViewModel request);
+        Task<Option<ImmutableList<EcommerceIdentityUserViewModel>, string>> CreateDeliveryInformationAsync(DeliveryInformationViewModel createModel);
+        Task<Option<ImmutableList<EcommerceIdentityUserViewModel>, string>> UpdateDeliveryInformationAsync(DeliveryInformationViewModel updateModel);
+        Task<Option<ImmutableList<EcommerceIdentityUserViewModel>, string>> DeleteDeliveryInformationAsync(int userId, int id);
     }
 
     public class UserService : IUserService
     {
         private readonly EcommerceRoleIntManager<EcommerceIdentityRole> roleService;
         private readonly EcommerceIdentityUserManager<EcommerceIdentityUser> userService;
-        private readonly IOrderService orderService;
-        private readonly IBrandService brandService;
-        private readonly IEmailService emailService;
         private readonly IMapper mapper;
+        private readonly IBaseService<DeliveryInformation> deliveryInformationService;
         public UserService(EcommerceRoleIntManager<EcommerceIdentityRole> roleService,
                            EcommerceIdentityUserManager<EcommerceIdentityUser> userService,
-                           IOrderService orderService,
-                           IBrandService brandService,
-                           IEmailService emailService,
-                           IMapper mapper)
+                           IMapper mapper,
+                           IBaseService<DeliveryInformation> deliveryInformationService)
         {
             this.roleService = roleService;
             this.userService = userService;
-            this.orderService = orderService;
-            this.brandService = brandService;
-            this.emailService = emailService;
             this.mapper = mapper;
+            this.deliveryInformationService = deliveryInformationService;
+        }
+
+        public async Task<Option<ImmutableList<EcommerceIdentityUserViewModel>, string>> CreateDeliveryInformationAsync(DeliveryInformationViewModel createModel)
+        {
+            return await ValidateDeliveryInformation(createModel)
+                .FlatMapAsync(async cm =>
+                {
+                    var tmpDi = this.deliveryInformationService.Get(di => di.Name == cm.Name || di.Address == cm.Address).FirstOrDefault();
+
+                    if (tmpDi != null)
+                    {
+                        return Option.None<DeliveryInformation, string>("Địa chỉ này đã tồn tại.");
+                    }
+
+                    return Option.Some<DeliveryInformation, string>(cm);
+                })
+                .MapAsync(async di =>
+                {
+                    var deliveryInformation = await this.deliveryInformationService.CreateAsync(di);
+                    await this.deliveryInformationService.CommitAsync();
+                    return await GetUsersAsync("", "", di.UserId);
+                });
+        }
+
+
+        public async Task<Option<ImmutableList<EcommerceIdentityUserViewModel>, string>> UpdateDeliveryInformationAsync(DeliveryInformationViewModel updateModel)
+        {
+            return await ValidateDeliveryInformation(updateModel)
+               .FlatMapAsync(um =>
+               {
+                   var deliveryInformation = this.deliveryInformationService.Get(d => d.Id == um.Id && d.Active).FirstOrDefault();
+
+                   if (deliveryInformation == null)
+                   {
+                       return Option.None<DeliveryInformation, string>("Không tìm thấy thông tin địa chỉ.");
+                   }
+
+                   deliveryInformation.Address = um.Address;
+                   deliveryInformation.City = um.City;
+                   deliveryInformation.Country = um.Country;
+                   deliveryInformation.District = um.District;
+                   deliveryInformation.Ward = um.Ward;
+
+                   return Option.Some<DeliveryInformation, string>(deliveryInformation);
+               })
+               .MapAsync(async di =>
+               {
+                   this.deliveryInformationService.Update(di);
+                   await this.deliveryInformationService.CommitAsync();
+                   return await GetUsersAsync("", "", di.UserId);
+               });
+        }
+
+
+        public async Task<Option<ImmutableList<EcommerceIdentityUserViewModel>, string>> DeleteDeliveryInformationAsync(int userId, int id)
+        {
+            var deliveryInformationViewModel = new DeliveryInformationViewModel
+            {
+                UserId = userId,
+                Id = id,
+                Active = false
+            };
+
+            return await ValidateDeliveryInformation(deliveryInformationViewModel)
+                .FlatMapAsync(um =>
+                {
+                    var deliveryInformation = this.deliveryInformationService.Get(d => d.Id == um.Id && d.Active).FirstOrDefault();
+
+                    if (deliveryInformation == null)
+                    {
+                        return Option.None<DeliveryInformation, string>("Không tìm thấy thông tin địa chỉ.");
+                    }
+
+                    return Option.Some<DeliveryInformation, string>(deliveryInformation);
+                }).MapAsync(async di =>
+                {
+                    var s = await this.deliveryInformationService.DeleteAsync(di.Id);
+                    await this.deliveryInformationService.CommitAsync();
+                    return await GetUsersAsync("", "", di.UserId);
+                });
+        }
+
+        private Task<Option<DeliveryInformation, string>> ValidateDeliveryInformation(DeliveryInformationViewModel model)
+        {
+            return model.SomeNotNull()
+                .WithException("Dữ liệu truyền lên rỗng.")
+                .Filter(cm => cm.UserId > 0, "Không tìm thấy dữ liệu người dùng.")
+                .FlatMapAsync(async cm =>
+                {
+                    var user = await this.userService.FindByIdAsync(cm.UserId.ToString());
+
+                    if (user == null)
+                    {
+                        return Option.None<DeliveryInformation, string>("Không tìm thấy dữ liệu người dùng.");
+                    }
+
+                    var deliveryInformation = this.mapper.Map<DeliveryInformation>(cm);
+
+                    return Option.Some<DeliveryInformation, string>(deliveryInformation);
+                });
         }
 
         public async Task<ClaimsIdentity> CreateClaimIdentityAsync(EcommerceIdentityUser user, int expireDays = 7, string authenticationType = "Cookies")
@@ -103,8 +201,8 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public async Task<ImmutableList<EcommerceIdentityUserViewModel>> GetUsersAsync(string userName = "", string phoneNumber = "", int id = 0)
         {
-            var userQuery = this.userService.Users.Where(u => u.Active).Include(u => u.UserRoles).AsNoTracking();
-            
+            var userQuery = this.userService.Users.Where(u => u.Active).Include(u => u.UserRoles).Include(u => u.DeliveryInformations).AsNoTracking();
+
             var listFilterOfUser = new List<(bool filterable, Func<EcommerceIdentityUser, bool> function)>();
             listFilterOfUser.Add((!string.IsNullOrEmpty(userName), u => u.UserName.StartsWith(userName)));
             listFilterOfUser.Add((!string.IsNullOrEmpty(phoneNumber), u => u.PhoneNumber.StartsWith(phoneNumber)));
@@ -118,7 +216,7 @@ namespace Doitsu.Ecommerce.Core.Services
         private async Task<ImmutableList<EcommerceIdentityUserViewModel>> GetUserViewModelAsync(IQueryable<EcommerceIdentityUser> ecommerceIdentityUsers)
         {
             var roleQuery = (await this.roleService.Roles.AsNoTracking().ToListAsync()).ToImmutableList();
-            
+
             return (ecommerceIdentityUsers.ToList())
            .Select(u =>
            {
@@ -128,6 +226,7 @@ namespace Doitsu.Ecommerce.Core.Services
                    var role = roleQuery.FirstOrDefault(r => r.Id == ur.RoleId);
                    return this.mapper.Map<EcommerceIdentityRoleViewModel>(role);
                }).ToList();
+               userVm.DeliveryInformations = this.mapper.Map<List<DeliveryInformationViewModel>>(u.DeliveryInformations.Where(di => di.Active));
                return userVm;
            }).ToImmutableList();
         }
@@ -158,43 +257,23 @@ namespace Doitsu.Ecommerce.Core.Services
                 });
         }
 
-        public async Task<Option<ClaimsPrincipal, string>> RegisterCustomerAccountAsync(RegisterViewModel request)
+        public async Task<Option<(ClaimsPrincipal claim, EcommerceIdentityUser user), string>> RegisterCustomerAccountAsync(RegisterViewModel request, bool withOrder)
         {
             return await request
                     .SomeNotNull()
                     .WithException(UserMessage.REGISTER_NULL_REQUEST)
+                    .Filter(req => (withOrder == false || req.CartInformation != null), UserMessage.CHECKOUT_CARD_NULL)
                     .FlatMapAsync(async d =>
                     {
                         var user = mapper.Map<EcommerceIdentityUser>(d);
                         var claimsPrincipal = await RegisterCustomerAsync(user, d.Password);
-                        return claimsPrincipal;
+                        return claimsPrincipal
+                            .Map(claim =>
+                            {
+                                return (claim, user);
+                            });
                     });
         }
-
-        public async Task<Option<(ClaimsPrincipal cp, string code), string>> RegisterWithOrderAsync(RegisterViewModel request)
-        {
-            return (await request
-                .SomeNotNull()
-                .WithException(UserMessage.REGISTER_NULL_REQUEST)
-                .Filter(req => req.CartInformation != null, UserMessage.CHECKOUT_CARD_NULL)
-                .FlatMapAsync(async req =>
-                {
-                    var user = mapper.Map<EcommerceIdentityUser>(req);
-                    var claimsPrincipal = await RegisterCustomerAsync(user, req.Password);
-
-                    return await claimsPrincipal
-                            .FlatMapAsync(async cp =>
-                            {
-                                var checkoutCard = await orderService.CheckoutCartAsync(req.CartInformation, user);
-                                return checkoutCard
-                                .FlatMap(cc =>
-                                {
-                                   return Option.Some<(ClaimsPrincipal cp, string code), string>((cp: cp, code: cc));
-                                });
-                            });
-                }));
-        }
-
         private async Task<Option<ClaimsPrincipal, string>> RegisterCustomerAsync(EcommerceIdentityUser user, string password)
         {
             return await new
@@ -232,7 +311,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 });
         }
 
-        public async Task<Option<string, string>> GetResettingPasswordAsync(string userIdentification, string scheme, string host)
+        public async Task<Option<(string subject, string body, MailPayloadInformation mailPayloadInfor), string>> GetResettingPasswordAsync(string userIdentification, string scheme, string host, string brandName)
         {
             return await userIdentification
                 .SomeNotNull()
@@ -245,8 +324,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     var user = await this.userService.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Email.Trim() == uI || x.PhoneNumber.Trim() == uI);
                     var resetToken = await this.userService.GeneratePasswordResetTokenAsync(user);
                     // Send reset password token to user mail
-                    var currentBrand = await brandService.FirstOrDefaultAsync();
-                    var subject = string.Format(SendEmailProperty.RESET_PASSWORD_SUBJECT, currentBrand.Name);
+                    var subject = string.Format(SendEmailProperty.RESET_PASSWORD_SUBJECT, brandName);
                     var mailPayloadInfor = new MailPayloadInformation
                     {
                         Mail = user.Email,
@@ -255,8 +333,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
                     var body = string.Format(SendEmailProperty.RESET_PASSWORD_BODY, scheme, host, uI, resetToken);
 
-                    emailService.SendEmailWithBachMocWrapper(subject, body, mailPayloadInfor);
-                    return SendEmailProperty.RESET_PASSWORD_REQUEST_SUCCESS;
+                    return (subject, body, mailPayloadInfor);
                 });
         }
 

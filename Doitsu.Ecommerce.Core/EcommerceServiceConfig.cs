@@ -1,4 +1,7 @@
-﻿using Doitsu.Ecommerce.Core.Services;
+﻿using Doitsu.Ecommerce.Core.Abstraction;
+using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
+using Doitsu.Ecommerce.Core.Data.Entities;
+using Doitsu.Ecommerce.Core.Services;
 using Doitsu.Ecommerce.Core.Services.Interface;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,6 +31,7 @@ namespace Doitsu.Ecommerce.Core
             services.AddTransient(typeof(IProductVariantService), typeof(ProductVariantService));
             services.AddTransient(typeof(IProductOptionService), typeof(ProductOptionService));
             services.AddTransient(typeof(IUserService), typeof(UserService));
+            services.AddTransient(typeof(IBaseService<DeliveryInformation>), typeof(BaseService<DeliveryInformation>));
             services.AddHttpContextAccessor();
             return services;
         }

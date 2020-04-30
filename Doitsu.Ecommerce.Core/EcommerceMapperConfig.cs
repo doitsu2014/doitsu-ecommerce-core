@@ -123,6 +123,9 @@ namespace Doitsu.Ecommerce.Core
 
                 cfg.CreateMap<UserTransactionViewModel, UserTransaction>();
                 cfg.CreateMap<UserTransaction, UserTransactionViewModel>();
+
+                cfg.CreateMap<DeliveryInformationViewModel, DeliveryInformation>();
+                cfg.CreateMap<DeliveryInformation, DeliveryInformationViewModel>();
             });
 
             IMapper mapper = autoMapperConfig.CreateMapper();
