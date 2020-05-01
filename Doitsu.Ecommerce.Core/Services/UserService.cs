@@ -1,14 +1,11 @@
-﻿using System.Security.Principal;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Doitsu.Ecommerce.Core.Data.Identities;
 using Doitsu.Ecommerce.Core.IdentitiesExtension;
 using Doitsu.Ecommerce.Core.IdentityManagers;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System;
 using Doitsu.Ecommerce.Core.ViewModels;
 using AutoMapper;
@@ -20,13 +17,11 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Doitsu.Service.Core.Services.EmailService;
 using AutoMapper.QueryableExtensions;
-using Doitsu.Ecommerce.Core.Services.Interface;
 using Doitsu.Ecommerce.Core.Abstraction.Interfaces;
 using Doitsu.Ecommerce.Core.Data.Entities;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-
     public interface IUserService
     {
         Task<ImmutableList<EcommerceIdentityUserViewModel>> GetUsersAsync(string name = "", string phone = "", int id = 0);

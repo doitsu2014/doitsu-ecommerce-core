@@ -22,13 +22,6 @@ steps:
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
-  displayName: "Building Doitsu.Ecommerce.Core.DeliveryIntegration Process"
-  inputs:
-    command: 'build'
-    projects: 'Doitsu.Ecommerce.Core.DeliveryIntegration/Doitsu.Ecommerce.Core.DeliveryIntegration.csproj'
-    arguments: '--configuration $(buildConfiguration)'
-
-- task: DotNetCoreCLI@2
   displayName: "Test Process"
   inputs:
     command: test
@@ -44,21 +37,9 @@ steps:
     nobuild: true
     versioningScheme: 'off'
 
-- task: DotNetCoreCLI@2
-  displayName: "Packing Doitsu.Ecommerce.Core.DeliveryIntegration Process"
-  inputs:
-    command: 'pack'
-    arguments: '--configuration $(buildConfiguration)'
-    packagesToPack: 'Doitsu.Ecommerce.Core.DeliveryIntegration/Doitsu.Ecommerce.Core.DeliveryIntegration.csproj'
-    nobuild: true
-    versioningScheme: 'off'
-
 - task: NuGetCommand@2
   inputs:
     command: 'push'
-    feedsToUse: 'select'
     packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
-    nuGetFeedType: 'internal'
-    publishVstsFeed: 'Doitsu.Technology'
-    versioningScheme: 'off'
-    allowPackageConflicts: true
+    nuGetFeedType: 'external'
+    publishFeedCredentials: 'Doitsu.Technology.NugetV3'

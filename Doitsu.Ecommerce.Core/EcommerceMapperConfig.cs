@@ -4,6 +4,7 @@ using Doitsu.Ecommerce.Core.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Doitsu.Ecommerce.Core.Data.Entities;
 using Doitsu.Ecommerce.Core.Data.Identities;
+using Doitsu.Ecommerce.Core.DeliveryIntegration.Common;
 
 namespace Doitsu.Ecommerce.Core
 {
@@ -123,6 +124,16 @@ namespace Doitsu.Ecommerce.Core
 
                 cfg.CreateMap<UserTransactionViewModel, UserTransaction>();
                 cfg.CreateMap<UserTransaction, UserTransactionViewModel>();
+
+                cfg.CreateMap<WareHouse, WareHouseViewModel>();
+                cfg.CreateMap<WareHouseViewModel, WareHouse>();
+
+                cfg.CreateMap<CreateOrderWithOptionViewModel, CalculateDeliveryFeesRequestModel>()
+                    .ForMember(d => d.Address, opt => opt.MapFrom(src => src.DeliveryAddress))
+                    .ForMember(d => d.District, opt => opt.MapFrom(src => src.DeliveryDistrict))
+                    .ForMember(d => d.Province, opt => opt.MapFrom(src => src.DeliveryCity))
+                    .ForMember(d => d.Ward, opt => opt.MapFrom(src => src.DeliveryWard))
+                    ;
 
                 cfg.CreateMap<DeliveryInformationViewModel, DeliveryInformation>();
                 cfg.CreateMap<DeliveryInformation, DeliveryInformationViewModel>();

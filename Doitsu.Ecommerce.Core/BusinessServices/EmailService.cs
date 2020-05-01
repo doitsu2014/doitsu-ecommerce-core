@@ -21,7 +21,9 @@ namespace Doitsu.Ecommerce.Core.Services
     public interface IEmailService
     {
         Option<bool, string> SendEmailWithBachMocWrapper(string subject, string content, MailPayloadInformation destEmail);
+        Option<bool, string> SendEmailWithYgflWrapper(string subject, string content, MailPayloadInformation destEmail);
         Task<Option<bool, string>> SendEmailWithBachMocWrapperAsync(List<MessagePayload> messagePayloads);
+        Task<Option<bool, string>> SendEmailWithYgflWrapperAsync(List<MessagePayload> messagePayloads);
         Task<MessagePayload> PrepareLeaderOrderMailConfirmAsync(EcommerceIdentityUser user, Orders order);
         Task<MessagePayload> PrepareCustomerOrderMailConfirm(EcommerceIdentityUser user, Orders order);
         Task<MessagePayload> PrepareCustomerFeedback(CustomerFeedbackViewModel data);
@@ -126,6 +128,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     }
                 });
         }
+        
         public async Task<MessagePayload> PrepareCustomerOrderMailConfirm(EcommerceIdentityUser user, Orders order)
         {
             try
@@ -250,6 +253,16 @@ namespace Doitsu.Ecommerce.Core.Services
                 logger.LogError(ex, $"Cannot send email to confirm Customer Feedback");
                 return null;
             }
+        }
+
+        public Option<bool, string> SendEmailWithYgflWrapper(string subject, string content, MailPayloadInformation destEmail)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Option<bool, string>> SendEmailWithYgflWrapperAsync(List<MessagePayload> messagePayloads)
+        {
+            throw new NotImplementedException();
         }
     }
 }

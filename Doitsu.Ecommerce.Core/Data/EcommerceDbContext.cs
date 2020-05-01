@@ -41,6 +41,8 @@ namespace Doitsu.Ecommerce.Core.Data
         public DbSet<ProductOptionValues> ProductOptionValues { get; set; }
         public DbSet<PromotionDetail> PromotionDetails { get; set; }
         public DbSet<UserTransaction> UserTransactions { get; set; }
+        public DbSet<WareHouse> WareHouses { get; set; }
+        public DbSet<DeliveryInformation> DeliveryInformation { get; set; }
 
         public EcommerceDbContext(DbContextOptions<EcommerceDbContext> options) : base(options) { }
         public EcommerceDbContext(DbContextOptions<EcommerceDbContext> options, IEnumerable<IEntityChangeHandler> handlers) : base(options)
