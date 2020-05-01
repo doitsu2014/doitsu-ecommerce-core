@@ -3,7 +3,7 @@
   <PropertyGroup>
     <LangVersion>8.0</LangVersion>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <PackageVersion>3.1.100.40</PackageVersion>
+    <PackageVersion>3.1.100.41</PackageVersion>
     <Title>Doitsu.Ecommerce.Core</Title>
     <PackageId>Doitsu.Ecommerce.Core</PackageId>
     <Authors>Doitsu Technology</Authors>
@@ -21,7 +21,7 @@
     <PackageProjectUrl>https://dev.azure.com/doitsutechnology/Doitsu.Technology.Core</PackageProjectUrl>
     <PackageIcon>doitsu-logo.png</PackageIcon>
     <RepositoryType>Azure Repos</RepositoryType>
-    <PackageReleaseNotes>Add warehouse service and fix brand view model to adapt ware house.</PackageReleaseNotes>
+    <PackageReleaseNotes>Update delivery information entity for User Table</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="4.5.3.2" />
@@ -35,7 +35,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.3" />
     <PackageReference Include="Doitsu.Service.Core" Version="3.1.100.10" />
-    <!-- <PackageReference Include="Doitsu.Ecommerce.Core.DeliveryIntegration" Version="3.1.100.2" /> -->
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Doitsu.Ecommerce.Core.DeliveryIntegration/Doitsu.Ecommerce.Core.DeliveryIntegration.csproj" />

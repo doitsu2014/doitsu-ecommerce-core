@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20200428173232_DeliveryInformation")]
-    partial class DeliveryInformation
+    [Migration("20200501034821_DeliveryIntegration")]
+    partial class DeliveryIntegration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

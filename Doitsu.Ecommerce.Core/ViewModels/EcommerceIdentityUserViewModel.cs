@@ -38,5 +38,8 @@ namespace Doitsu.Ecommerce.Core.ViewModels
 
         [JsonProperty("roleName")]
         public List<EcommerceIdentityRoleViewModel> EcommerceIdentityRoles { get; set; }
+
+        [JsonProperty("deliveryInformation")]
+        public List<DeliveryInformationViewModel> DeliveryInformations { get; set; }
     }
 }

@@ -134,6 +134,9 @@ namespace Doitsu.Ecommerce.Core
                     .ForMember(d => d.Province, opt => opt.MapFrom(src => src.DeliveryCity))
                     .ForMember(d => d.Ward, opt => opt.MapFrom(src => src.DeliveryWard))
                     ;
+
+                cfg.CreateMap<DeliveryInformationViewModel, DeliveryInformation>();
+                cfg.CreateMap<DeliveryInformation, DeliveryInformationViewModel>();
             });
 
             IMapper mapper = autoMapperConfig.CreateMapper();

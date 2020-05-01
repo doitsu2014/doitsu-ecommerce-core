@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
-    public partial class DeliveryInformation : Migration
+    public partial class DeliveryIntegration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
