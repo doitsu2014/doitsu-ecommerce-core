@@ -180,6 +180,9 @@ namespace Doitsu.Ecommerce.Core.ViewModels
         [JsonProperty("productPrice")]
         public decimal ProductPrice { get; set; }
 
+        [JsonProperty("productWeight")]
+        public float ProductWeight { get; set; }
+
         [JsonProperty("productVariantOptionValues")]
         public virtual ICollection<ProductVariantOptionValueViewModel> ProductVariantOptionValues { get; set; }
     }

@@ -141,7 +141,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     Name = user.Fullname
                 };
 
-                var body = $"<p>Bạn đã đặt thành công đơn hàng có mã đơn: <a href='{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}/nguoi-dung/thong-tin-tai-khoan'>#{order.Code}</a></p>";
+                var body = $"<p>Bạn đã đặt thành công đơn hàng có mã đơn: <a href='{CreateHostWithScheme()}/nguoi-dung/thong-tin-tai-khoan'>#{order.Code}</a></p>";
                 body += $"<p>Để có thể xem chi tiết đơn hàng, mong quý khách nhấp vào đường dẫn phía trên.</p><br/>";
 
                 var messagePayload = new MessagePayload();
@@ -156,6 +156,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 return null;
             }
         }
+
         public async Task<MessagePayload> PrepareLeaderOrderMailConfirmAsync(EcommerceIdentityUser user, Orders order)
         {
             try
@@ -177,7 +178,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 body += $"Ngày đặt: {DateTime.UtcNow.ToVietnamDateTime().ToShortDateString()}<br/>";
                 body += $"Tổng tiền: {order.FinalPrice}";
                 body += "</p>";
-                body += $"<p>Hãy vào trang quản lý để xem thông tin chi tiết: <a href='{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}/Admin'>Trang Quản Lý</a></p><br/>";
+                body += $"<p>Hãy vào trang quản lý để xem thông tin chi tiết: <a href='{CreateHostWithScheme()}/Admin'>Trang Quản Lý</a></p><br/>";
 
                 var messagePayload = new MessagePayload();
                 messagePayload.Subject = subject;
@@ -192,6 +193,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 return null;
             }
         }
+        
         public async Task<MessagePayload> PrepareCustomerFeedback(CustomerFeedbackViewModel data)
         {
             try
@@ -224,6 +226,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 return null;
             }
         }
+
         public async Task<MessagePayload> PrepareLeaderCustomerFeedback(CustomerFeedbackViewModel data)
         {
             try
@@ -264,5 +267,7 @@ namespace Doitsu.Ecommerce.Core.Services
         {
             throw new NotImplementedException();
         }
+
+        private string CreateHostWithScheme() => httpContextAccessor.HttpContext != null ? $"{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}" : "http://null";
     }
 }

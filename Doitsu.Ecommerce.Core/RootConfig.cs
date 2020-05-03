@@ -10,6 +10,7 @@ using Doitsu.Service.Core.Extensions;
 using Doitsu.Service.Core.Services.EmailService;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;

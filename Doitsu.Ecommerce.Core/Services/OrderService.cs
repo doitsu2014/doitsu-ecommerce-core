@@ -272,6 +272,9 @@ namespace Doitsu.Ecommerce.Core.Services
                 .WithException("Thông tin đơn hàng rỗng")
                 .FlatMapAsync(async d =>
                 {
+                    var calcShippingFeesReqData = this.Mapper.Map<CalculateDeliveryFeesRequestModel>(d);
+                    calcShippingFeesReqData.Weight = 0;
+
                     foreach (var orderItem in d.OrderItems)
                     {
                         var productVariant = await productService.FindProductVariantFromOptionsAsync(orderItem.ProductOptionValues);
@@ -285,6 +288,7 @@ namespace Doitsu.Ecommerce.Core.Services
                         }
                         else
                         {
+                            // Mapping data to order items
                             orderItem.ProductId = productVariant.ProductId;
                             orderItem.Discount = productVariant.AnotherDiscount;
 
@@ -300,25 +304,23 @@ namespace Doitsu.Ecommerce.Core.Services
                             d.TotalPrice += price;
                             d.TotalQuantity += orderItem.SubTotalQuantity;
                             d.FinalPrice += orderItem.SubTotalFinalPrice;
+
+                            // Mapping data to delivery information
+                            calcShippingFeesReqData.Weight += productVariant.ProductWeight;
                         }
                     }
-                    return Option.Some<CreateOrderWithOptionViewModel, string>(d);
-                })
-                .MapAsync(async o =>
-                {
-                    if (o.DeliveryProvider != null)
+                    if (d.DeliveryProvider != null)
                     {
-                        var deliver = o.DeliveryProvider.Value;
-                        var calculationModel = this.Mapper.Map<CalculateDeliveryFeesRequestModel>(o);
+                        var deliver = d.DeliveryProvider.Value;
                         var defaultWareHouse = await this.DbContext.WareHouses.FirstOrDefaultAsync();
-                        calculationModel.PickAddress = defaultWareHouse.Address;
-                        calculationModel.PickProvince = defaultWareHouse.City;
-                        calculationModel.PickWard = defaultWareHouse.Ward;
-                        calculationModel.PickDistrict = defaultWareHouse.District;
-                        (await this.deliveryIntegrator.CalculateShipFeeAsync(deliver, calculationModel))
-                            .Map(fees => o.DeliveryFees = fees);
+                        calcShippingFeesReqData.PickAddress = defaultWareHouse.Address;
+                        calcShippingFeesReqData.PickProvince = defaultWareHouse.City;
+                        calcShippingFeesReqData.PickWard = defaultWareHouse.Ward;
+                        calcShippingFeesReqData.PickDistrict = defaultWareHouse.District;
+                        (await this.deliveryIntegrator.CalculateShipFeeAsync(deliver, calcShippingFeesReqData))
+                            .Map(fees => d.DeliveryFees = fees);
                     }
-                    return o;
+                    return Option.Some<CreateOrderWithOptionViewModel, string>(d);
                 }))
                 .Map(d =>
                 {
