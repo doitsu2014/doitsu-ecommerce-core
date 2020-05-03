@@ -127,6 +127,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 Slug = "nap-the-tra-truoc-va-tra-sau",
                 Price = 0,
                 Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
+                Weight = 1000,
                 ProductOptions = Product1ProductOptionsData
             };
 
