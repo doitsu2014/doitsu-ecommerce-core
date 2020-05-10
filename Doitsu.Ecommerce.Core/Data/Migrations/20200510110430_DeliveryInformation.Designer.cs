@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20200501034821_DeliveryIntegration")]
-    partial class DeliveryIntegration
+    [Migration("20200510110430_DeliveryInformation")]
+    partial class DeliveryInformation
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -814,6 +814,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(500)")
                         .HasMaxLength(500);
+
+                    b.Property<string>("PaymentProofImageUrl")
+                        .HasColumnType("nvarchar(300)")
+                        .HasMaxLength(300);
 
                     b.Property<int?>("PaymentType")
                         .HasColumnType("int");
