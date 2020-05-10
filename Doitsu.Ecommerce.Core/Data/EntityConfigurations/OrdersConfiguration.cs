@@ -53,6 +53,8 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
 
             builder.Property(e => e.CancelNote).HasMaxLength(255);
 
+            builder.Property(e => e.PaymentProofImageUrl).HasMaxLength(300);
+
             builder.Property(e => e.Status).HasDefaultValue(OrderTypeEnum.Sale);
 
             builder.HasOne(d => d.User)

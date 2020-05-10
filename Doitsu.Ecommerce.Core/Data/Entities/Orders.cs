@@ -41,7 +41,10 @@ namespace Doitsu.Ecommerce.Core.Data.Entities
         public string Note { get; set; }
         public string CancelNote { get; set; }
         public int? SummaryOrderId { get; set; }
+
         public OrderPaymentTypeEnum? PaymentType { get; set; }
+        public string PaymentProofImageUrl { get; set; }
+
         public OrderTypeEnum Type { get; set; }
         public OrderPriorityEnum? Priority { get; set; }
         public byte[] Vers { get; set; }

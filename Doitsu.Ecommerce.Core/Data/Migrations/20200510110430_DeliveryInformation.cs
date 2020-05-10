@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
-    public partial class DeliveryIntegration : Migration
+    public partial class DeliveryInformation : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -44,6 +44,12 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 name: "DeliveryWard",
                 table: "Orders",
                 maxLength: 30,
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "PaymentProofImageUrl",
+                table: "Orders",
+                maxLength: 300,
                 nullable: true);
 
             migrationBuilder.AddColumn<int>(
@@ -183,6 +189,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
 
             migrationBuilder.DropColumn(
                 name: "DeliveryWard",
+                table: "Orders");
+
+            migrationBuilder.DropColumn(
+                name: "PaymentProofImageUrl",
                 table: "Orders");
 
             migrationBuilder.DropColumn(

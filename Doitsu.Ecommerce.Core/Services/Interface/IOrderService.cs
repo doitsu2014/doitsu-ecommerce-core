@@ -112,7 +112,7 @@ namespace Doitsu.Ecommerce.Core.Services.Interface
 
         Task<Option<OrderViewModel, string>> ChangeOrderNote(int orderId, string note = "");
         Task<Option<OrderViewModel, string>> ChangeOrderCancelNote(int orderId, string note = "");
-
+        Task<Option<OrderViewModel, string>> ChangeOrderPaymentProofImageUrlAsync(int orderId, string proof = "");
     }
 
 

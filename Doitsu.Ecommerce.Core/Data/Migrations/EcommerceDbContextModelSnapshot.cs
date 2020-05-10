@@ -813,6 +813,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("nvarchar(500)")
                         .HasMaxLength(500);
 
+                    b.Property<string>("PaymentProofImageUrl")
+                        .HasColumnType("nvarchar(300)")
+                        .HasMaxLength(300);
+
                     b.Property<int?>("PaymentType")
                         .HasColumnType("int");
 

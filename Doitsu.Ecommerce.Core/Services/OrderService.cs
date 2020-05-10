@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 using AutoMapper;
@@ -25,11 +24,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using OfficeOpenXml;
-
 using Optional;
 using Optional.Async;
-using Optional.Collections;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -467,6 +463,22 @@ namespace Doitsu.Ecommerce.Core.Services
                 {
                     var order = await this.FindByKeysAsync(orderId);
                     order.CancelNote = note;
+                    this.Update(order);
+                    await this.CommitAsync();
+                    return this.Mapper.Map<OrderViewModel>(order);
+                });
+        }
+
+        public async Task<Option<OrderViewModel, string>> ChangeOrderPaymentProofImageUrlAsync(int orderId, string proof = "")
+        {
+            return await (orderId, proof)
+                .SomeNotNull()
+                .WithException(string.Empty)
+                .FilterAsync(async data => await this.AnyAsync(o => o.Id == data.orderId), "Không tìm thấy đơn hàng cần thay đổi")
+                .MapAsync(async data =>
+                {
+                    var order = await this.FindByKeysAsync(orderId);
+                    order.PaymentProofImageUrl = proof;
                     this.Update(order);
                     await this.CommitAsync();
                     return this.Mapper.Map<OrderViewModel>(order);
