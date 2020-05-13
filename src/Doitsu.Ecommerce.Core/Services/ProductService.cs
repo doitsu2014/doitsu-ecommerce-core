@@ -85,7 +85,13 @@ namespace Doitsu.Ecommerce.Core.Services
             this.productOptionService = productOptionService;
         }
 
-        private async Task<CategoryWithProductOverviewViewModel> GetFirstCategoryWithProductByCateSlug(string slug) => await DbContext.Set<Categories>().Where(c => c.Slug == slug).ProjectTo<CategoryWithProductOverviewViewModel>(Mapper.ConfigurationProvider).FirstOrDefaultAsync();
+        private async Task<CategoryWithProductOverviewViewModel> GetFirstCategoryWithProductByCateSlug(string slug) => await DbContext.Set<Categories>()
+            .Include(c => c.InverseParentCate)
+                .ThenInclude(c => c.InverseParentCate)
+                    .ThenInclude(c => c.Products)
+            .Include(c => c.Products)
+            .Where(c => c.Slug == slug).ProjectTo<CategoryWithProductOverviewViewModel>(Mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
 
         public async Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsByCateIdAsync(string cateSlug)
         {
@@ -94,22 +100,9 @@ namespace Doitsu.Ecommerce.Core.Services
             {
                 return (new List<ProductOverviewViewModel>()).ToImmutableList();
             }
-            var productsQuery =
-                await QueryAllOriginProductsInSuperParentCategoryAsync(Constants.SuperFixedCategorySlug.PRODUCT);
             if (category.InverseParentCate.Count() > 0)
             {
-                var listProducts = ImmutableList<ProductOverviewViewModel>.Empty;
-                foreach (var childCate in category.InverseParentCate)
-                {
-                    var innerProducts = (await productsQuery
-                            .Where(pro => pro.CateId == childCate.Id).ToListAsync())
-                        .Select(
-                            pro => Mapper.Map<ProductOverviewViewModel>(pro)
-                        );
-
-                    listProducts = listProducts.AddRange(innerProducts);
-                }
-                return listProducts;
+                return category.InverseParentCate.SelectMany(c => c.Products).ToImmutableList();
             }
             else
             {
@@ -219,11 +212,10 @@ namespace Doitsu.Ecommerce.Core.Services
 
             // query products through categories ids
             var cateIds = sortedSetInverseCategoryIds.AsEnumerable();
-            var productsQuery = this.Get(pro => pro.CateId.HasValue);
-            productsQuery = productsQuery
-                .Include(pro => pro.Cate)
-                .Include(pro => pro.Cate.ParentCate)
-                .Where(pro => cateIds.Contains(pro.CateId.Value));
+            var productsQuery = this.Get(
+                    pro => pro.CateId.HasValue && cateIds.Contains(pro.CateId.Value),
+                    pro => pro.Include(hPro => hPro.Cate).ThenInclude(hC => hC.ParentCate)
+                );
 
             return productsQuery;
         }

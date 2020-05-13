@@ -25,6 +25,7 @@ using SixLabors.ImageSharp.Web.DependencyInjection;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
 using Doitsu.Ecommerce.Core.Abstraction;
+using Doitsu.Ecommerce.Core.DeliveryIntegration;
 
 namespace Doitsu.Ecommerce.Core
 {
@@ -106,7 +107,8 @@ namespace Doitsu.Ecommerce.Core
             #endregion
 
             #region Config service
-            services.AddFurnitureServices();
+            services.AddEcommerceServices();
+            services.ConfigDeliveryIntegration(configuration);
             #endregion
 
             #region Mapper Config
