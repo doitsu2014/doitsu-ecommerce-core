@@ -107,6 +107,8 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         public OrderPaymentTypeEnum? PaymentType { get; set; }
         [JsonProperty("paymentProofImageUrl")]
         public string PaymentProofImageUrl { get; set; }
+        [JsonProperty("paymentValue")]
+        public decimal PaymentValue { get; set; }
     }
 
     public class CreateOrderWithOptionViewModel : OrderViewModel
@@ -191,6 +193,8 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         public OrderPaymentTypeEnum? PaymentType { get; set; }
         [JsonProperty("paymentProofImageUrl")]
         public string PaymentProofImageUrl { get; set; }
+        [JsonProperty("paymentValue")]
+        public decimal PaymentValue { get; set; }
     }
 
     public class RequestChangeOrderNoteViewModel
