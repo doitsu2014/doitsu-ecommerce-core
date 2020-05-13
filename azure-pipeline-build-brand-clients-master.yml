@@ -18,7 +18,7 @@ steps:
   displayName: "Building Doitsu.Ecommerce.Core Process"
   inputs:
     command: 'build'
-    projects: 'Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj'
+    projects: 'src/Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj'
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
@@ -33,7 +33,7 @@ steps:
   inputs:
     command: 'pack'
     arguments: '--configuration $(buildConfiguration)'
-    packagesToPack: 'Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj'
+    packagesToPack: 'src/Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj'
     nobuild: true
     versioningScheme: 'off'
 

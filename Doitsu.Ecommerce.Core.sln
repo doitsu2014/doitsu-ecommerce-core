@@ -2,11 +2,24 @@
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29318.209
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Doitsu.Ecommerce.Core", "Doitsu.Ecommerce.Core\Doitsu.Ecommerce.Core.csproj", "{0143AF97-82AD-428B-8A2E-F2EE46AA9C48}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Doitsu.Ecommerce.Core", "src\Doitsu.Ecommerce.Core\Doitsu.Ecommerce.Core.csproj", "{0143AF97-82AD-428B-8A2E-F2EE46AA9C48}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doitsu.Ecommerce.Core.Tests", "Doitsu.Ecommerce.Core.Tests\Doitsu.Ecommerce.Core.Tests.csproj", "{C83A79F7-82F2-496F-881A-6E9A11AAA736}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doitsu.Ecommerce.Core.Tests", "test\Doitsu.Ecommerce.Core.Tests\Doitsu.Ecommerce.Core.Tests.csproj", "{C83A79F7-82F2-496F-881A-6E9A11AAA736}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doitsu.Ecommerce.Core.DeliveryIntegration", "Doitsu.Ecommerce.Core.DeliveryIntegration\Doitsu.Ecommerce.Core.DeliveryIntegration.csproj", "{E0717928-6B3E-4783-9E32-8B1C90CD339E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doitsu.Ecommerce.Core.DeliveryIntegration", "src\Doitsu.Ecommerce.Core.DeliveryIntegration\Doitsu.Ecommerce.Core.DeliveryIntegration.csproj", "{E0717928-6B3E-4783-9E32-8B1C90CD339E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doitsu.Ecommerce.Core.Abstraction", "src\Doitsu.Ecommerce.Core.Abstraction\Doitsu.Ecommerce.Core.Abstraction.csproj", "{C6FF44BA-13E0-4D13-99F2-97D68B5F32A5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FDE97434-7DB9-4569-8949-668AEB5F82AC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{ECE4838C-320F-4C61-8B68-DF01EB8CDCEF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7387779B-0DCC-4BAB-849F-4618BF455983}"
+	ProjectSection(SolutionItems) = preProject
+		nuget.config = nuget.config
+		azure-pipeline-build-brand-clients-master.yml = azure-pipeline-build-brand-clients-master.yml
+		azure-pipeline-build-brand-master.yml = azure-pipeline-build-brand-master.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,11 +43,21 @@ Global
 		{12229E54-6D0C-4DD3-9059-814E6147F15C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12229E54-6D0C-4DD3-9059-814E6147F15C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{12229E54-6D0C-4DD3-9059-814E6147F15C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6FF44BA-13E0-4D13-99F2-97D68B5F32A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6FF44BA-13E0-4D13-99F2-97D68B5F32A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6FF44BA-13E0-4D13-99F2-97D68B5F32A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6FF44BA-13E0-4D13-99F2-97D68B5F32A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {66AC9005-03D0-4BEB-A607-6172E1D42244}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0143AF97-82AD-428B-8A2E-F2EE46AA9C48} = {FDE97434-7DB9-4569-8949-668AEB5F82AC}
+		{C6FF44BA-13E0-4D13-99F2-97D68B5F32A5} = {FDE97434-7DB9-4569-8949-668AEB5F82AC}
+		{E0717928-6B3E-4783-9E32-8B1C90CD339E} = {FDE97434-7DB9-4569-8949-668AEB5F82AC}
+		{C83A79F7-82F2-496F-881A-6E9A11AAA736} = {ECE4838C-320F-4C61-8B68-DF01EB8CDCEF}
 	EndGlobalSection
 EndGlobal
