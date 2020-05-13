@@ -22,6 +22,20 @@ steps:
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
+  displayName: "Building Doitsu.Ecommerce.Core.Abstraction Process"
+  inputs:
+    command: 'build'
+    projects: 'src/Doitsu.Ecommerce.Core.Abstraction/Doitsu.Ecommerce.Core.Abstraction.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: "Building Doitsu.Ecommerce.Core.DeliveryIntegration Process"
+  inputs:
+    command: 'build'
+    projects: 'src/Doitsu.Ecommerce.Core.DeliveryIntegration/Doitsu.Ecommerce.Core.DeliveryIntegration.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
   displayName: "Test Process"
   inputs:
     command: test
@@ -34,6 +48,24 @@ steps:
     command: 'pack'
     arguments: '--configuration $(buildConfiguration)'
     packagesToPack: 'src/Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj'
+    nobuild: true
+    versioningScheme: 'off'
+
+- task: DotNetCoreCLI@2
+  displayName: "Packing Doitsu.Ecommerce.Core.Abstraction Process"
+  inputs:
+    command: 'pack'
+    arguments: '--configuration $(buildConfiguration)'
+    packagesToPack: 'src/Doitsu.Ecommerce.Core.Abstraction/Doitsu.Ecommerce.Core.Abstraction.csproj'
+    nobuild: true
+    versioningScheme: 'off'
+
+- task: DotNetCoreCLI@2
+  displayName: "Packing Doitsu.Ecommerce.Core.DeliveryIntegration Process"
+  inputs:
+    command: 'pack'
+    arguments: '--configuration $(buildConfiguration)'
+    packagesToPack: 'src/Doitsu.Ecommerce.Core.DeliveryIntegration/Doitsu.Ecommerce.Core.DeliveryIntegration.csproj'
     nobuild: true
     versioningScheme: 'off'
 
