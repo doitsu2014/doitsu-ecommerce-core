@@ -15,10 +15,24 @@ variables:
 steps:
 
 - task: DotNetCoreCLI@2
-  displayName: "Building Process"
+  displayName: "Building Doitsu.Ecommerce.Core Process"
   inputs:
     command: 'build'
-    projects: 'Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj'
+    projects: 'src/Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: "Building Doitsu.Ecommerce.Core.Abstraction Process"
+  inputs:
+    command: 'build'
+    projects: 'src/Doitsu.Ecommerce.Core.Abstraction/Doitsu.Ecommerce.Core.Abstraction.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: "Building Doitsu.Ecommerce.Core.DeliveryIntegration Process"
+  inputs:
+    command: 'build'
+    projects: 'src/Doitsu.Ecommerce.Core.DeliveryIntegration/Doitsu.Ecommerce.Core.DeliveryIntegration.csproj'
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
@@ -29,20 +43,35 @@ steps:
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
-  displayName: "Packing Process"
+  displayName: "Packing Doitsu.Ecommerce.Core Process"
   inputs:
     command: 'pack'
     arguments: '--configuration $(buildConfiguration)'
-    packagesToPack: 'Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj'
+    packagesToPack: 'src/Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj'
+    nobuild: true
+    versioningScheme: 'off'
+
+- task: DotNetCoreCLI@2
+  displayName: "Packing Doitsu.Ecommerce.Core.Abstraction Process"
+  inputs:
+    command: 'pack'
+    arguments: '--configuration $(buildConfiguration)'
+    packagesToPack: 'src/Doitsu.Ecommerce.Core.Abstraction/Doitsu.Ecommerce.Core.Abstraction.csproj'
+    nobuild: true
+    versioningScheme: 'off'
+
+- task: DotNetCoreCLI@2
+  displayName: "Packing Doitsu.Ecommerce.Core.DeliveryIntegration Process"
+  inputs:
+    command: 'pack'
+    arguments: '--configuration $(buildConfiguration)'
+    packagesToPack: 'src/Doitsu.Ecommerce.Core.DeliveryIntegration/Doitsu.Ecommerce.Core.DeliveryIntegration.csproj'
     nobuild: true
     versioningScheme: 'off'
 
 - task: NuGetCommand@2
   inputs:
     command: 'push'
-    feedsToUse: 'select'
     packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
-    nuGetFeedType: 'internal'
-    publishVstsFeed: 'Doitsu.Technology'
-    versioningScheme: 'off'
-    allowPackageConflicts: true
+    nuGetFeedType: 'external'
+    publishFeedCredentials: 'Doitsu.Technology.NugetV3'
