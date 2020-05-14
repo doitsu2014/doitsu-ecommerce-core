@@ -1,5 +1,4 @@
-﻿using Doitsu.Ecommerce.Core.Abstraction;
-
+﻿
 using Doitsu.Ecommerce.Core.Abstraction.Entities;
 using Doitsu.Ecommerce.Core.Services;
 using Doitsu.Ecommerce.Core.Services.Interface;
@@ -9,7 +8,7 @@ namespace Doitsu.Ecommerce.Core
 {
     public static class EcommerceServiceConfig
     {
-        public static IServiceCollection AddFurnitureServices(this IServiceCollection services)
+        public static IServiceCollection AddEcommerceServices(this IServiceCollection services)
         {
             services.AddTransient(typeof(IMemCacheService), typeof(MemCacheService));
             services.AddTransient(typeof(ICategoryService), typeof(CategoryService));

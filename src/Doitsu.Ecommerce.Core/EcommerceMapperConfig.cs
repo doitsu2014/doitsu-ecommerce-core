@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Xml.Schema;
+using AutoMapper;
 using Doitsu.Ecommerce.Core.Abstraction.ViewModels;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -31,13 +32,17 @@ namespace Doitsu.Ecommerce.Core
                 cfg.CreateMap<Categories, CategoryMenuViewModel>().MaxDepth(5);
                 cfg.CreateMap<Categories, CategoryViewModel>();
                 cfg.CreateMap<Categories, CategoryWithProductOverviewViewModel>();
-                cfg.CreateMap<Categories, CategoryWithParentViewModel>().MaxDepth(3);
+                cfg.CreateMap<Categories, CategoryWithParentViewModel>();
+                cfg.CreateMap<Categories, CategoryWithoutParentViewModel>();
                 cfg.CreateMap<Categories, CategoryWithInverseParentViewModel>().MaxDepth(5);
                 cfg.CreateMap<CategoryMenuViewModel, Categories>();
                 cfg.CreateMap<CategoryViewModel, Categories>();
                 cfg.CreateMap<CategoryWithProductOverviewViewModel, Categories>();
-                cfg.CreateMap<CategoryWithParentViewModel, Categories>().MaxDepth(3);
+                cfg.CreateMap<CategoryWithParentViewModel, Categories>();
+                cfg.CreateMap<CategoryWithoutParentViewModel, Categories>();
                 cfg.CreateMap<CategoryWithInverseParentViewModel, Categories>().MaxDepth(5);
+                cfg.CreateMap<BaseCategoryViewModel, Categories>();
+                cfg.CreateMap<Categories, BaseCategoryViewModel>();
                 #endregion
                 #region Products
                 cfg.CreateMap<Products, ProductViewModel>();
