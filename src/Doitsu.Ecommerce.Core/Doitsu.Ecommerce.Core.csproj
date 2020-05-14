@@ -3,7 +3,7 @@
     <PropertyGroup>
         <LangVersion>8.0</LangVersion>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <PackageVersion>7.0.47</PackageVersion>
+        <PackageVersion>7.0.48</PackageVersion>
         <Title>Doitsu.Ecommerce.Core</Title>
         <PackageId>Doitsu.Ecommerce.Core</PackageId>
         <Authors>Doitsu Technology</Authors>
@@ -21,7 +21,7 @@
         <PackageProjectUrl>https://dev.azure.com/doitsutechnology/Doitsu.Technology.Core</PackageProjectUrl>
         <PackageIcon>doitsu-logo.png</PackageIcon>
         <RepositoryType>Azure Repos</RepositoryType>
-        <PackageReleaseNotes>Update YGFL.Shop.Website Features</PackageReleaseNotes>
+        <PackageReleaseNotes>Update Doitsu.Ecommerce.Feature Features</PackageReleaseNotes>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="EPPlus" Version="4.5.3.3" />
