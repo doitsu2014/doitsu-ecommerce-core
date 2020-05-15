@@ -66,8 +66,27 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         [JsonProperty("slug")]
         public string Slug { get; set; }
         [JsonProperty("parentCate")]
-        public CategoryWithParentViewModel ParentCate { get; set; }
+        public CategoryWithoutParentViewModel ParentCate { get; set; }
+    }
 
+    public class CategoryWithoutParentViewModel
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+        [JsonProperty("name")]
+        public string Name { get; set; }
+        [JsonProperty("active")]
+        public bool Active { get; set; }
+        [JsonProperty("slug")]
+        public string Slug { get; set; }
+    }
+
+    public class BaseCategoryViewModel
+    {
+        public string Name { get; set; }
+        public string Slug { get; set; }
+        public int? ParentCateId { get; set; }
+        public bool IsFixed { get; set; }
     }
 
     public class CategoryMenuViewModel : BaseViewModel<Categories>
@@ -88,7 +107,6 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         public int? ParentCateId { get; set; }
         public string ParentCateName { get; set; }
         public ICollection<CategoryViewModel> InverseParentCate { get; set; }
-
     }
 
     public class CategoryWithProductOverviewViewModel : BaseViewModel<Categories>
