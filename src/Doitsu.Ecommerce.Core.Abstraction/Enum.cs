@@ -30,7 +30,8 @@ namespace Doitsu.Ecommerce.Core.Abstraction
         Processing = 1,
         Done = 2,
         Cancel = 3,
-        Fail = 4
+        Fail = 4,
+        Delivery = 5
     }
 
     public enum UserTransactionTypeEnum

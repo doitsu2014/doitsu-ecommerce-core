@@ -212,4 +212,13 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         public string PaymentProofImageUrl { get; set; }
     }
 
+    public class RequestChangePaymentValue
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+
+        [JsonProperty("paymentValue")]
+        public decimal? PaymentValue { get; set; }
+    }
+
 }

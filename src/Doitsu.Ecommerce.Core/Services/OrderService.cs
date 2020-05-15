@@ -484,5 +484,22 @@ namespace Doitsu.Ecommerce.Core.Services
                     return this.Mapper.Map<OrderViewModel>(order);
                 });
         }
+
+        public async Task<Option<OrderViewModel, string>> ChangeOrderPaymentValueAsync(int orderId, decimal? paymentValue)
+        {
+            return await (orderId, paymentValue)
+                            .SomeNotNull()
+                            .WithException(string.Empty)
+                            .Filter(data => data.paymentValue != null, "Phải nhập giá trị thanh toán")
+                            .FilterAsync(async data => await this.AnyAsync(o => o.Id == data.orderId), "Không tìm thấy đơn hàng cần thay đổi")
+                            .MapAsync(async data =>
+                            {
+                                var order = await this.FindByKeysAsync(orderId);
+                                order.PaymentValue = paymentValue.Value;
+                                this.Update(order);
+                                await this.CommitAsync();
+                                return this.Mapper.Map<OrderViewModel>(order);
+                            });
+        }
     }
 }
