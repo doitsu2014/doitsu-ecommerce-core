@@ -109,10 +109,13 @@ namespace Doitsu.Ecommerce.Core.Services.Interface
         /// <param name="statusEnum"></param>
         /// <returns></returns>
         Task<Option<OrderViewModel, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum, int auditUserId, string note = "");
-
         Task<Option<OrderViewModel, string>> ChangeOrderNote(int orderId, string note = "");
         Task<Option<OrderViewModel, string>> ChangeOrderCancelNote(int orderId, string note = "");
         Task<Option<OrderViewModel, string>> ChangeOrderPaymentProofImageUrlAsync(int orderId, string proof = "");
+        Task<Option<OrderViewModel, string>> ChangeOrderPaymentValueAsync(int orderId, decimal? paymentValue);
+        Task<Option<OrderViewModel, string>> ChangeStatusToDeliveryOrderAsync(string orderCode, int userId);
+        Task<Option<OrderViewModel, string>> ChangeStatusToProcessOrderAsync(string orderCode, int userId);
+        Task<Option<OrderViewModel, string>> ChangeOrderDeliveryProviderCodeAsync(int orderId, string code);
     }
 
 

@@ -24,7 +24,6 @@ namespace Doitsu.Ecommerce.Core.Services
                         return res;
                     });
             }
-
         }
 
         /// <summary>
@@ -108,6 +107,57 @@ namespace Doitsu.Ecommerce.Core.Services
                     }
                 });
         }
+        
+        
+        public async Task<Option<OrderViewModel, string>> ChangeStatusToProcessOrderAsync(string orderCode, int userId)
+        {
+            return await (orderCode).SomeNotNull()
+                .WithException("Mã của Đơn Tổng không hợp lệ.")
+                .FlatMapAsync(async req =>
+                {
+                    var order = await this.GetAsTracking(o => o.Code == orderCode && OrderTypeEnum.Summary != o.Type).FirstOrDefaultAsync();
+                    var auditUser = await userManager.FindByIdAsync(userId.ToString());
+                    if (auditUser == null)
+                    {
+                        return Option.None<OrderViewModel, string>("Tài khoản đang thao tác xử lý đơn hàng không tồn tại hoặc bị xóa.");
+                    }
+                    var isInRoleAdmin = await userManager.IsInRoleAsync(auditUser, Constants.UserRoles.ADMIN);
+                    if (order == null) return Option.None<OrderViewModel, string>("Không tìm thấy đơn hàng phù hợp");
+                    else if (!isInRoleAdmin) return Option.None<OrderViewModel, string>($"Đơn hàng {orderCode} không thể xử lý do người thao tác không phải là Admin.");
+                    else
+                    {
+                        order.Status = (int)OrderStatusEnum.Processing;
+                        this.Update(order);
+                        await this.CommitAsync();
+                        return Option.Some<OrderViewModel, string>(this.Mapper.Map<OrderViewModel>(order));
+                    }
+                });
+        }
+
+        public async Task<Option<OrderViewModel, string>> ChangeStatusToDeliveryOrderAsync(string orderCode, int userId)
+        {
+            return await (orderCode).SomeNotNull()
+                .WithException("Mã của Đơn Tổng không hợp lệ.")
+                .FlatMapAsync(async req =>
+                {
+                    var order = await this.GetAsTracking(o => o.Code == orderCode && OrderTypeEnum.Summary != o.Type).FirstOrDefaultAsync();
+                    var auditUser = await userManager.FindByIdAsync(userId.ToString());
+                    if (auditUser == null)
+                    {
+                        return Option.None<OrderViewModel, string>("Tài khoản đang thao tác xử lý đơn hàng không tồn tại hoặc bị xóa.");
+                    }
+                    var isInRoleAdmin = await userManager.IsInRoleAsync(auditUser, Constants.UserRoles.ADMIN);
+                    if (order == null) return Option.None<OrderViewModel, string>("Không tìm thấy đơn hàng phù hợp");
+                    else if (!isInRoleAdmin) return Option.None<OrderViewModel, string>($"Đơn hàng {orderCode} không thể xử lý do người thao tác không phải là Admin.");
+                    else
+                    {
+                        order.Status = (int)OrderStatusEnum.Delivery;
+                        this.Update(order);
+                        await this.CommitAsync();
+                        return Option.Some<OrderViewModel, string>(this.Mapper.Map<OrderViewModel>(order));
+                    }
+                });
+        }
 
         public async Task<Option<OrderViewModel, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum, int auditUserId, string note = "")
         {
@@ -123,6 +173,10 @@ namespace Doitsu.Ecommerce.Core.Services
                             return await CancelOrderAsync(orderCode, auditUserId, note);
                         case OrderStatusEnum.Done:
                             return await CompleteOrderAsync(orderCode, auditUserId);
+                        case OrderStatusEnum.Processing:
+                            return await ChangeStatusToProcessOrderAsync(orderCode, auditUserId);
+                        case OrderStatusEnum.Delivery:
+                            return await ChangeStatusToDeliveryOrderAsync(orderCode, auditUserId);
                         default:
                             return Option.None<OrderViewModel, string>("Không thể chuyển đơn hàng sang trạng thái này.");
                     }

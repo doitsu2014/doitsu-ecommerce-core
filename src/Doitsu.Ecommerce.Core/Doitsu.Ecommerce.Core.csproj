@@ -3,7 +3,7 @@
     <PropertyGroup>
         <LangVersion>8.0</LangVersion>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <PackageVersion>7.0.48</PackageVersion>
+        <PackageVersion>7.0.51</PackageVersion>
         <Title>Doitsu.Ecommerce.Core</Title>
         <PackageId>Doitsu.Ecommerce.Core</PackageId>
         <Authors>Doitsu Technology</Authors>
@@ -34,7 +34,7 @@
         <PackageReference Include="SixLabors.ImageSharp.Web" Version="1.0.0-rc0001" />
         <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.4" />
-        <PackageReference Include="Doitsu.Service.Core" Version="7.0.12" />
+        <PackageReference Include="Doitsu.Service.Core" Version="7.0.13" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="../Doitsu.Ecommerce.Core.DeliveryIntegration/Doitsu.Ecommerce.Core.DeliveryIntegration.csproj" />
