@@ -115,6 +115,7 @@ namespace Doitsu.Ecommerce.Core.Services.Interface
         Task<Option<OrderViewModel, string>> ChangeOrderPaymentValueAsync(int orderId, decimal? paymentValue);
         Task<Option<OrderViewModel, string>> ChangeStatusToDeliveryOrderAsync(string orderCode, int userId);
         Task<Option<OrderViewModel, string>> ChangeStatusToProcessOrderAsync(string orderCode, int userId);
+        Task<Option<OrderViewModel, string>> ChangeOrderDeliveryProviderCodeAsync(int orderId, string code);
     }
 
 

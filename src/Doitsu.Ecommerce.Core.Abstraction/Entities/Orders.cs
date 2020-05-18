@@ -29,8 +29,10 @@ namespace Doitsu.Ecommerce.Core.Abstraction.Entities
         public string DeliveryDistrict { get; set; }
         public string DeliveryCity { get; set; }
         public string DeliveryWard { get; set; }
-        public DeliverEnum? DeliveryProvider { get; set; }
         public decimal? DeliveryFees { get; set; }
+        public DeliverEnum? DeliveryProvider { get; set; }
+        public string DeliveryProviderReferenceLink { get; set; }
+        public string DeliveryProviderCode { get; set; }
 
         public string Dynamic01 { get; set; }
         public string Dynamic02 { get; set; }

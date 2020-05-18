@@ -80,33 +80,49 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
 
         [JsonProperty("deliverProvider")]
         public DeliverEnum? DeliveryProvider { get; set; }
+
         [JsonProperty("deliveryFees")]
         public decimal? DeliveryFees { get; set; }
+
+        [JsonProperty("deliveryProviderReferenceLink")]
+        public string DeliveryProviderReferenceLink { get; set; }
+
+        [JsonProperty("deliveryProviderCode")]
+        public string DeliveryProviderCode { get; set; }
+
         [JsonProperty("dynamic01")]
         public string Dynamic01 { get; set; }
+
         [JsonProperty("dynamic02")]
         public string Dynamic02 { get; set; }
+
         [JsonProperty("dynamic03")]
         public string Dynamic03 { get; set; }
+
         [JsonProperty("dynamic04")]
         public string Dynamic04 { get; set; }
+
         [JsonProperty("dynamic05")]
         public string Dynamic05 { get; set; }
+
         [JsonProperty("note")]
         public string Note { get; set; }
+
         [JsonProperty("cancelNote")]
         public string CancelNote { get; set; }
 
-
         [JsonProperty("priority")]
         public OrderPriorityEnum? Priority { get; set; }
+
         [JsonProperty("type")]
         public OrderTypeEnum Type { get; set; }
 
         [JsonProperty("paymentType")]
         public OrderPaymentTypeEnum? PaymentType { get; set; }
+
         [JsonProperty("paymentProofImageUrl")]
         public string PaymentProofImageUrl { get; set; }
+
         [JsonProperty("paymentValue")]
         public decimal PaymentValue { get; set; }
     }
@@ -159,10 +175,19 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
 
         [JsonProperty("deliveryWard")]
         public string DeliveryWard { get; set; }
-        [JsonProperty("deliverProvider")]
-        public DeliverEnum? DeliveryProvider { get; set; }
+
         [JsonProperty("deliveryFees")]
         public decimal? DeliveryFees { get; set; }
+
+        [JsonProperty("deliverProvider")]
+        public DeliverEnum? DeliveryProvider { get; set; }
+
+        [JsonProperty("deliveryProviderReferenceLink")]
+        public string DeliveryProviderReferenceLink { get; set; }
+
+        [JsonProperty("deliveryProviderCode")]
+        public string DeliveryProviderCode { get; set; }
+
         [JsonProperty("dynamic01")]
         public string Dynamic01 { get; set; }
         [JsonProperty("dynamic02")]
@@ -219,6 +244,12 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
 
         [JsonProperty("paymentValue")]
         public decimal? PaymentValue { get; set; }
+    }
+
+    public class RequestChangeDeliveryProviderCode
+    {
+        [JsonProperty("deliveryProviderCode")]
+        public string DeliveryProviderCode { get; set; }
     }
 
 }
