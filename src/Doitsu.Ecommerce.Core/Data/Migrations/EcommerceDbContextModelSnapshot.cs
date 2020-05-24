@@ -1526,19 +1526,27 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasDefaultValue(true);
 
                     b.Property<string>("Address")
-                        .HasColumnType("nvarchar(350)")
-                        .HasMaxLength(350);
+                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(255);
 
                     b.Property<decimal>("Balance")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(60)")
+                        .HasMaxLength(60);
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Country")
-                        .HasColumnType("nvarchar(100)")
-                        .HasMaxLength(100);
+                        .HasColumnType("nvarchar(60)")
+                        .HasMaxLength(60);
+
+                    b.Property<string>("District")
+                        .HasColumnType("nvarchar(30)")
+                        .HasMaxLength(30);
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(256)")
@@ -1548,8 +1556,8 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Fullname")
-                        .HasColumnType("nvarchar(255)")
-                        .HasMaxLength(255);
+                        .HasColumnType("nvarchar(125)")
+                        .HasMaxLength(125);
 
                     b.Property<int>("Gender")
                         .HasColumnType("int");
@@ -1587,9 +1595,13 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
 
+                    b.Property<string>("Ward")
+                        .HasColumnType("nvarchar(30)")
+                        .HasMaxLength(30);
+
                     b.Property<string>("ZipCode")
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
+                        .HasColumnType("nvarchar(15)")
+                        .HasMaxLength(15);
 
                     b.HasKey("Id");
 

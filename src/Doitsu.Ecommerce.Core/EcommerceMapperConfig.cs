@@ -25,6 +25,7 @@ namespace Doitsu.Ecommerce.Core
                         desc.UserName = src.PhoneNumber;
                     });
                 cfg.CreateMap<EcommerceIdentityUser, EcommerceIdentityUserViewModel>();
+                cfg.CreateMap<UserInforViewModel, UpdateDetailViewModel>();
                 cfg.CreateMap<EcommerceIdentityUserViewModel, EcommerceIdentityUser>();
                 cfg.CreateMap<EcommerceIdentityRole, EcommerceIdentityRoleViewModel>();
                 #endregion

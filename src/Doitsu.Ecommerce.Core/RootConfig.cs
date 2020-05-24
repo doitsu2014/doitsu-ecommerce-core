@@ -142,6 +142,7 @@ namespace Doitsu.Ecommerce.Core
             });
             #endregion
         }
+
         #region Config Image Sharp Methods
         private static void ConfigureCustomServicesAndCustomOptions(IServiceCollection services)
         {

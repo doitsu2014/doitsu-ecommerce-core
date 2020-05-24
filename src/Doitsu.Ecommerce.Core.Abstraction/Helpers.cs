@@ -1,14 +1,42 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Doitsu.Ecommerce.Core.Abstraction
 {
+    public static class EnumExtensionHelper
+    {
+        public static string GetDisplayName(this Enum enu)
+        {
+            var attr = GetDisplayAttribute(enu);
+            return attr != null ? attr.Name : enu.ToString();
+        }
+
+        public static string GetDescription(this Enum enu)
+        {
+            var attr = GetDisplayAttribute(enu);
+            return attr != null ? attr.Description : enu.ToString();
+        }
+
+        private static DisplayAttribute GetDisplayAttribute(object value)
+        {
+            Type type = value.GetType();
+            if (!type.IsEnum)
+            {
+                throw new ArgumentException(string.Format("Type {0} is not an enum", type));
+            }
+
+            // Get the enum field.
+            var field = type.GetField(value.ToString());
+            return field == null ? null : field.GetCustomAttribute<DisplayAttribute>();
+        }
+    }
+
     public static class EnumHelper<T>
     {
         public static IList<T> GetValues(Enum value)
@@ -64,16 +92,8 @@ namespace Doitsu.Ecommerce.Core.Abstraction
             if (descriptionAttributes == null) return string.Empty;
             return (descriptionAttributes.Length > 0) ? descriptionAttributes[0].Name : value.ToString();
         }
-    }
 
-    public static class SystemHelper
-    {
-        //public static TService GetService<TService>(this IServiceProvider serviceProdiver)
-        //            where TService : class
-        //{
-        //    var service = (TService)serviceProdiver.GetService(typeof(TService));
-        //    return service;
-        //}
+
     }
 
     public static class ClaimsPrincipalHelper
@@ -91,4 +111,18 @@ namespace Doitsu.Ecommerce.Core.Abstraction
         }
     }
 
+    public static class RazorPageHelper
+    {
+        public static string IsSelected(this IHtmlHelper htmlHelper, string controllers, string actions, string cssClass = "selected")
+        {
+            string currentAction = htmlHelper.ViewContext.RouteData.Values["action"] as string;
+            string currentController = htmlHelper.ViewContext.RouteData.Values["controller"] as string;
+
+            IEnumerable<string> acceptedActions = (actions ?? currentAction).Split(',');
+            IEnumerable<string> acceptedControllers = (controllers ?? currentController).Split(',');
+
+            return acceptedActions.Contains(currentAction) && acceptedControllers.Contains(currentController) ?
+                cssClass : String.Empty;
+        }
+    }
 }

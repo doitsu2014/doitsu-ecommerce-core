@@ -160,8 +160,8 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
 
     public class LoginByPhoneViewModel : LoginViewModel
     {
-        [Required(ErrorMessage = "Không được bỏ trống")]
         [DataType(DataType.PhoneNumber)]
+        [Required(ErrorMessage = "Không được bỏ trống")]
         [RegularExpression(@"^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$", ErrorMessage = "Số điện thoại không đúng mẫu")]
         [Display(Name = "Số điện thoại", Prompt = "Nhập vào số điện thoại")]
         public string PhoneNumber
@@ -173,6 +173,10 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
 
     public class LoginByEmailViewModel : LoginViewModel
     {
+        [DataType(DataType.EmailAddress)]
+        [Required(ErrorMessage = "Không được bỏ trống")]
+        [EmailAddress(ErrorMessage = "Địa chỉ email không đúng mẫu")]
+        [Display(Name = "Email", Prompt = "Nhập vào địa chỉ email")]
         public string Email
         {
             get;
@@ -239,8 +243,8 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
 
         [JsonProperty("address")]
         [Required(ErrorMessage = "Không được bỏ trống")]
-        [MaxLength(350, ErrorMessage = "Địa chỉ vượt quá 350 ký tự")]
-        [Display(Name = "Địa chỉ", Prompt = "Nhập địa chỉ")]
+        [MaxLength(255, ErrorMessage = "Địa chỉ vượt quá 255 ký tự")]
+        [Display(Name = "Địa chỉ", Prompt = "Nhập địa chỉ nơi sống hiện tại của bạn")]
         public string Address
         {
             get;
@@ -303,7 +307,10 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
 
     public class ChangePasswordViewMode
     {
-
+        [DataType(DataType.Password)]
+        [Required(ErrorMessage = "Không được bỏ trống")]
+        [MaxLength(32, ErrorMessage = "Mật khẩu vượt quá 32 ký tự")]
+        [Display(Name = "Mật khẩu", Prompt = "Nhập mật khẩu của bạn tối đa 32 ký tự")]
         [JsonProperty("currentPassword")]
         public string CurrentPassword
         {
@@ -311,6 +318,9 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
             set;
         }
 
+        [DataType(DataType.Password)]
+        [Required(ErrorMessage = "Không được bỏ trống")]
+        [Display(Name = "Mật khẩu mới", Prompt = "Nhập mật khẩu mới")]
         [JsonProperty("newPassword")]
         public string NewPassword
         {
@@ -322,12 +332,19 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
     public class UpdateDetailViewModel
     {
         [JsonProperty("phoneNumber")]
+        [Required(ErrorMessage = "Số điện thoại không được bỏ trống.")]
+        [MaxLength(60, ErrorMessage = "Số điện thoại không được vượt quá 60 ký tự.")]
+        [Display(Name = "Số điện thoại", Prompt = "Nhập vào số điện thoại")]
         public string PhoneNumber
         {
             get;
             set;
         }
+
         [JsonProperty("fullName")]
+        [Required(ErrorMessage = "Họ và tên không được bỏ trống.")]
+        [MaxLength(125, ErrorMessage = "Họ và tên không được vượt quá 255 ký tự.")]
+        [Display(Name = "Họ và tên", Prompt = "Nhập vào họ và tên")]
         public string Fullname
         {
             get;
