@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		azure-pipeline-build-brand-master.yml = azure-pipeline-build-brand-master.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doitsu.Ecommerce.Core.SEO", "src\Doitsu.Ecommerce.Core.SEO\Doitsu.Ecommerce.Core.SEO.csproj", "{4F07D296-4B77-4858-B952-1E98240C1010}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{C6FF44BA-13E0-4D13-99F2-97D68B5F32A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6FF44BA-13E0-4D13-99F2-97D68B5F32A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6FF44BA-13E0-4D13-99F2-97D68B5F32A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F07D296-4B77-4858-B952-1E98240C1010}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F07D296-4B77-4858-B952-1E98240C1010}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F07D296-4B77-4858-B952-1E98240C1010}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F07D296-4B77-4858-B952-1E98240C1010}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -59,5 +65,6 @@ Global
 		{C6FF44BA-13E0-4D13-99F2-97D68B5F32A5} = {FDE97434-7DB9-4569-8949-668AEB5F82AC}
 		{E0717928-6B3E-4783-9E32-8B1C90CD339E} = {FDE97434-7DB9-4569-8949-668AEB5F82AC}
 		{C83A79F7-82F2-496F-881A-6E9A11AAA736} = {ECE4838C-320F-4C61-8B68-DF01EB8CDCEF}
+		{4F07D296-4B77-4858-B952-1E98240C1010} = {FDE97434-7DB9-4569-8949-668AEB5F82AC}
 	EndGlobalSection
 EndGlobal

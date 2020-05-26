@@ -6,6 +6,16 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "Property",
+                table: "Products");
+
+            migrationBuilder.AddColumn<string>(
+                name: "ShortDescription",
+                table: "Products",
+                maxLength: 255,
+                nullable: true);
+
             migrationBuilder.AddColumn<string>(
                 name: "DeliveryProviderCode",
                 table: "Orders",
@@ -80,6 +90,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
+                name: "ShortDescription",
+                table: "Products");
+
+            migrationBuilder.DropColumn(
                 name: "DeliveryProviderCode",
                 table: "Orders");
 
@@ -98,6 +112,12 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "Ward",
                 table: "AspNetUsers");
+
+            migrationBuilder.AddColumn<string>(
+                name: "Property",
+                table: "Products",
+                type: "nvarchar(max)",
+                nullable: true);
 
             migrationBuilder.AlterColumn<string>(
                 name: "ZipCode",

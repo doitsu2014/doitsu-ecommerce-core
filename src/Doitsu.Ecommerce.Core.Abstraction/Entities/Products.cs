@@ -9,7 +9,7 @@ namespace Doitsu.Ecommerce.Core.Abstraction.Entities
         public string Code { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public string Property { get; set; }
+        public string ShortDescription { get; set; }
         public int? CateId { get; set; }
         public int? ArtistId { get; set; }
         public int? CollectionId { get; set; }

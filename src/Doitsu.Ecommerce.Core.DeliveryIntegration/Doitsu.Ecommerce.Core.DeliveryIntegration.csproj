@@ -3,21 +3,17 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
         <LangVersion>8.0</LangVersion>
-        <PackageVersion>7.0.2</PackageVersion>
+        <PackageVersion>7.0.3</PackageVersion>
         <Title>Doitsu.Ecommerce.Core.DeliveryIntegration</Title>
         <PackageId>Doitsu.Ecommerce.Core.DeliveryIntegration</PackageId>
         <Authors>Doitsu Technology</Authors>
         <Owners>Doitsu Technology</Owners>
         <IsPackable>true</IsPackable>
         <Copyright>2020</Copyright>
-        <DevelopmentDependency>true</DevelopmentDependency>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <SynchReleaseVersion>false</SynchReleaseVersion>
         <NeutralLanguage>en</NeutralLanguage>
         <Summary>Deliverer Services Integrator</Summary>
-        <PackageTags>Deliverer Services Integrator</PackageTags>
-        <Description>
-        </Description>
+        <PackageTags>Delivery Services</PackageTags>
         <RepositoryUrl>https://doitsutechnology@dev.azure.com/doitsutechnology/Doitsu.Technology.Core/_git/Doitsu.Ecommerce.Core</RepositoryUrl>
         <PackageProjectUrl>https://dev.azure.com/doitsutechnology/Doitsu.Technology.Core</PackageProjectUrl>
         <PackageIcon>doitsu-logo.png</PackageIcon>
@@ -25,7 +21,7 @@
         <PackageReleaseNotes>Latest</PackageReleaseNotes>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Doitsu.Service.Core" Version="7.0.13" />
+        <PackageReference Include="Doitsu.Service.Core" Version="7.0.14" />
     </ItemGroup>
     <ItemGroup>
         <Folder Include="Resources\" />

@@ -38,6 +38,9 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
                 .IsRequired()
                 .HasMaxLength(255);
 
+            builder.Property(e => e.ShortDescription)
+                .HasMaxLength(255);
+
             builder.Property(e => e.Weight)
                 .HasDefaultValue(0);
 

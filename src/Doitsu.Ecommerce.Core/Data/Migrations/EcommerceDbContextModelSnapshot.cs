@@ -1210,8 +1210,9 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("money");
 
-                    b.Property<string>("Property")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ShortDescription")
+                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(255);
 
                     b.Property<string>("Slug")
                         .IsRequired()

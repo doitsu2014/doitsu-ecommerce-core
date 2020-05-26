@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20200522084349_AddMorePropToDeliveryInfor")]
+    [Migration("20200526171815_AddMorePropToDeliveryInfor")]
     partial class AddMorePropToDeliveryInfor
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1212,8 +1212,9 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("money");
 
-                    b.Property<string>("Property")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ShortDescription")
+                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(255);
 
                     b.Property<string>("Slug")
                         .IsRequired()
