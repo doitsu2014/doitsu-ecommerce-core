@@ -1,5 +1,4 @@
-﻿using Doitsu.Ecommerce.Core.Tests.Interfaces;
-using Microsoft.AspNetCore;
+﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -12,6 +11,8 @@ using System.IO;
 using System.Linq;
 using Doitsu.Service.Core.Interfaces.EfCore;
 using Doitsu.Ecommerce.Core.Data;
+using Doitsu.Ecommerce.Core.Data.DatabaseConfigurer;
+using Doitsu.Service.Core.Interfaces;
 
 namespace Doitsu.Ecommerce.Core.Tests.Helpers
 {
@@ -31,43 +32,31 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
         }
 
 
-        private static DbContextOptionsBuilder<T> GenerateOptions<T>(string connectionString, IServiceProvider serviceProvider, string assemblyName) where T : DbContext
+        private static DbContextOptionsBuilder<T> GenerateOptionsBuilderForRealDb<T>(string connectionString, IServiceProvider serviceProvider, string assemblyName) where T : DbContext
         {
             var builder = new DbContextOptionsBuilder<T>();
-            builder.UseSqlServer(connectionString,
-                builder => builder.MigrationsAssembly(assemblyName));
+            builder.UseSqlServer(connectionString, builder => builder.MigrationsAssembly(assemblyName));
             builder.UseLoggerFactory(serviceProvider.GetService<ILoggerFactory>());
             return builder;
         }
 
-        public static IWebHostBuilder PoolBuilderDb(string poolKey)
+        private static DbContextOptionsBuilder<T> GenerateOptionsBuilderForInMemoryDb<T>(string connectionString, IServiceProvider serviceProvider, string assemblyName) where T : DbContext
         {
-            return StandardWebHostBuilderInternal()
-                .ConfigureServices(services => services.AddSingleton<IDatabaseConfigurer, TestDatabaseConfigurer>())
-                .UseStartup<Startup>()
-                .ConfigureServices((context, services) =>
-                {
-                    var connectionString = context.Configuration.GetConnectionString(nameof(EcommerceDbContext));
-                    var generatedPoolKeyConnStr = DatabaseHelper.GeneratePoolKeyConnectionString(connectionString, poolKey);
-                    services.AddScoped(serviceProvider => {
-                        var connectionString = generatedPoolKeyConnStr;
-                        var opts = GenerateOptions<EcommerceDbContext>(connectionString, serviceProvider, typeof(EcommerceDbContext).Assembly.GetName().Name).Options;
-                        var dbContext = new Data.EcommerceDbContext(opts, serviceProvider.GetService<IEnumerable<IEntityChangeHandler>>());
-                        return dbContext;
-                    });
-                });
+            var builder = new DbContextOptionsBuilder<T>();
+            builder.UseSqlite(connectionString, builder => builder.MigrationsAssembly(assemblyName));
+            builder.UseLoggerFactory(serviceProvider.GetService<ILoggerFactory>());
+            return builder;
         }
 
-        public static IWebHostBuilder StandardBuilderInMemory()
+        private static IWebHostBuilder StandardWebHostBuilder()
         {
-            return StandardWebHostBuilderInternal()
-                .ConfigureServices(services => services.AddSingleton<IDatabaseConfigurer, InMemorySqliteConfigurer>())
+            return WebHost.CreateDefaultBuilder()
                 .UseStartup<Startup>();
         }
 
-        private static IWebHostBuilder StandardWebHostBuilderInternal()
+        private static IWebHostBuilder BuildWebhostWithJsonContent()
         {
-            return WebHost.CreateDefaultBuilder()
+            return StandardWebHostBuilder()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .ConfigureAppConfiguration((context, config) =>
                 {
@@ -79,6 +68,30 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 })
                 .ConfigureLogging((context, builder) => builder.ClearProviders())
                 .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
+        }
+
+        public static IWebHostBuilder BuilderWebhostWithRealDb(string poolKey)
+        {
+            return BuildWebhostWithJsonContent()
+                .ConfigureServices(services => services.AddSingleton<IDatabaseConfigurer, EcommerceDatabaseConfigurer>())
+                .ConfigureServices((context, services) =>
+                {
+                    var connectionString = context.Configuration.GetConnectionString(nameof(EcommerceDbContext));
+                    var generatedPoolKeyConnStr = DatabaseHelper.GeneratePoolKeyConnectionString(connectionString, poolKey);
+                    services.AddScoped(serviceProvider =>
+                    {
+                        var connectionString = generatedPoolKeyConnStr;
+                        var opts = GenerateOptionsBuilderForRealDb<EcommerceDbContext>(connectionString, serviceProvider, typeof(EcommerceDbContext).Assembly.GetName().Name).Options;
+                        var dbContext = new Data.EcommerceDbContext(opts, serviceProvider.GetService<IEnumerable<IEntityChangeHandler>>());
+                        return dbContext;
+                    });
+                });
+        }
+
+        public static IWebHostBuilder BuilderWebhostWithInmemoryDb(string poolKey)
+        {
+            return BuildWebhostWithJsonContent()
+                .ConfigureServices(services => services.AddSingleton<IDatabaseConfigurer, InMemorySqliteConfigurer>());
         }
     }
 }

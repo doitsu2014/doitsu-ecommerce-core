@@ -25,7 +25,7 @@
         <None Include="Images\doitsu-logo.png" Pack="true" PackagePath="" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Doitsu.Service.Core" Version="7.0.14" />
+        <PackageReference Include="Doitsu.Service.Core" Version="7.0.15" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.DataAnnotations" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />

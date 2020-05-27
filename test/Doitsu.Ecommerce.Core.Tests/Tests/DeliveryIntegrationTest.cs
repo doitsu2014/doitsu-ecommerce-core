@@ -21,7 +21,7 @@ namespace Doitsu.Ecommerce.Core.Tests
         [Fact]
         private async Task Test_CalculateFees()
         {
-            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            using (var webhost = WebHostBuilderHelper.BuilderWebhostWithInmemoryDb(_poolKey).Build())
             {
                 var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
                 using (var scope = scopeFactory.CreateScope())

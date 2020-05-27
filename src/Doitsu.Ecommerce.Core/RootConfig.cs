@@ -26,6 +26,7 @@ using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
 using Doitsu.Ecommerce.Core.Abstraction;
 using Doitsu.Ecommerce.Core.DeliveryIntegration;
+using Doitsu.Service.Core.Interfaces;
 
 namespace Doitsu.Ecommerce.Core
 {
@@ -80,16 +81,13 @@ namespace Doitsu.Ecommerce.Core
             app.UseRequestLocalization(LocalizationOptions);
         }
 
-        public static void Service(IServiceCollection services, IConfiguration configuration, bool isConfigImageSharpWeb = false)
+        public static void Service(IServiceCollection services, IConfiguration configuration, IDatabaseConfigurer databaseConfigurer, bool isConfigImageSharpWeb = false)
         {
             #region Identity Database Config
             var loggerFactory = services.BuildServiceProvider().GetService<ILoggerFactory>();
             // Config identity db config
-            services.AddDbContext<EcommerceDbContext>(options =>
-                    options
-                    .UseSqlServer(configuration.GetConnectionString(nameof(EcommerceDbContext)))
-                    .UseLoggerFactory(loggerFactory)
-                    .EnableSensitiveDataLogging(),
+            services.AddDbContext<EcommerceDbContext>(builder =>
+                    databaseConfigurer.Configure(builder, typeof(EcommerceDbContext).Assembly.GetName().Name),
                     ServiceLifetime.Scoped)
                 .AddIdentity<EcommerceIdentityUser, EcommerceIdentityRole>()
                 .AddEntityFrameworkStores<EcommerceDbContext>()

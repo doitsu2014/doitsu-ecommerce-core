@@ -21,7 +21,7 @@
         <PackageReleaseNotes>Latest</PackageReleaseNotes>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Doitsu.Service.Core" Version="7.0.14" />
+        <PackageReference Include="Doitsu.Service.Core" Version="7.0.15" />
     </ItemGroup>
     <ItemGroup>
         <Folder Include="Resources\" />
