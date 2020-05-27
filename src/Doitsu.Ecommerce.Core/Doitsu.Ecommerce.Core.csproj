@@ -33,7 +33,7 @@
         <PackageReference Include="SixLabors.ImageSharp.Web" Version="1.0.0-rc0001" />
         <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.4" />
-        <PackageReference Include="Doitsu.Service.Core" Version="7.0.15" />
+        <PackageReference Include="Doitsu.Service.Core" Version="7.0.16" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="../Doitsu.Ecommerce.Core.DeliveryIntegration/Doitsu.Ecommerce.Core.DeliveryIntegration.csproj" />
