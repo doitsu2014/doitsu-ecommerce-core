@@ -1,9 +1,5 @@
-using System.ComponentModel;
-using System;
-using System.Linq.Expressions;
 using Doitsu.Ecommerce.Core.Abstraction.Entities;
 using EFCore.Abstractions.EntityConfigurations;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations

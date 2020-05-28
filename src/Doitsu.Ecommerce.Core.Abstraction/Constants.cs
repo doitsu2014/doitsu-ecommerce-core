@@ -87,7 +87,7 @@
             public const string EMAIL_REQUIRED = "Địa chỉ email không được bỏ trống.";
             public const string PASSWORD_REQUIRED = "Mật khẩu không được bỏ trống.";
             public const string NEW_PASSWORD_REQUIRED = "Mật khẩu xác nhận không được để trống.";
-            public const string PHONE_REQUIRED = "Số điện thoại không được bỏ trống.";         
+            public const string PHONE_REQUIRED = "Số điện thoại không được bỏ trống.";
             public const string FULLNAME_REQUIRED = "Tên không được bỏ trống.";
             public const string REQUEST_REQUIRED = "Dữ liệu truyền lên rỗng.";
 
@@ -100,7 +100,7 @@
             public const string PHONE_EXISTED = "Đã tồn tại số điện thoại {0} trong hệ thống.";
 
             //Not existed
-            public const string PHONE_EMAIL_NOT_EXISTED = "Không tìm thấy người dùng với email hay số điện thoại: {0}."; 
+            public const string PHONE_EMAIL_NOT_EXISTED = "Không tìm thấy người dùng với email hay số điện thoại: {0}.";
             public const string USER_NOT_EXISTED = "Tài khoản người dùng này không tồn tại!";
 
             //Login
@@ -113,7 +113,7 @@
             public const string REGISTER_AUTH_FAILED = "Phân quyền người dùng thất bại.";
             public const string REGISTER_SUCCESS = "Đăng ký thành công.";
             public const string CHECKOUT_CARD_NULL = "Giỏ hàng rỗng, không thể tạo đơn hàng cho bạn.";
-            public const string CREATE_NEW_FAILED = "Tạo người dùng {0} thât bại!\n có thể do trùng tên đăng nhập."; 
+            public const string CREATE_NEW_FAILED = "Tạo người dùng {0} thât bại!\n có thể do trùng tên đăng nhập.";
 
             //Reset password 
             public const string RESET_PASSWORD_NULL_REQUEST = "Dữ liệu để đặt lại mật khẩu rỗng, xin vui lòng thử lại.";
@@ -141,6 +141,11 @@
             public const string RESET_PASSWORD_SUBJECT = "[{0}] Xác nhận yêu cầu đặt lại mật khẩu";
             public const string RESET_PASSWORD_BODY = "<p>Hãy nhập vào link này để <a href='{0}://{1}/nguoi-dung/dat-lai-mat-khau?userIdentification={2}&token={3}'>đặt lại mật khẩu</a></p>";
             public const string RESET_PASSWORD_REQUEST_SUCCESS = "Gửi yêu cầu đặt lại mật khẩu thành công.";
+        }
+
+        public static class ModelErrorKey
+        {
+            public const string SERVER_ERROR = "SERVER_ERROR";
         }
     }
 }

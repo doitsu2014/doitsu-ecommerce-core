@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using Doitsu.Ecommerce.Core.Abstraction.Entities;
 using Doitsu.Ecommerce.Core.Abstraction;
+using System.Linq;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -37,10 +38,20 @@ namespace Doitsu.Ecommerce.Core.Services
         private readonly IBlogService blogService;
         private readonly ISliderService sliderService;
         private readonly ICatalogueService catalogueService;
+        private readonly ITagService tagService;
         private readonly ILogger<MemCacheService> logger;
         private readonly IMapper mapper;
 
-        public MemCacheService(ICategoryService categoryService, IProductService productService, IMemoryCache memoryCache, IBrandService brandService, IBlogService blogService, ISliderService sliderService, ICatalogueService catalogueService, ILogger<MemCacheService> logger, IMapper mapper)
+        public MemCacheService(ICategoryService categoryService,
+                               IProductService productService,
+                               IMemoryCache memoryCache,
+                               IBrandService brandService,
+                               IBlogService blogService,
+                               ISliderService sliderService,
+                               ICatalogueService catalogueService,
+                               ILogger<MemCacheService> logger,
+                               IMapper mapper,
+                               ITagService tagService)
         {
             this.categoryService = categoryService;
             this.productService = productService;
@@ -234,6 +245,17 @@ namespace Doitsu.Ecommerce.Core.Services
             {
                 return ImmutableList<CategoryWithInverseParentViewModel>.Empty;
             }
+        }
+
+        public async Task<ImmutableList<TagViewModel>> GetTopBlogTagsAsync(int limit, int cachingMinutes)
+        {
+            var key = $"{Constants.CacheKey.TOP_TAGS}_{limit}";
+            if (!memoryCache.TryGetValue(key, out ImmutableList<TagViewModel> topTags))
+            {
+                var tags = await tagService.GetTopBlogTagsAsync(limit);
+                memoryCache.Set(key, tags.ToImmutableList(), TimeSpan.FromMinutes(cachingMinutes));
+            }
+            return topTags;
         }
     }
 }

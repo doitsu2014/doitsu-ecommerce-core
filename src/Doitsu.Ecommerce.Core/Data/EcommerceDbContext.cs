@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Doitsu.Ecommerce.Core.Abstraction.Entities;
 using Doitsu.Ecommerce.Core.Abstraction.Identities;
+using Doitsu.Ecommerce.Core.Data.DatabaseConfigurer.Converter;
 using Doitsu.Service.Core.Interfaces.EfCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -67,6 +68,24 @@ namespace Doitsu.Ecommerce.Core.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.ApplyConfigurationsFromAssembly(GetType().Assembly);
+
+            // Configure for sqlite
+            if (this.Database.IsSqlite())
+            {
+                // Config all rowvers properties to sqlite timestamp
+                var timestampProperties = builder.Model
+                    .GetEntityTypes()
+                    .SelectMany(t => t.GetProperties())
+                    .Where(p => p.ClrType == typeof(byte[])
+                        && p.ValueGenerated == ValueGenerated.OnAddOrUpdate
+                        && p.IsConcurrencyToken);
+
+                foreach (var property in timestampProperties)
+                {
+                    property.SetValueConverter(new SqliteTimestampConverter());
+                    property.SetDefaultValueSql("CURRENT_TIMESTAMP");
+                }
+            }
         }
 
         private async Task<int> SaveChangesWithBeforeSavingAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())

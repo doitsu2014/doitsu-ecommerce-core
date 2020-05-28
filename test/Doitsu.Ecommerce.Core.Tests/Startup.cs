@@ -1,5 +1,6 @@
 
 using Doitsu.Ecommerce.Core.DeliveryIntegration;
+using Doitsu.Service.Core.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -12,18 +13,19 @@ namespace Doitsu.Ecommerce.Core.Tests
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IDatabaseConfigurer databaseConfigurer;
+        public Startup(IConfiguration configuration, IDatabaseConfigurer databaseConfigurer)
         {
             Configuration = configuration;
+            this.databaseConfigurer = databaseConfigurer;
         }
 
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        [System.Obsolete]
         public void ConfigureServices(IServiceCollection services)
         {
-            RootConfig.Service(services, Configuration, true);
+            RootConfig.Service(services, Configuration, databaseConfigurer, true);
             services.ConfigDeliveryIntegration(Configuration);
             services.Configure<ForwardedHeadersOptions>(options =>
             {

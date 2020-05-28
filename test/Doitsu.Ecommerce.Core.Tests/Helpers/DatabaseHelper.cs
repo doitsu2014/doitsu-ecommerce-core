@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using Doitsu.Ecommerce.Core;
 using Doitsu.Ecommerce.Core.Data;
+using Doitsu.Service.Core.Interfaces;
 
 namespace Doitsu.Ecommerce.Core.Tests.Helpers
 {
@@ -182,6 +183,20 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 var myCommand = new SqlCommand(command, myConn);
                 myConn.Open();
                 return (int)myCommand.ExecuteScalar();
+            }
+        }
+
+        public static async Task MigrateDatabase(DbContext context, IDatabaseConfigurer databaseConfigurer, IWebHost webHost, string _poolkey = "")
+        {
+            await context.Database.EnsureDeletedAsync();
+            if (databaseConfigurer.GetType() == typeof(InMemorySqliteConfigurer))
+            {
+                await context.Database.EnsureCreatedAsync();
+            }
+            else
+            {
+                await context.Database.MigrateAsync();
+                await DatabaseHelper.MakeEmptyDatabase(webHost, _poolkey);
             }
         }
     }

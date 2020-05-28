@@ -3,19 +3,17 @@
     <PropertyGroup>
         <LangVersion>8.0</LangVersion>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <PackageVersion>7.0.51</PackageVersion>
+        <PackageVersion>7.0.55</PackageVersion>
         <Title>Doitsu.Ecommerce.Core</Title>
         <PackageId>Doitsu.Ecommerce.Core</PackageId>
         <Authors>Doitsu Technology</Authors>
         <Owners>Doitsu Technology</Owners>
         <IsPackable>true</IsPackable>
         <Copyright>2020</Copyright>
-        <DevelopmentDependency>true</DevelopmentDependency>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <SynchReleaseVersion>false</SynchReleaseVersion>
         <NeutralLanguage>en</NeutralLanguage>
         <Summary>Core of doitsu api website service</Summary>
-        <PackageTags>Code First Database, Ecommerce Services</PackageTags>
+        <PackageTags>Ecommerce code first;Ecommerce services</PackageTags>
         <Description>Doitsu.Ecommerce.Core is a library implement business logic and code first database for a Ecommerce Platform by AspNetCore. It is using Doitsu.Service.Core library as a helper library to implement abstraction.</Description>
         <RepositoryUrl>https://doitsutechnology@dev.azure.com/doitsutechnology/Doitsu.Technology.Core/_git/Doitsu.Ecommerce.Core</RepositoryUrl>
         <PackageProjectUrl>https://dev.azure.com/doitsutechnology/Doitsu.Technology.Core</PackageProjectUrl>
@@ -27,6 +25,7 @@
         <PackageReference Include="EPPlus" Version="4.5.3.3" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.4" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.4" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.4" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.4" />
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.4" />
         <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.4" />
@@ -34,7 +33,7 @@
         <PackageReference Include="SixLabors.ImageSharp.Web" Version="1.0.0-rc0001" />
         <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.4" />
-        <PackageReference Include="Doitsu.Service.Core" Version="7.0.13" />
+        <PackageReference Include="Doitsu.Service.Core" Version="7.0.16" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="../Doitsu.Ecommerce.Core.DeliveryIntegration/Doitsu.Ecommerce.Core.DeliveryIntegration.csproj" />

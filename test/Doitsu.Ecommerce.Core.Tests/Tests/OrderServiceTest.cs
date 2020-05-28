@@ -12,6 +12,7 @@ using Doitsu.Ecommerce.Core.IdentityManagers;
 using Doitsu.Ecommerce.Core.Services;
 using Doitsu.Ecommerce.Core.Services.Interface;
 using Doitsu.Ecommerce.Core.Tests.Helpers;
+using Doitsu.Service.Core.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,10 +42,9 @@ namespace Doitsu.Ecommerce.Core.Tests
                 var productService = scope.ServiceProvider.GetService<IProductService>();
                 var brandService = scope.ServiceProvider.GetService<IBrandService>();
                 var productVariantService = scope.ServiceProvider.GetService<IProductVariantService>();
+                var databaseConfigurer = scope.ServiceProvider.GetService<IDatabaseConfigurer>();
 
-                await dbContext.Database.EnsureDeletedAsync();
-                await dbContext.Database.MigrateAsync();
-                await DatabaseHelper.MakeEmptyDatabase(webhost, _poolKey);
+                await DatabaseHelper.MigrateDatabase(dbContext, databaseConfigurer, webhost, _poolKey);
 
                 // Add Brand
                 await brandService.CreateAsync(_fixture.BrandData);
@@ -124,7 +124,7 @@ namespace Doitsu.Ecommerce.Core.Tests
         [Fact]
         private async Task Test_CreateSaleOrderWithProductOption_NormalProducts()
         {
-            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            using (var webhost = WebHostBuilderHelper.BuilderWebhostWithInmemoryDb(_poolKey).Build())
             {
                 await InitialDatabaseAsync(webhost);
                 var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
@@ -149,7 +149,7 @@ namespace Doitsu.Ecommerce.Core.Tests
         [Fact]
         private async Task Test_CreateNormalOrderWithProductOption_NormalProducts()
         {
-            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            using (var webhost = WebHostBuilderHelper.BuilderWebhostWithInmemoryDb(_poolKey).Build())
             {
                 await InitialDatabaseAsync(webhost);
                 var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
@@ -183,7 +183,7 @@ namespace Doitsu.Ecommerce.Core.Tests
         [Fact]
         private async Task Test_ChangeStatusOrder_Done()
         {
-            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            using (var webhost = WebHostBuilderHelper.BuilderWebhostWithInmemoryDb(_poolKey).Build())
             {
                 await InitialDatabaseAsync(webhost);
                 var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
@@ -244,7 +244,7 @@ namespace Doitsu.Ecommerce.Core.Tests
         [Fact]
         private async Task Test_ChangeStatusOrder_Cancel()
         {
-            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            using (var webhost = WebHostBuilderHelper.BuilderWebhostWithInmemoryDb(_poolKey).Build())
             {
                 await InitialDatabaseAsync(webhost);
                 var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
@@ -284,7 +284,7 @@ namespace Doitsu.Ecommerce.Core.Tests
         [Fact]
         private async Task Test_CreateSaleOrderWithProductOption_DisabledProducts()
         {
-            using (var webhost = WebHostBuilderHelper.PoolBuilderDb(_poolKey).Build())
+            using (var webhost = WebHostBuilderHelper.BuilderWebhostWithInmemoryDb(_poolKey).Build())
             {
                 await InitialDatabaseAsync(webhost);
                 var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();

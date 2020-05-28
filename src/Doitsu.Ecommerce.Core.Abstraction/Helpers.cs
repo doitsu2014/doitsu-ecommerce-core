@@ -1,14 +1,43 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Doitsu.Ecommerce.Core.Abstraction
 {
+    public static class EnumExtensionHelper
+    {
+        public static string GetDisplayName(this Enum enu)
+        {
+            var attr = GetDisplayAttribute(enu);
+            return attr != null ? attr.Name : enu.ToString();
+        }
+
+        public static string GetDescription(this Enum enu)
+        {
+            var attr = GetDisplayAttribute(enu);
+            return attr != null ? attr.Description : enu.ToString();
+        }
+
+        private static DisplayAttribute GetDisplayAttribute(object value)
+        {
+            Type type = value.GetType();
+            if (!type.IsEnum)
+            {
+                throw new ArgumentException(string.Format("Type {0} is not an enum", type));
+            }
+
+            // Get the enum field.
+            var field = type.GetField(value.ToString());
+            return field == null ? null : field.GetCustomAttribute<DisplayAttribute>();
+        }
+    }
+
     public static class EnumHelper<T>
     {
         public static IList<T> GetValues(Enum value)
@@ -64,16 +93,8 @@ namespace Doitsu.Ecommerce.Core.Abstraction
             if (descriptionAttributes == null) return string.Empty;
             return (descriptionAttributes.Length > 0) ? descriptionAttributes[0].Name : value.ToString();
         }
-    }
 
-    public static class SystemHelper
-    {
-        //public static TService GetService<TService>(this IServiceProvider serviceProdiver)
-        //            where TService : class
-        //{
-        //    var service = (TService)serviceProdiver.GetService(typeof(TService));
-        //    return service;
-        //}
+
     }
 
     public static class ClaimsPrincipalHelper
@@ -91,4 +112,40 @@ namespace Doitsu.Ecommerce.Core.Abstraction
         }
     }
 
+    public static class RazorPageHelper
+    {
+        public static string IsSelected(this IHtmlHelper htmlHelper, string controllers, string actions, string cssClass = "selected")
+        {
+            string currentAction = htmlHelper.ViewContext.RouteData.Values["action"] as string;
+            string currentController = htmlHelper.ViewContext.RouteData.Values["controller"] as string;
+
+            IEnumerable<string> acceptedActions = (actions ?? currentAction).Split(',');
+            IEnumerable<string> acceptedControllers = (controllers ?? currentController).Split(',');
+
+            return acceptedActions.Contains(currentAction) && acceptedControllers.Contains(currentController) ?
+                cssClass : String.Empty;
+        }
+
+        public static string MakeContentToShortContentByString(this string data, int length)
+        {
+            if (data.IsNullOrEmpty()) return data;
+            return $"{data.Substring(0, length)}...";
+        }
+
+        public static string ParseDecimalToCurrencyVnd(this decimal data)
+        {
+            CultureInfo cul = CultureInfo.GetCultureInfo("vi-VN");   // try with "en-US"
+            return string.Format(cul, "{0:C0}", data);
+        }
+
+        public static string ConcatImageResizeConfiguration(this string data, int width = 0, int height = 0, string rmode = "")
+        {
+            if(data.IsNullOrEmpty()) return data;
+            var queryData = new List<string>();
+            if(width > 0) queryData.Add($"width={width}");
+            if(height > 0) queryData.Add($"height={height}");
+            if(rmode.IsNotNullOrEmpty()) queryData.Add($"rmode={rmode}");
+            return $"{data}?{queryData.Aggregate((a,b) => $"{a}&{b}")}";
+        }
+    }
 }

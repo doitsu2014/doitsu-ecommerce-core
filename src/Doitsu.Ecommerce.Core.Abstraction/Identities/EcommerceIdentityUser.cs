@@ -9,14 +9,21 @@ namespace Doitsu.Ecommerce.Core.Abstraction.Identities
 {
     public class EcommerceIdentityUser : IdentityUser<int>, IActivable
     {
-        [MaxLength(255)]
+        [MaxLength(125)]
         public string Fullname { get; set; }
-        [MaxLength(350)]
+        [MaxLength(255)]
         public string Address { get; set; }
-        [MaxLength(50)]
+        [MaxLength(15)]
         public string ZipCode { get; set; }
-        [MaxLength(100)]
+        [MaxLength(60)]
         public string Country { get; set; }
+        [MaxLength(60)]
+        public string City { get; set; }
+        [MaxLength(30)]
+        public string District { get; set; }
+        [MaxLength(30)]
+        public string Ward { get; set; }
+
         [DefaultValue(GenderEnum.Unknown)]
         public int Gender { get; set; }
         public bool Active { get; set; }
