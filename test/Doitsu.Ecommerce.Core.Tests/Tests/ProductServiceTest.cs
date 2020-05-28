@@ -47,7 +47,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                 await categoryService.CreateAsync<CategoryWithInverseParentViewModel>(_fixture.CategoryData);
                 await categoryService.CommitAsync();
                 // Add Products
-                var firstCategory = await categoryService.GetAll().FirstOrDefaultAsync(x => x.Slug == "hang-ban");
+                var firstCategory = await categoryService.GetAll(isTracking: false).FirstOrDefaultAsync(x => x.Slug == "hang-ban");
                 var productData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; }).ToImmutableList();
                 var result = await productService.CreateProductWithOptionAsync(productData);
                 await productService.CommitAsync();
