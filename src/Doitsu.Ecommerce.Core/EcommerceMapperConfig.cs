@@ -13,7 +13,7 @@ namespace Doitsu.Ecommerce.Core
     {
         public EcommerceMappingProfile()
         {
-            AllowNullDestinationValues = false;
+            // AllowNullDestinationValues = false;
 
             #region User Mapper
             CreateMap<EcommerceIdentityUser, UserInforViewModel>();
@@ -54,7 +54,8 @@ namespace Doitsu.Ecommerce.Core
                 .ForMember(dest => dest.CategorySlug, opt => opt.MapFrom(x => x.Cate.Slug))
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(x => x.Cate.Name));
 
-            CreateMap<CreateProductViewModel, Products>();
+            CreateMap<CreateProductViewModel, Products>()
+                .ForMember(dest => dest.Cate, opts => opts.MapFrom(src => src.Cate ?? null));
             CreateMap<UpdateProductViewModel, Products>();
             CreateMap<Products, CreateProductViewModel>();
             CreateMap<Products, UpdateProductViewModel>();
@@ -136,8 +137,7 @@ namespace Doitsu.Ecommerce.Core
                 .ForMember(d => d.Address, opt => opt.MapFrom(src => src.DeliveryAddress))
                 .ForMember(d => d.District, opt => opt.MapFrom(src => src.DeliveryDistrict))
                 .ForMember(d => d.Province, opt => opt.MapFrom(src => src.DeliveryCity))
-                .ForMember(d => d.Ward, opt => opt.MapFrom(src => src.DeliveryWard))
-                ;
+                .ForMember(d => d.Ward, opt => opt.MapFrom(src => src.DeliveryWard));
 
             CreateMap<DeliveryInformationViewModel, DeliveryInformation>();
             CreateMap<DeliveryInformation, DeliveryInformationViewModel>();

@@ -69,6 +69,10 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         public bool Active { get; set; }
         [JsonProperty("slug")]
         public string Slug { get; set; }
+        [JsonProperty("vers")]
+        public byte[] Vers { get; set; }
+        [JsonProperty("parentCateId")]
+        public int? ParentCateId { get; set; }
         [JsonProperty("parentCate")]
         public CategoryWithoutParentViewModel ParentCate { get; set; }
     }

@@ -62,6 +62,7 @@ namespace Doitsu.Ecommerce.Core.Services
             this.catalogueService = catalogueService;
             this.logger = logger;
             this.mapper = mapper;
+            this.memoryCache = memoryCache;
         }
 
         public async Task<BrandViewModel> GetBrandInformationAsync(int brandId, int timeCache = 30)
