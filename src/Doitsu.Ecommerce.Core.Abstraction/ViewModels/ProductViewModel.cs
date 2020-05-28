@@ -28,18 +28,7 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         public ICollection<ProductOptionViewModel> ProductOptions { get; set; }
     }
 
-    public class ProductDetailWrapperViewModel
-    {
-        public static ProductDetailWrapperViewModel Empty => new ProductDetailWrapperViewModel();
-        [JsonProperty("product")]
-        public ProductDetailViewModel Product { get; set; }
-        [JsonProperty("categories")]
-        public ImmutableList<CategoryViewModel> Categories { get; set; }
-        [JsonProperty("parentCategorySlug")]
-        public string ParentCategorySlug { get; set; }
-    }
-
-    public class ProductDetailViewModel : BaseViewModel<Products>
+    public class ProductOverviewViewModel
     {
         [JsonProperty("id")]
         public int Id { get; set; }
@@ -64,9 +53,6 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
 
         [JsonProperty("categoryName")]
         public string CategoryName { get; set; }
-
-        [JsonProperty("description")]
-        public string Description { get; set; }
 
         [JsonProperty("shortDescription")]
         public string ShortDescription { get; set; }
@@ -97,32 +83,35 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
 
         [JsonProperty("productVariants")]
         public ICollection<ProductVariantViewModel> ProductVariants { get; set; }
-    }
 
-    public class ProductOverviewViewModel : BaseViewModel<Products>
-    {
-        [JsonProperty("id")]
-        public int Id { get; set; }
-        [JsonProperty("imageThumbUrl")]
-        public string ImageThumbUrl { get; set; }
-        [JsonProperty("name")]
-        public string Name { get; set; }
-        [JsonProperty("code")]
-        public string Code { get; set; }
-        [JsonProperty("price")]
-        public decimal Price { get; set; }
-        [JsonProperty("slug")]
-        public string Slug { get; set; }
-        [JsonProperty("categorySlug")]
-        public string CategorySlug { get; set; }
-        [JsonProperty("categoryName")]
-        public string CategoryName { get; set; }
-        [JsonProperty("productOptions")]
-        public ICollection<ProductOptionViewModel> ProductOptions { get; set; }
         [JsonProperty("categoryRecursive")]
         public CategoryWithParentViewModel Cate { get; set; }
     }
 
+    public class ProductDetailViewModel : ProductOverviewViewModel
+    {
+        [JsonProperty("description")]
+        public string Description { get; set; }
+    }
+
+    public class CreateProductViewModel : ProductDetailViewModel
+    {
+    }
+
+    public class UpdateProductViewModel : ProductDetailViewModel
+    {
+    } 
+
+    public class ProductDetailWrapperViewModel
+    {
+        public static ProductDetailWrapperViewModel Empty => new ProductDetailWrapperViewModel();
+        [JsonProperty("product")]
+        public ProductDetailViewModel Product { get; set; }
+        [JsonProperty("categories")]
+        public ImmutableList<CategoryViewModel> Categories { get; set; }
+        [JsonProperty("parentCategorySlug")]
+        public string ParentCategorySlug { get; set; }
+    }
 
     /// <summary>
     /// This view model to wrapper necessary data and pass to angularjs
@@ -154,82 +143,12 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         public ImmutableList<ProductOverviewViewModel> ProductOverviews { get; set; }
     }
 
-    public class CreateProductViewModel : ProductDetailViewModel
-    {
-    }
-
-    public class UpdateProductViewModel : ProductDetailViewModel
-    {
-    }
-
-    public class ProductVariantViewModel
-    {
-        [JsonProperty("id")]
-        public int Id { get; set; }
-        [JsonProperty("productId")]
-        public int ProductId { get; set; }
-        [JsonProperty("sku")]
-        public string Sku { get; set; }
-        [JsonProperty("anotherPrice")]
-        public decimal AnotherPrice { get; set; }
-        [JsonProperty("anotherDiscount")]
-        public float AnotherDiscount { get; set; }
-        [JsonProperty("inventoryQuantity")]
-        public long InventoryQuantity { get; set; }
-        [JsonProperty("vers")]
-        public byte[] Vers { get; set; }
-        [JsonProperty("status")]
-        public ProductVariantStatusEnum Status { get; set; }
-
-        [JsonProperty("productPrice")]
-        public decimal ProductPrice { get; set; }
-
-        [JsonProperty("productWeight")]
-        public float ProductWeight { get; set; }
-
-        [JsonProperty("productVariantOptionValues")]
-        public virtual ICollection<ProductVariantOptionValueViewModel> ProductVariantOptionValues { get; set; }
-    }
-
-    public class ProductVariantDetailViewModel : ProductVariantViewModel
-    {
-    }
-
-    public class ProductVariantOptionValueViewModel
-    {
-        [JsonProperty("id")]
-        public int Id { get; set; }
-        [JsonProperty("productOptionId")]
-        public int ProductOptionId { get; set; }
-        [JsonProperty("productVariantId")]
-        public int ProductVariantId { get; set; }
-        [JsonProperty("productOptionValueId")]
-        public int ProductOptionValueId { get; set; }
-        [JsonProperty("Vers")]
-        public byte[] Vers { get; set; }
-        [JsonProperty("active")]
-        public bool Active { get; set; }
-
-        [JsonProperty("productOption")]
-        public ProductOptionViewModel ProductOption { get; set; }
-        [JsonProperty("productOptionValue")]
-        public ProductOptionValueViewModel ProductOptionValue { get; set; }
-    }
-
     public class ProductFilterParamViewModel
     {
         [JsonProperty("id")]
         public int Id { get; set; }
         [JsonProperty("productOptions")]
         public ProductOptionFilterParamViewModel[] ProductOptions { get; set; }
-    }
-
-    public class ProductOptionFilterParamViewModel
-    {
-        [JsonProperty("id")]
-        public int Id { get; set; }
-        [JsonProperty("selectedValueId")]
-        public int? SelectedValueId { get; set; }
     }
 }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
@@ -123,6 +124,28 @@ namespace Doitsu.Ecommerce.Core.Abstraction
 
             return acceptedActions.Contains(currentAction) && acceptedControllers.Contains(currentController) ?
                 cssClass : String.Empty;
+        }
+
+        public static string MakeContentToShortContentByString(this string data, int length)
+        {
+            if (data.IsNullOrEmpty()) return data;
+            return $"{data.Substring(0, length)}...";
+        }
+
+        public static string ParseDecimalToCurrencyVnd(this decimal data)
+        {
+            CultureInfo cul = CultureInfo.GetCultureInfo("vi-VN");   // try with "en-US"
+            return string.Format(cul, "{0:C0}", data);
+        }
+
+        public static string ConcatImageResizeConfiguration(this string data, int width = 0, int height = 0, string rmode = "")
+        {
+            if(data.IsNullOrEmpty()) return data;
+            var queryData = new List<string>();
+            if(width > 0) queryData.Add($"width={width}");
+            if(height > 0) queryData.Add($"height={height}");
+            if(rmode.IsNotNullOrEmpty()) queryData.Add($"rmode={rmode}");
+            return $"{data}?{queryData.Aggregate((a,b) => $"{a}&{b}")}";
         }
     }
 }

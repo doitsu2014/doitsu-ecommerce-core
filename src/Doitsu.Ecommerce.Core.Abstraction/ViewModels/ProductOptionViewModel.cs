@@ -37,5 +37,13 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         [JsonProperty("vers")]
         public byte[] Vers { get; set; }
     }
+
+    public class ProductOptionFilterParamViewModel
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+        [JsonProperty("selectedValueId")]
+        public int? SelectedValueId { get; set; }
+    }
 }
 

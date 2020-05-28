@@ -34,16 +34,13 @@ namespace Doitsu.Ecommerce.Core.Services
     /// </summary>
     public class UserTransactionService : BaseService<UserTransaction>, IUserTransactionService
     {
-        private readonly IMemoryCache memoryCache;
         private readonly EcommerceIdentityUserManager<EcommerceIdentityUser> userManager;
 
         public UserTransactionService(EcommerceDbContext dbContext,
                           IMapper mapper,
                           ILogger<BaseService<UserTransaction, EcommerceDbContext>> logger,
-                          IMemoryCache memoryCache,
                           EcommerceIdentityUserManager<EcommerceIdentityUser> userManager) : base(dbContext, mapper, logger)
         {
-            this.memoryCache = memoryCache;
             this.userManager = userManager;
         }
 
