@@ -41,5 +41,8 @@ steps:
 
 - task: NuGetCommand@2
   inputs:
-    command: 'custom'
-    arguments: 'push $(Build.ArtifactStagingDirectory)/**/*.nupkg --source $(nugetSource) --api-key $(nugetSourceUploadKey) --skip-duplicate'
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+    nuGetFeedType: 'external'
+    publishFeedCredentials: 'Doitsu.Technology.NugetV3'
+    arguments: '--skip-duplicate'
