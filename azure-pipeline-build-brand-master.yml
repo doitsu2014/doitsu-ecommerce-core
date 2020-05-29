@@ -90,4 +90,4 @@ steps:
 - task: NuGetCommand@2
   inputs:
     command: 'custom'
-    arguments: 'push "$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg" -Source $(nugetSource) -ApiKey (nugetSourceUploadKey) -SkipDuplicate'
+    arguments: 'push $(Build.ArtifactStagingDirectory)/**/*.nupkg -Source $(nugetSource) -ApiKey (nugetSourceUploadKey) -SkipDuplicate'
