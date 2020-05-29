@@ -44,7 +44,7 @@ namespace Doitsu.Ecommerce.Core
     /// ++ Doitsu.Identity.DevDB key, value
     /// ++ Doitsu.Ecommerce.Core.DevDB key, value
     /// </summary>
-    public static class RootConfig
+    public static class DoitsuEcommerceCoreConfiguration
     {
         private readonly static CultureInfo[] supportedCultures = {
             new CultureInfo("en-US"),
@@ -66,7 +66,7 @@ namespace Doitsu.Ecommerce.Core
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public static void AppHosting(IApplicationBuilder app, bool isConfigImageSharpWeb = false)
+        public static void UseDoitsuEcommerceCoreHosting(this IApplicationBuilder app, bool isConfigImageSharpWeb = false)
         {
             // Using authorize
             app.UseAuthentication();
@@ -81,7 +81,7 @@ namespace Doitsu.Ecommerce.Core
             app.UseRequestLocalization(LocalizationOptions);
         }
 
-        public static void Service(IServiceCollection services, IConfiguration configuration, IDatabaseConfigurer databaseConfigurer, bool isConfigImageSharpWeb = false)
+        public static IServiceCollection AddDoitsuEcommerceCore(this IServiceCollection services, IConfiguration configuration, IDatabaseConfigurer databaseConfigurer, bool isConfigImageSharpWeb = false)
         {
             #region Identity Database Config
             var loggerFactory = services.BuildServiceProvider().GetService<ILoggerFactory>();
@@ -105,12 +105,12 @@ namespace Doitsu.Ecommerce.Core
             #endregion
 
             #region Config service
-            services.AddEcommerceServices();
+            services.AddDoitsuEcommerceCoreServices();
             services.ConfigDeliveryIntegration(configuration);
             #endregion
 
             #region Mapper Config
-            services.AddFurnitureAutoMapper();
+            services.AddDoitsuEcommerceCoreAutoMapper();
             #endregion
 
             #region Cache Config
@@ -139,6 +139,7 @@ namespace Doitsu.Ecommerce.Core
                 options.SupportedUICultures = LocalizationOptions.SupportedUICultures;
             });
             #endregion
+            return services;
         }
 
         #region Config Image Sharp Methods

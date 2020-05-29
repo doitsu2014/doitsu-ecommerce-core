@@ -3,7 +3,7 @@
     <PropertyGroup>
         <LangVersion>8.0</LangVersion>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <PackageVersion>7.0.55</PackageVersion>
+        <PackageVersion>7.0.56</PackageVersion>
         <Title>Doitsu.Ecommerce.Core</Title>
         <PackageId>Doitsu.Ecommerce.Core</PackageId>
         <Authors>Doitsu Technology</Authors>
@@ -37,6 +37,7 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="../Doitsu.Ecommerce.Core.DeliveryIntegration/Doitsu.Ecommerce.Core.DeliveryIntegration.csproj" />
+        <ProjectReference Include="../Doitsu.Ecommerce.Core.SEO/Doitsu.Ecommerce.Core.SEO.csproj" />
         <ProjectReference Include="../Doitsu.Ecommerce.Core.Abstraction/Doitsu.Ecommerce.Core.Abstraction.csproj" />
     </ItemGroup>
     <ItemGroup>

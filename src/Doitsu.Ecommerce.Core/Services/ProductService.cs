@@ -191,6 +191,7 @@ namespace Doitsu.Ecommerce.Core.Services
             // query categories
             var allParentCategoriesOfProduct = (await GetRepository<Categories>()
                 .AsNoTracking()
+                .Include(c => c.InverseParentCate)
                 .Where(x => x.ParentCate != null && x.ParentCate.Slug == superParentCateSlug)
                 .ProjectTo<CategoryMenuViewModel>(Mapper.ConfigurationProvider)
                 .ToListAsync()).ToImmutableList();

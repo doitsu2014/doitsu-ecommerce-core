@@ -49,10 +49,10 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         public decimal Price { get; set; }
 
         [JsonProperty("categorySlug")]
-        public string CategorySlug { get; set; }
+        public string CateSlug { get; set; }
 
         [JsonProperty("categoryName")]
-        public string CategoryName { get; set; }
+        public string CateName { get; set; }
 
         [JsonProperty("shortDescription")]
         public string ShortDescription { get; set; }

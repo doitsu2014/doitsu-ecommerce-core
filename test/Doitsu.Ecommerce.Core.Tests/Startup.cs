@@ -2,12 +2,13 @@
 using Doitsu.Ecommerce.Core.DeliveryIntegration;
 using Doitsu.Service.Core.Interfaces;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Doitsu.Ecommerce.Core.Tests
 {
@@ -25,8 +26,7 @@ namespace Doitsu.Ecommerce.Core.Tests
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            RootConfig.Service(services, Configuration, databaseConfigurer, true);
-            services.ConfigDeliveryIntegration(Configuration);
+            services.AddDoitsuEcommerceCore(Configuration, databaseConfigurer, true);
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders =
@@ -50,8 +50,7 @@ namespace Doitsu.Ecommerce.Core.Tests
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        [System.Obsolete]
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -67,7 +66,7 @@ namespace Doitsu.Ecommerce.Core.Tests
             app.UseForwardedHeaders();
             app.UseHttpsRedirection();
             app.UseDefaultFiles();
-            RootConfig.AppHosting(app, true);
+            app.UseDoitsuEcommerceCoreHosting(true);
             app.UseStaticFiles();
             app.UseMvc(routes =>
             {
