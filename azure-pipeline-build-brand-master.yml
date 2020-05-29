@@ -42,4 +42,4 @@ steps:
 - task: NuGetCommand@2
   inputs:
     command: 'custom'
-    arguments: 'dotnet nuget push $(Build.ArtifactStagingDirectory)/**/*.nupkg -s $(nugetSource) -k $(nugetSourceUploadKey) --skip-duplicate'
+    arguments: 'push $(Build.ArtifactStagingDirectory)/**/*.nupkg -s $(nugetSource) -k $(nugetSourceUploadKey) --skip-duplicate'
