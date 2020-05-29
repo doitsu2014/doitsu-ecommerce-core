@@ -12,7 +12,7 @@ pool:
 variables:
     buildConfiguration: 'Release'
     nugetSource: 'https://api.nuget.org/v3/index.json'
-    nugetSourceUploadKey: 'oy2ol23knrvokxqctjdq45is63t6c3ae7chpue6eu4jidq'
+    nugetSourceUploadKey: 'oy2n4dtgwfurr6p55kuays2vgh3n4afufg3tw2dyelen6y'
 
 steps:
 
@@ -89,8 +89,5 @@ steps:
 
 - task: NuGetCommand@2
   inputs:
-    command: 'push'
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
-    nuGetFeedType: 'external'
-    publishFeedCredentials: 'Doitsu.Technology.NugetV3'
-    arguments: '--skip-duplicate'
+    command: 'custom'
+    arguments: 'push $(Build.ArtifactStagingDirectory)/*.nupkg -Source $(nugetSource) -ApiKey $(nugetSourceUploadKey) -SkipDuplicate'
