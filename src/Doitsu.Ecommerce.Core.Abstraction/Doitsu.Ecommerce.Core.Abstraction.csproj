@@ -19,6 +19,8 @@
         <PackageIcon>doitsu-logo.png</PackageIcon>
         <RepositoryType>Azure Repos</RepositoryType>
         <PackageReleaseNotes>Update Doitsu.Ecommerce.Core.Abstraction ViewModels and Entites</PackageReleaseNotes>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
     <ItemGroup>
         <Folder Include="Resources\" />

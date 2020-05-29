@@ -19,6 +19,8 @@
         <PackageIcon>doitsu-logo.png</PackageIcon>
         <RepositoryType>Azure Repos</RepositoryType>
         <PackageReleaseNotes>Latest</PackageReleaseNotes>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Doitsu.Service.Core" Version="7.0.16" />

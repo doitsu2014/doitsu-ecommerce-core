@@ -20,6 +20,8 @@
         <PackageIcon>doitsu-logo.png</PackageIcon>
         <RepositoryType>Azure Repos</RepositoryType>
         <PackageReleaseNotes>Update Doitsu.Ecommerce.Core.SEO</PackageReleaseNotes>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
     <ItemGroup>
         <Folder Include="Resources\" />

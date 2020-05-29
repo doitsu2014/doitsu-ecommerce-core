@@ -20,6 +20,8 @@
         <PackageIcon>doitsu-logo.png</PackageIcon>
         <RepositoryType>Azure Repos</RepositoryType>
         <PackageReleaseNotes>Update Doitsu.Ecommerce.Feature Features</PackageReleaseNotes>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="EPPlus" Version="4.5.3.3" />
