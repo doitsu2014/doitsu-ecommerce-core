@@ -2,6 +2,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
+        <LangVersion>8.0</LangVersion>
+        <PackageVersion>7.0.10</PackageVersion>
+        <Title>Doitsu.Ecommerce.Core.DeliveryIntegration</Title>
+        <PackageId>Doitsu.Ecommerce.Core.DeliveryIntegration</PackageId>
+        <Authors>Doitsu Technology</Authors>
+        <Owners>Doitsu Technology</Owners>
+        <IsPackable>true</IsPackable>
+        <Copyright>2020</Copyright>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <NeutralLanguage>en</NeutralLanguage>
+        <Summary>Deliverer Services Integrator</Summary>
+        <PackageTags>Delivery Services</PackageTags>
+        <RepositoryUrl>https://doitsutechnology@dev.azure.com/doitsutechnology/Doitsu.Technology.Core/_git/Doitsu.Ecommerce.Core</RepositoryUrl>
+        <PackageProjectUrl>https://dev.azure.com/doitsutechnology/Doitsu.Technology.Core</PackageProjectUrl>
+        <PackageIcon>doitsu-logo.png</PackageIcon>
+        <RepositoryType>Azure Repos</RepositoryType>
+        <PackageReleaseNotes>Latest</PackageReleaseNotes>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Doitsu.Service.Core" Version="7.0.16" />
