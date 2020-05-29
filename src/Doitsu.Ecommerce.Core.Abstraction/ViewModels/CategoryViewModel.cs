@@ -34,7 +34,7 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         [JsonProperty("parentCateId")]
         public int? ParentCateId { get; set; }
         [JsonProperty("vers")]
-        public string Vers { get; set; }
+        public byte[] Vers { get; set; }
     }
 
     public class CategoryWithInverseParentViewModel
@@ -97,23 +97,16 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         public bool IsFixed { get; set; }
     }
 
-    public class CategoryMenuViewModel : BaseViewModel<Categories>
+    public class CategoryMenuViewModel
     {
-        public CategoryMenuViewModel()
-        {
-        }
-
-        public CategoryMenuViewModel(Categories entity, IMapper mapper) : base(entity, mapper)
-        {
-        }
-
         public int Id { get; set; }
         public string Name { get; set; }
-        public bool Active { get; set; }
         public string Slug { get; set; }
         public bool IsFixed { get; set; }
         public int? ParentCateId { get; set; }
         public string ParentCateName { get; set; }
+        public byte[] Vers { get; set; }
+        public bool Active { get; set; }
         public ICollection<CategoryViewModel> InverseParentCate { get; set; }
     }
 
