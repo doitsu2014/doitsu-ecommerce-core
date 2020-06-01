@@ -147,5 +147,12 @@
         {
             public const string SERVER_ERROR = "SERVER_ERROR";
         }
+
+        public static class EcommerceIs4Scopes 
+        { 
+            public const string ALL = "ecommerce_all";
+            public const string MANAGEMENT = "ecommerce_management";
+            public const string USER = "ecommerce_user";
+        }
     }
 }

@@ -1,16 +1,16 @@
-﻿using System.IO;
-using Doitsu.Ecommerce.Core.Data;
+﻿using Doitsu.Ecommerce.Core.IdentityServer4.Data;
+using IdentityServer4.EntityFramework.DbContexts;
+using IdentityServer4.EntityFramework.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.Extensions.Configuration;
 
 namespace Hris.Data.Identity
 {
-    public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<EcommerceDbContext>
+    public class EcommerceIs4ConfigurationDbContextFactory : IDesignTimeDbContextFactory<EcommerceIs4ConfigurationDbContext>
     {
-        public EcommerceDbContext CreateDbContext(string[] args)
+        public EcommerceIs4ConfigurationDbContext CreateDbContext(string[] args)
         {
-            var builder = new DbContextOptionsBuilder<EcommerceDbContext>();
+            var builder = new DbContextOptionsBuilder<ConfigurationDbContext>();
 
             // this line very important, to config the destination of Database to Migration
             // var connectionString = "Server=localhost,1433;Database=BachMoc_Furniture_Dev;Trusted_Connection=False;User Id=sa;Password=zaQ@1234";
@@ -19,7 +19,7 @@ namespace Hris.Data.Identity
             // YGFL
             var connectionString = "Server=103.114.104.24,1444;Database=factory;Trusted_Connection=False;User Id=sa;Password=zaQ@1234";
             builder.UseSqlServer(connectionString);
-            return new EcommerceDbContext(builder.Options);
+            return new EcommerceIs4ConfigurationDbContext(builder.Options, new ConfigurationStoreOptions() {  });
         }
     }
 }

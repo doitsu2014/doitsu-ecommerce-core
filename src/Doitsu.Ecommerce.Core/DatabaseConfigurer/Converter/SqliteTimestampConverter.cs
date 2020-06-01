@@ -1,7 +1,7 @@
 using System.Linq;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Doitsu.Ecommerce.Core.Data.DatabaseConfigurer.Converter
+namespace Doitsu.Ecommerce.Core.DatabaseConfigurer.Converter
 {
     public class SqliteTimestampConverter : ValueConverter<byte[], string>
     {

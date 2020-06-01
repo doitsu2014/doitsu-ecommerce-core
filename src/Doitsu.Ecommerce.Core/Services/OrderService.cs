@@ -196,6 +196,16 @@ namespace Doitsu.Ecommerce.Core.Services
 
         }
 
+        /// <summary>
+        /// This function is serving on the creating order action and rewrite user's balance from 1 transaction scope
+        /// Obselete and why?
+        /// Because using transaction should using on Controller or another higher Layer
+        /// So this function will be deleted on the some next version
+        /// And you should use CreateNormalOrderWithOptionAsync instead of this function.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [Obsolete]
         public async Task<Option<OrderViewModel, string>> CreateWithdrawalOrderWithOptionAsync(CreateOrderWithOptionViewModel request)
         {
             using (var transaction = await this.CreateTransactionAsync())
@@ -436,7 +446,6 @@ namespace Doitsu.Ecommerce.Core.Services
                     return this.Mapper.Map<OrderViewModel>(o);
                 });
         }
-
 
     }
 }

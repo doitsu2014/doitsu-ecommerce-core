@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Builder;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -27,6 +26,8 @@ using SixLabors.ImageSharp.Web.Providers;
 using Doitsu.Ecommerce.Core.Abstraction;
 using Doitsu.Ecommerce.Core.DeliveryIntegration;
 using Doitsu.Service.Core.Interfaces;
+using Doitsu.Ecommerce.Core.IdentityServer4.Data;
+using Doitsu.Ecommerce.Core.Extensions;
 
 namespace Doitsu.Ecommerce.Core
 {
@@ -64,23 +65,6 @@ namespace Doitsu.Ecommerce.Core
             }
         };
 
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public static void UseDoitsuEcommerceCoreHosting(this IApplicationBuilder app, bool isConfigImageSharpWeb = false)
-        {
-            // Using authorize
-            app.UseAuthentication();
-            app.UseCookiePolicy();
-
-            // Using resource files
-            app.UseResponseCompression();
-            if (isConfigImageSharpWeb)
-                app.UseImageSharp();
-
-            // Using localization
-            app.UseRequestLocalization(LocalizationOptions);
-        }
-
         public static IServiceCollection AddDoitsuEcommerceCore(this IServiceCollection services, IConfiguration configuration, IDatabaseConfigurer databaseConfigurer, bool isConfigImageSharpWeb = false)
         {
             #region Identity Database Config
@@ -92,7 +76,7 @@ namespace Doitsu.Ecommerce.Core
                 .AddIdentity<EcommerceIdentityUser, EcommerceIdentityRole>()
                 .AddEntityFrameworkStores<EcommerceDbContext>()
                 .AddDefaultTokenProviders();
-                
+            
             services.RegisterDefaultEntityChangesHandlers();
             // Inject Identity Manager
             services.AddScoped(typeof(EcommerceIdentityUserManager<EcommerceIdentityUser>));
@@ -101,7 +85,9 @@ namespace Doitsu.Ecommerce.Core
             services.AddScoped(typeof(IUserClaimsPrincipalFactory<EcommerceIdentityUser>), typeof(DoitsuCookieIdenittyCustomClaimsFactory<EcommerceIdentityUser>));
 
             // Authentication configure
-            services.AddDoitsuBasicAuthorize();
+            services.AddEcommerceIs4Server(databaseConfigurer, typeof(EcommerceIs4ConfigurationDbContext).Assembly.GetName().Name);
+            // services.AddDoitsuBasicAuthorize();
+            services.AddEcommerceIs4Authentication(configuration);
             #endregion
 
             #region Config service
@@ -173,5 +159,21 @@ namespace Doitsu.Ecommerce.Core
         }
         #endregion
 
+         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public static void UseDoitsuEcommerceCoreHosting(this IApplicationBuilder app, bool isConfigImageSharpWeb = false)
+        {
+            // Using authorize
+            //app.UseAuthentication();
+            app.UseIdentityServer();
+            app.UseCookiePolicy();
+
+            // Using resource files
+            app.UseResponseCompression();
+            if (isConfigImageSharpWeb)
+                app.UseImageSharp();
+
+            // Using localization
+            app.UseRequestLocalization(LocalizationOptions);
+        }
     }
 }

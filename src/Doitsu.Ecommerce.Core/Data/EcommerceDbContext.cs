@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Doitsu.Ecommerce.Core.Abstraction.Entities;
 using Doitsu.Ecommerce.Core.Abstraction.Identities;
-using Doitsu.Ecommerce.Core.Data.DatabaseConfigurer.Converter;
+using Doitsu.Ecommerce.Core.DatabaseConfigurer.Converter;
 using Doitsu.Service.Core.Interfaces.EfCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

@@ -1,14 +1,13 @@
-﻿
 using Doitsu.Ecommerce.Core.Abstraction.Entities;
 using Doitsu.Ecommerce.Core.Services;
 using Doitsu.Ecommerce.Core.Services.Interface;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Doitsu.Ecommerce.Core
+namespace Doitsu.Ecommerce.Core.Extensions
 {
-    public static class EcommerceServiceConfig
+    public static partial class DoitsuServiceExtension
     {
-        public static IServiceCollection AddDoitsuEcommerceCoreServices(this IServiceCollection services)
+        internal static IServiceCollection AddDoitsuEcommerceCoreServices(this IServiceCollection services)
         {
             services.AddTransient(typeof(IMemCacheService), typeof(MemCacheService));
             services.AddTransient(typeof(ICategoryService), typeof(CategoryService));
@@ -34,6 +33,5 @@ namespace Doitsu.Ecommerce.Core
             services.AddHttpContextAccessor();
             return services;
         }
-
     }
 }

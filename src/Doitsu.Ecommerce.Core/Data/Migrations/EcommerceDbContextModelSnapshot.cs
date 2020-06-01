@@ -1202,6 +1202,9 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<string>("ImageUrls")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<long>("IventoryQuantity")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(255)")

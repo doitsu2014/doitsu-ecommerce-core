@@ -11,8 +11,8 @@ using System.IO;
 using System.Linq;
 using Doitsu.Service.Core.Interfaces.EfCore;
 using Doitsu.Ecommerce.Core.Data;
-using Doitsu.Ecommerce.Core.Data.DatabaseConfigurer;
 using Doitsu.Service.Core.Interfaces;
+using Doitsu.Ecommerce.Core.DatabaseConfigurer;
 
 namespace Doitsu.Ecommerce.Core.Tests.Helpers
 {
