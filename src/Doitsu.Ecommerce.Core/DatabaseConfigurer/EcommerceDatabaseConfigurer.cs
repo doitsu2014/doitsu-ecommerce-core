@@ -1,10 +1,11 @@
 using System;
+using Doitsu.Ecommerce.Core.Data;
 using Doitsu.Service.Core.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace Doitsu.Ecommerce.Core.Data.DatabaseConfigurer
+namespace Doitsu.Ecommerce.Core.DatabaseConfigurer
 {
     public class EcommerceDatabaseConfigurer : IDatabaseConfigurer
     {

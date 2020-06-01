@@ -10,6 +10,12 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 name: "Property",
                 table: "Products");
 
+            migrationBuilder.AddColumn<long>(
+                name: "IventoryQuantity",
+                table: "Products",
+                nullable: false,
+                defaultValue: 0L);
+
             migrationBuilder.AddColumn<string>(
                 name: "ShortDescription",
                 table: "Products",
@@ -89,6 +95,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "IventoryQuantity",
+                table: "Products");
+
             migrationBuilder.DropColumn(
                 name: "ShortDescription",
                 table: "Products");

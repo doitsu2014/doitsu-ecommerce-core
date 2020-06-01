@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20200526171815_AddMorePropToDeliveryInfor")]
+    [Migration("20200601093311_AddMorePropToDeliveryInfor")]
     partial class AddMorePropToDeliveryInfor
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1203,6 +1203,9 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
 
                     b.Property<string>("ImageUrls")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("IventoryQuantity")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Name")
                         .IsRequired()

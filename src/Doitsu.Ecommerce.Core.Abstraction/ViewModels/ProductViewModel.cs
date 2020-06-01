@@ -74,6 +74,9 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         [Required]
         [JsonProperty("weight")]
         public float Weight { get; set; }
+
+        [JsonProperty("inventoryQuantity")]
+        public long IventoryQuantity { get; set; }
     
         [JsonProperty("vers")]
         public byte[] Vers { get; set; }

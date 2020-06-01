@@ -3,7 +3,7 @@
     <PropertyGroup>
         <LangVersion>8.0</LangVersion>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <PackageVersion>7.0.60</PackageVersion>
+        <PackageVersion>7.0.61</PackageVersion>
         <Title>Doitsu.Ecommerce.Core</Title>
         <PackageId>Doitsu.Ecommerce.Core</PackageId>
         <Authors>Doitsu Technology</Authors>
@@ -36,6 +36,10 @@
         <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.4" />
         <PackageReference Include="Doitsu.Service.Core" Version="7.0.16" />
+        <PackageReference Include="IdentityServer4" Version="3.1.3" />
+        <PackageReference Include="IdentityServer4.AspNetIdentity" Version="3.1.3" />
+        <PackageReference Include="IdentityServer4.EntityFramework" Version="3.1.3" />
+        <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="../Doitsu.Ecommerce.Core.DeliveryIntegration/Doitsu.Ecommerce.Core.DeliveryIntegration.csproj" />
@@ -45,6 +49,7 @@
     <ItemGroup>
         <Folder Include="Resources\" />
         <None Include="Images\doitsu-logo.png" Pack="true" PackagePath="" />
+        <Folder Include="IdentityServer4.Data\" />
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Update="Resources\GeneralResource.vn.resx">
