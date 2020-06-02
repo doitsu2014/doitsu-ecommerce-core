@@ -65,7 +65,7 @@ namespace Doitsu.Ecommerce.Core
             }
         };
 
-        public static IServiceCollection AddDoitsuEcommerceCore(this IServiceCollection services, IConfiguration configuration, IDatabaseConfigurer databaseConfigurer, bool isConfigImageSharpWeb = false)
+        public static IServiceCollection AddDoitsuEcommerceCore(this IServiceCollection services, IConfiguration configuration, IDatabaseConfigurer databaseConfigurer, bool isConfigImageSharpWeb = false, bool isUsingIdentityServer = false)
         {
             #region Identity Database Config
             var loggerFactory = services.BuildServiceProvider().GetService<ILoggerFactory>();
@@ -76,7 +76,7 @@ namespace Doitsu.Ecommerce.Core
                 .AddIdentity<EcommerceIdentityUser, EcommerceIdentityRole>()
                 .AddEntityFrameworkStores<EcommerceDbContext>()
                 .AddDefaultTokenProviders();
-            
+
             services.RegisterDefaultEntityChangesHandlers();
             // Inject Identity Manager
             services.AddScoped(typeof(EcommerceIdentityUserManager<EcommerceIdentityUser>));
@@ -85,9 +85,14 @@ namespace Doitsu.Ecommerce.Core
             services.AddScoped(typeof(IUserClaimsPrincipalFactory<EcommerceIdentityUser>), typeof(DoitsuCookieIdenittyCustomClaimsFactory<EcommerceIdentityUser>));
 
             // Authentication configure
-            services.AddEcommerceIs4Server(databaseConfigurer, typeof(EcommerceIs4ConfigurationDbContext).Assembly.GetName().Name);
-            // services.AddDoitsuBasicAuthorize();
-            services.AddEcommerceIs4Authentication(configuration);
+            if (isUsingIdentityServer)
+            {
+                services.AddEcommerceIs4Server(databaseConfigurer, typeof(EcommerceIs4ConfigurationDbContext).Assembly.GetName().Name, configuration);
+            }
+            else
+            {
+                services.AddDoitsuBasicAuthorize();
+            }
             #endregion
 
             #region Config service
@@ -159,14 +164,20 @@ namespace Doitsu.Ecommerce.Core
         }
         #endregion
 
-         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public static void UseDoitsuEcommerceCoreHosting(this IApplicationBuilder app, bool isConfigImageSharpWeb = false)
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public static void UseDoitsuEcommerceCoreHosting(this IApplicationBuilder app, bool isConfigImageSharpWeb = false, bool isUsingIdentityServer = false)
         {
             // Using authorize
-            //app.UseAuthentication();
-            app.UseIdentityServer();
-            app.UseCookiePolicy();
+            if (isUsingIdentityServer)
+            {
+                app.UseIdentityServer();
+            }
+            else
+            {
+                app.UseAuthentication();
+            }
 
+            app.UseCookiePolicy();
             // Using resource files
             app.UseResponseCompression();
             if (isConfigImageSharpWeb)

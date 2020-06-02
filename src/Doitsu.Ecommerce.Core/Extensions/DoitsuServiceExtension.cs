@@ -8,10 +8,7 @@ using Doitsu.Ecommerce.Core.AuthorizeBuilder;
 using Doitsu.Ecommerce.Core.IdentityServer4.Data;
 using Doitsu.Service.Core.Interfaces;
 using Doitsu.Service.Core.Services.EmailService;
-using IdentityServer4;
 using IdentityServer4.EntityFramework.DbContexts;
-using IdentityServer4.EntityFramework.Stores;
-using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -36,19 +33,18 @@ namespace Doitsu.Service.Core.Extensions
             return services;
         }
 
-        public static IServiceCollection AddEcommerceIs4Server(this IServiceCollection services, IDatabaseConfigurer databaseConfigurer, string migrationAssembly)
+        public static IServiceCollection AddEcommerceIs4Server(this IServiceCollection services, IDatabaseConfigurer databaseConfigurer, string migrationAssembly, IConfiguration configuration)
         {
-            
             // services.AddTransient(typeof(ICache<>), typeof(IdentityServers4Cache<>));
 
             services.AddDbContext<ConfigurationDbContext>(builder =>
                     databaseConfigurer.Configure(builder, typeof(EcommerceIs4ConfigurationDbContext).Assembly.GetName().Name),
                     ServiceLifetime.Scoped);
-            
+
             services.AddDbContext<PersistedGrantDbContext>(builder =>
                     databaseConfigurer.Configure(builder, typeof(EcommerceIs4PersistedGrantDbContext).Assembly.GetName().Name),
                     ServiceLifetime.Scoped);
-                    
+
             services.AddIdentityServer(options =>
                 {
                     options.Events.RaiseErrorEvents = true;
@@ -70,16 +66,20 @@ namespace Doitsu.Service.Core.Extensions
                 })
                 .AddAspNetIdentity<EcommerceIdentityUser>();
 
+            services.AddEcommerceIs4Authentication(configuration);
             return services;
         }
 
-        public static IServiceCollection AddEcommerceIs4Authentication(this IServiceCollection services, IConfiguration configuration)
+        private static IServiceCollection AddEcommerceIs4Authentication(this IServiceCollection services, IConfiguration configuration)
         {
             var isConfiguration = configuration.GetSection(nameof(IdentityServerConfiguration)).Get<IdentityServerConfiguration>();
-
             services
-                .AddAuthentication()
-                .AddCookie(options =>
+                .AddAuthentication(opt =>
+                {
+                    opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    opt.DefaultChallengeScheme = "oidc";
+                })
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                 {
                     options.Cookie.HttpOnly = true;
                     options.LoginPath = new PathString("/nguoi-dung/dang-nhap");
@@ -97,6 +97,16 @@ namespace Doitsu.Service.Core.Extensions
                         return Task.FromResult(0);
                     };
                 })
+                .AddOpenIdConnect("oidc", options =>
+                {
+                    options.Authority = isConfiguration.ServerUrl;
+                    options.RequireHttpsMetadata = false;
+
+                    options.ClientId = isConfiguration.ClientId;
+                    options.ClientSecret = isConfiguration.ClientSecret;
+                    options.ResponseType = "code";
+                    options.SaveTokens = true;
+                })
                 .AddJwtBearer(DoitsuAuthenticationSchemes.JWT_SCHEME, options =>
                 {
                     options.RequireHttpsMetadata = false;
@@ -109,13 +119,13 @@ namespace Doitsu.Service.Core.Extensions
                         ValidIssuer = DoitsuJWTValidators.Issuer,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.Default.GetBytes(DoitsuJWTValidators.SecretKey))
                     };
-                })
-                .AddIdentityServerAuthentication(options =>
-                {
-                    options.Authority = isConfiguration.ServerUrl;
-                    options.ApiName = isConfiguration.SystemName;
-                    options.RequireHttpsMetadata = false;
                 });
+            // .AddIdentityServerAuthentication(options =>
+            // {
+            //     options.Authority = isConfiguration.ServerUrl;
+            //     options.ApiName = isConfiguration.SystemName;
+            //     options.RequireHttpsMetadata = false;
+            // });
             return services;
         }
 
