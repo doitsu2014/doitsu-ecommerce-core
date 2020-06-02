@@ -481,19 +481,27 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                 schema: "is4cf",
                 table: "ApiResources",
                 columns: new[] { "Id", "Created", "Description", "DisplayName", "Enabled", "LastAccessed", "Name", "NonEditable", "Updated" },
-                values: new object[] { 1, new DateTime(2020, 6, 2, 16, 53, 8, 151, DateTimeKind.Utc).AddTicks(4553), null, "Doitsu Ecommerce System", true, null, "doitsu_ecommerce_system", false, null });
+                values: new object[] { 1, new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770), null, "Doitsu Ecommerce System", true, null, "doitsu_ecommerce_system", false, null });
 
             migrationBuilder.InsertData(
                 schema: "is4cf",
                 table: "Clients",
                 columns: new[] { "Id", "AbsoluteRefreshTokenLifetime", "AccessTokenLifetime", "AccessTokenType", "AllowAccessTokensViaBrowser", "AllowOfflineAccess", "AllowPlainTextPkce", "AllowRememberConsent", "AlwaysIncludeUserClaimsInIdToken", "AlwaysSendClientClaims", "AuthorizationCodeLifetime", "BackChannelLogoutSessionRequired", "BackChannelLogoutUri", "ClientClaimsPrefix", "ClientId", "ClientName", "ClientUri", "ConsentLifetime", "Created", "Description", "DeviceCodeLifetime", "EnableLocalLogin", "Enabled", "FrontChannelLogoutSessionRequired", "FrontChannelLogoutUri", "IdentityTokenLifetime", "IncludeJwtId", "LastAccessed", "LogoUri", "NonEditable", "PairWiseSubjectSalt", "ProtocolType", "RefreshTokenExpiration", "RefreshTokenUsage", "RequireClientSecret", "RequireConsent", "RequirePkce", "SlidingRefreshTokenLifetime", "UpdateAccessTokenClaimsOnRefresh", "Updated", "UserCodeType", "UserSsoLifetime" },
-                values: new object[] { 1, 2592000, 28800, 0, false, false, false, true, false, false, 300, true, null, "client_", "2d916f81-43b0-42eb-b6ea-750a5ab7d3cc", "Manager Client", null, null, new DateTime(2020, 6, 2, 16, 53, 8, 151, DateTimeKind.Utc).AddTicks(4553), null, 300, true, true, true, null, 300, false, null, null, false, null, "oidc", 1, 1, true, true, false, 1296000, false, null, null, null });
+                values: new object[,]
+                {
+                    { 1, 2592000, 28800, 0, false, false, false, true, false, false, 300, true, null, "client_", "2d916f81-43b0-42eb-b6ea-750a5ab7d3cc", "Manager Client", null, null, new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770), null, 300, true, true, true, null, 300, false, null, null, false, null, "oidc", 1, 1, true, true, false, 1296000, false, null, null, null },
+                    { 2, 2592000, 28800, 0, false, false, false, true, false, false, 300, true, null, "client_", "68dcf419-d41b-4af6-9222-cfa0be6cb347", "User Client", null, null, new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770), null, 300, true, true, true, null, 300, false, null, null, false, null, "oidc", 1, 1, true, true, false, 1296000, false, null, null, null }
+                });
 
             migrationBuilder.InsertData(
                 schema: "is4cf",
-                table: "Clients",
-                columns: new[] { "Id", "AbsoluteRefreshTokenLifetime", "AccessTokenLifetime", "AccessTokenType", "AllowAccessTokensViaBrowser", "AllowOfflineAccess", "AllowPlainTextPkce", "AllowRememberConsent", "AlwaysIncludeUserClaimsInIdToken", "AlwaysSendClientClaims", "AuthorizationCodeLifetime", "BackChannelLogoutSessionRequired", "BackChannelLogoutUri", "ClientClaimsPrefix", "ClientId", "ClientName", "ClientUri", "ConsentLifetime", "Created", "Description", "DeviceCodeLifetime", "EnableLocalLogin", "Enabled", "FrontChannelLogoutSessionRequired", "FrontChannelLogoutUri", "IdentityTokenLifetime", "IncludeJwtId", "LastAccessed", "LogoUri", "NonEditable", "PairWiseSubjectSalt", "ProtocolType", "RefreshTokenExpiration", "RefreshTokenUsage", "RequireClientSecret", "RequireConsent", "RequirePkce", "SlidingRefreshTokenLifetime", "UpdateAccessTokenClaimsOnRefresh", "Updated", "UserCodeType", "UserSsoLifetime" },
-                values: new object[] { 2, 2592000, 28800, 0, false, false, false, true, false, false, 300, true, null, "client_", "68dcf419-d41b-4af6-9222-cfa0be6cb347", "User Client", null, null, new DateTime(2020, 6, 2, 16, 53, 8, 151, DateTimeKind.Utc).AddTicks(4553), null, 300, true, true, true, null, 300, false, null, null, false, null, "oidc", 1, 1, true, true, false, 1296000, false, null, null, null });
+                table: "IdentityResources",
+                columns: new[] { "Id", "Created", "Description", "DisplayName", "Emphasize", "Enabled", "Name", "NonEditable", "Required", "ShowInDiscoveryDocument", "Updated" },
+                values: new object[,]
+                {
+                    { 1, new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770), null, "Your user identifier", false, true, "openid", false, true, true, null },
+                    { 2, new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770), "Your user profile information (first name, last name, etc.)", "User profile", true, true, "profile", false, false, true, null }
+                });
 
             migrationBuilder.InsertData(
                 schema: "is4cf",
@@ -502,9 +510,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                 values: new object[,]
                 {
                     { 1, 1, null, "Doitsu Ecommerce System Management Scope", false, "ecommerce_management", false, true },
-                    { 2, 1, null, "Doitsu Ecommerce System User Scope", false, "ecommerce_user", false, true },
-                    { 3, 1, null, "Doitsu Ecommerce System OpenId", false, "openid", false, true },
-                    { 4, 1, null, "Doitsu Ecommerce System User Scope", false, "profile", false, true }
+                    { 2, 1, null, "Doitsu Ecommerce System User Scope", false, "ecommerce_user", false, true }
                 });
 
             migrationBuilder.InsertData(
@@ -514,7 +520,9 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                 values: new object[,]
                 {
                     { 1, 1, "password" },
-                    { 2, 2, "password" }
+                    { 2, 1, "authorization_code" },
+                    { 4, 2, "authorization_code" },
+                    { 3, 2, "password" }
                 });
 
             migrationBuilder.InsertData(
@@ -537,8 +545,8 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                 {
                     { 6, 2, "profile" },
                     { 5, 2, "openid" },
-                    { 4, 1, "ecommerce_user" },
                     { 7, 2, "ecommerce_user" },
+                    { 4, 1, "ecommerce_user" },
                     { 3, 1, "ecommerce_management" },
                     { 2, 1, "profile" },
                     { 1, 1, "openid" }
@@ -550,8 +558,31 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                 columns: new[] { "Id", "ClientId", "Created", "Description", "Expiration", "Type", "Value" },
                 values: new object[,]
                 {
-                    { 1, 1, new DateTime(2020, 6, 2, 16, 53, 8, 151, DateTimeKind.Utc).AddTicks(4553), null, null, "SharedSecret", "4XVomuenFFTWNqWNtji41KEBQU/gGjgL4jB89ZJcJ6g=" },
-                    { 2, 2, new DateTime(2020, 6, 2, 16, 53, 8, 151, DateTimeKind.Utc).AddTicks(4553), null, null, "SharedSecret", "bHvoVitRa8DFPZ5YXS+5o30FMV99Ng96mGXZv0HOVzQ=" }
+                    { 2, 2, new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770), null, null, "SharedSecret", "bHvoVitRa8DFPZ5YXS+5o30FMV99Ng96mGXZv0HOVzQ=" },
+                    { 1, 1, new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770), null, null, "SharedSecret", "4XVomuenFFTWNqWNtji41KEBQU/gGjgL4jB89ZJcJ6g=" }
+                });
+
+            migrationBuilder.InsertData(
+                schema: "is4cf",
+                table: "IdentityClaims",
+                columns: new[] { "Id", "IdentityResourceId", "Type" },
+                values: new object[,]
+                {
+                    { 13, 2, "zoneinfo" },
+                    { 12, 2, "birthdate" },
+                    { 11, 2, "gender" },
+                    { 10, 2, "website" },
+                    { 9, 2, "picture" },
+                    { 8, 2, "profile" },
+                    { 5, 2, "middle_name" },
+                    { 6, 2, "nickname" },
+                    { 4, 2, "given_name" },
+                    { 3, 2, "family_name" },
+                    { 2, 2, "name" },
+                    { 1, 1, "sub" },
+                    { 14, 2, "locale" },
+                    { 7, 2, "preferred_username" },
+                    { 15, 2, "updated_at" }
                 });
 
             migrationBuilder.CreateIndex(

@@ -66,7 +66,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         new
                         {
                             Id = 1,
-                            Created = new DateTime(2020, 6, 2, 16, 53, 8, 151, DateTimeKind.Utc).AddTicks(4553),
+                            Created = new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770),
                             DisplayName = "Doitsu Ecommerce System",
                             Enabled = true,
                             Name = "doitsu_ecommerce_system",
@@ -182,26 +182,6 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                             DisplayName = "Doitsu Ecommerce System User Scope",
                             Emphasize = false,
                             Name = "ecommerce_user",
-                            Required = false,
-                            ShowInDiscoveryDocument = true
-                        },
-                        new
-                        {
-                            Id = 3,
-                            ApiResourceId = 1,
-                            DisplayName = "Doitsu Ecommerce System OpenId",
-                            Emphasize = false,
-                            Name = "openid",
-                            Required = false,
-                            ShowInDiscoveryDocument = true
-                        },
-                        new
-                        {
-                            Id = 4,
-                            ApiResourceId = 1,
-                            DisplayName = "Doitsu Ecommerce System User Scope",
-                            Emphasize = false,
-                            Name = "profile",
                             Required = false,
                             ShowInDiscoveryDocument = true
                         });
@@ -434,7 +414,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                             ClientClaimsPrefix = "client_",
                             ClientId = "2d916f81-43b0-42eb-b6ea-750a5ab7d3cc",
                             ClientName = "Manager Client",
-                            Created = new DateTime(2020, 6, 2, 16, 53, 8, 151, DateTimeKind.Utc).AddTicks(4553),
+                            Created = new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770),
                             DeviceCodeLifetime = 300,
                             EnableLocalLogin = true,
                             Enabled = true,
@@ -468,7 +448,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                             ClientClaimsPrefix = "client_",
                             ClientId = "68dcf419-d41b-4af6-9222-cfa0be6cb347",
                             ClientName = "User Client",
-                            Created = new DateTime(2020, 6, 2, 16, 53, 8, 151, DateTimeKind.Utc).AddTicks(4553),
+                            Created = new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770),
                             DeviceCodeLifetime = 300,
                             EnableLocalLogin = true,
                             Enabled = true,
@@ -567,8 +547,20 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         new
                         {
                             Id = 2,
+                            ClientId = 1,
+                            GrantType = "authorization_code"
+                        },
+                        new
+                        {
+                            Id = 3,
                             ClientId = 2,
                             GrantType = "password"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            ClientId = 2,
+                            GrantType = "authorization_code"
                         });
                 });
 
@@ -788,7 +780,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         {
                             Id = 1,
                             ClientId = 1,
-                            Created = new DateTime(2020, 6, 2, 16, 53, 8, 151, DateTimeKind.Utc).AddTicks(4553),
+                            Created = new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770),
                             Type = "SharedSecret",
                             Value = "4XVomuenFFTWNqWNtji41KEBQU/gGjgL4jB89ZJcJ6g="
                         },
@@ -796,7 +788,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         {
                             Id = 2,
                             ClientId = 2,
-                            Created = new DateTime(2020, 6, 2, 16, 53, 8, 151, DateTimeKind.Utc).AddTicks(4553),
+                            Created = new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770),
                             Type = "SharedSecret",
                             Value = "bHvoVitRa8DFPZ5YXS+5o30FMV99Ng96mGXZv0HOVzQ="
                         });
@@ -822,6 +814,98 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                     b.HasIndex("IdentityResourceId");
 
                     b.ToTable("IdentityClaims");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            IdentityResourceId = 1,
+                            Type = "sub"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            IdentityResourceId = 2,
+                            Type = "name"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            IdentityResourceId = 2,
+                            Type = "family_name"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            IdentityResourceId = 2,
+                            Type = "given_name"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            IdentityResourceId = 2,
+                            Type = "middle_name"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            IdentityResourceId = 2,
+                            Type = "nickname"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            IdentityResourceId = 2,
+                            Type = "preferred_username"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            IdentityResourceId = 2,
+                            Type = "profile"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            IdentityResourceId = 2,
+                            Type = "picture"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            IdentityResourceId = 2,
+                            Type = "website"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            IdentityResourceId = 2,
+                            Type = "gender"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            IdentityResourceId = 2,
+                            Type = "birthdate"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            IdentityResourceId = 2,
+                            Type = "zoneinfo"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            IdentityResourceId = 2,
+                            Type = "locale"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            IdentityResourceId = 2,
+                            Type = "updated_at"
+                        });
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.IdentityResource", b =>
@@ -871,6 +955,33 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         .IsUnique();
 
                     b.ToTable("IdentityResources");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Created = new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770),
+                            DisplayName = "Your user identifier",
+                            Emphasize = false,
+                            Enabled = true,
+                            Name = "openid",
+                            NonEditable = false,
+                            Required = true,
+                            ShowInDiscoveryDocument = true
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Created = new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770),
+                            Description = "Your user profile information (first name, last name, etc.)",
+                            DisplayName = "User profile",
+                            Emphasize = true,
+                            Enabled = true,
+                            Name = "profile",
+                            NonEditable = false,
+                            Required = false,
+                            ShowInDiscoveryDocument = true
+                        });
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.IdentityResourceProperty", b =>

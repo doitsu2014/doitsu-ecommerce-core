@@ -10,6 +10,9 @@ using Microsoft.EntityFrameworkCore;
 using ApiResource = IdentityServer4.EntityFramework.Entities.ApiResource;
 using Client = IdentityServer4.EntityFramework.Entities.Client;
 using IdentityResource = IdentityServer4.EntityFramework.Entities.IdentityResource;
+using IdentityClaim = IdentityServer4.EntityFramework.Entities.IdentityClaim;
+using IdentityProperty = IdentityServer4.EntityFramework.Entities.IdentityResourceProperty;
+using System.Linq;
 
 namespace Doitsu.Ecommerce.Core.IdentityServer4.Data
 {
@@ -40,9 +43,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data
 
             modelBuilder.Entity<ApiScope>().HasData(
                 CreateApiScope(1, 1, Constants.EcommerceIs4Scopes.MANAGEMENT, "Doitsu Ecommerce System Management Scope"),
-                CreateApiScope(2, 1, Constants.EcommerceIs4Scopes.USER, "Doitsu Ecommerce System User Scope"),
-                CreateApiScope(3, 1, IdentityServerConstants.StandardScopes.OpenId, "Doitsu Ecommerce System OpenId"),
-                CreateApiScope(4, 1, IdentityServerConstants.StandardScopes.Profile, "Doitsu Ecommerce System User Scope"));
+                CreateApiScope(2, 1, Constants.EcommerceIs4Scopes.USER, "Doitsu Ecommerce System User Scope"));
 
             #endregion
 
@@ -54,7 +55,9 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data
 
             modelBuilder.Entity<ClientGrantType>().HasData(
                 CreateClientGrantType(1, 1, GrantType.ResourceOwnerPassword),
-                CreateClientGrantType(2, 2, GrantType.ResourceOwnerPassword));
+                CreateClientGrantType(2, 1, GrantType.AuthorizationCode),
+                CreateClientGrantType(3, 2, GrantType.ResourceOwnerPassword),
+                CreateClientGrantType(4, 2, GrantType.AuthorizationCode));
 
             modelBuilder.Entity<ClientScope>().HasData(
                 CreateClientScope(1, 1, IdentityServerConstants.StandardScopes.OpenId),
@@ -75,9 +78,94 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data
             );
 
             modelBuilder.Entity<ClientPostLogoutRedirectUri>().HasData(
-                new ClientPostLogoutRedirectUri() { Id = 1, PostLogoutRedirectUri = "/nguoi-dung/dang-xuat", ClientId = 2 } 
+                new ClientPostLogoutRedirectUri() { Id = 1, PostLogoutRedirectUri = "/nguoi-dung/dang-xuat", ClientId = 2 }
             );
 
+            #endregion
+
+
+            #region Identity Resource
+            var openIdIdentityResource = new IdentityResources.OpenId();
+            var profileIdentityResource = new IdentityResources.Profile();
+
+            modelBuilder.Entity<IdentityResource>().HasData(
+               new IdentityResource()
+               {
+                   Id = 1,
+                   Name = openIdIdentityResource.Name,
+                   DisplayName = openIdIdentityResource.DisplayName,
+                   Enabled = openIdIdentityResource.Enabled,
+                   Emphasize = openIdIdentityResource.Emphasize,
+                   Required = openIdIdentityResource.Required,
+                   ShowInDiscoveryDocument = openIdIdentityResource.ShowInDiscoveryDocument,
+                   Created = now,
+                   Description = openIdIdentityResource.Description,
+
+               },
+                new IdentityResource()
+                {
+                    Id = 2,
+                    Name = profileIdentityResource.Name,
+                    DisplayName = profileIdentityResource.DisplayName,
+                    Enabled = profileIdentityResource.Enabled,
+                    Emphasize = profileIdentityResource.Emphasize,
+                    Required = profileIdentityResource.Required,
+                    ShowInDiscoveryDocument = profileIdentityResource.ShowInDiscoveryDocument,
+                    Created = now,
+                    Description = profileIdentityResource.Description
+                }
+            );
+
+            var identityResourceClaimCount = 0;
+            modelBuilder.Entity<IdentityClaim>().HasData(
+                openIdIdentityResource.UserClaims.Select(uc =>
+                {
+                    ++identityResourceClaimCount;
+                    return new IdentityClaim()
+                    {
+                        Id = identityResourceClaimCount,
+                        IdentityResourceId = 1,
+                        Type = uc
+                    };
+                }));
+
+            modelBuilder.Entity<IdentityClaim>().HasData(
+                profileIdentityResource.UserClaims.Select(uc =>
+                {
+                    ++identityResourceClaimCount;
+                    return new IdentityClaim()
+                    {
+                        Id = identityResourceClaimCount,
+                        IdentityResourceId = 2,
+                        Type = uc
+                    };
+                }));
+
+            var identityResourcePropertyCount = 0;
+            modelBuilder.Entity<IdentityResource>().HasData(
+                openIdIdentityResource.Properties.Select(prop =>
+                {
+                    return new IdentityProperty()
+                    {
+                        Id = ++identityResourcePropertyCount,
+                        IdentityResourceId = 1,
+                        Key = prop.Key,
+                        Value = prop.Value
+                    };
+                })
+            );
+
+            modelBuilder.Entity<IdentityProperty>().HasData(
+                profileIdentityResource.Properties.Select(prop =>
+                {
+                    return new IdentityProperty()
+                    {
+                        Id = ++identityResourcePropertyCount,
+                        IdentityResourceId = 2,
+                        Key = prop.Key,
+                        Value = prop.Value
+                    };
+                }));
             #endregion
         }
 
@@ -88,8 +176,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data
                                       string name,
                                       int accessTokenLifetime,
                                       DateTime created,
-                                      bool allowOfflineAccess = true,
-                                      string clientClaimsPrefix = "client_") =>
+                                      bool allowOfflineAccess = true) =>
             new Client
             {
                 Id = id,
@@ -112,7 +199,6 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data
                 RefreshTokenExpiration = 1,
                 AccessTokenType = 0,
                 EnableLocalLogin = true,
-                ClientClaimsPrefix = clientClaimsPrefix,
                 Created = created
             };
 
