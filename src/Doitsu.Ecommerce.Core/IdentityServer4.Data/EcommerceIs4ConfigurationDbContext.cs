@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Doitsu.Ecommerce.Core.Abstraction;
+using IdentityServer4;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Entities;
 using IdentityServer4.EntityFramework.Options;
@@ -26,7 +27,6 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data
 
             #region Constants
             const int defaultAccessTokenLifetime = 28800;
-            const string godClientId = "8cdd7cc8-a601-4091-a2e2-388b9eede6b9";
             const string managerClientId = "2d916f81-43b0-42eb-b6ea-750a5ab7d3cc";
             const string userClientId = "68dcf419-d41b-4af6-9222-cfa0be6cb347";
             #endregion
@@ -39,49 +39,43 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data
                 CreateApiResource(1, "doitsu_ecommerce_system", "Doitsu Ecommerce System", now));
 
             modelBuilder.Entity<ApiScope>().HasData(
-                CreateApiScope(1, 1, Constants.EcommerceIs4Scopes.ALL, "Doitsu Ecommerce System All Scopes"),
-                CreateApiScope(2, 1, Constants.EcommerceIs4Scopes.MANAGEMENT, "Doitsu Ecommerce System Management Scope"),
-                CreateApiScope(3, 1, Constants.EcommerceIs4Scopes.USER, "Doitsu Ecommerce System User Scope"));
+                CreateApiScope(1, 1, Constants.EcommerceIs4Scopes.MANAGEMENT, "Doitsu Ecommerce System Management Scope"),
+                CreateApiScope(2, 1, Constants.EcommerceIs4Scopes.USER, "Doitsu Ecommerce System User Scope"),
+                CreateApiScope(3, 1, IdentityServerConstants.StandardScopes.OpenId, "Doitsu Ecommerce System OpenId"),
+                CreateApiScope(4, 1, IdentityServerConstants.StandardScopes.Profile, "Doitsu Ecommerce System User Scope"));
 
             #endregion
 
             #region Client
 
             modelBuilder.Entity<Client>().HasData(
-                CreateClient(1, godClientId, "God Client", defaultAccessTokenLifetime, now, true),
-                CreateClient(2, managerClientId, "Manager Client", defaultAccessTokenLifetime, now, false),
-                CreateClient(3,
-                             userClientId,
-                             "User Client",
-                             defaultAccessTokenLifetime,
-                             now,
-                             false));
+                CreateClient(1, managerClientId, "Manager Client", defaultAccessTokenLifetime, now, false),
+                CreateClient(2, userClientId, "User Client", defaultAccessTokenLifetime, now, false));
 
             modelBuilder.Entity<ClientGrantType>().HasData(
-                CreateClientGrantType(1, 1, GrantType.ClientCredentials),
-                CreateClientGrantType(2, 2, GrantType.ResourceOwnerPassword),
-                CreateClientGrantType(3, 3, GrantType.ResourceOwnerPassword));
+                CreateClientGrantType(1, 1, GrantType.ResourceOwnerPassword),
+                CreateClientGrantType(2, 2, GrantType.ResourceOwnerPassword));
 
             modelBuilder.Entity<ClientScope>().HasData(
-                CreateClientScope(1, 1, Constants.EcommerceIs4Scopes.ALL),
-                CreateClientScope(2, 1, Constants.EcommerceIs4Scopes.MANAGEMENT),
-                CreateClientScope(3, 1, Constants.EcommerceIs4Scopes.USER),
-                CreateClientScope(4, 2, Constants.EcommerceIs4Scopes.MANAGEMENT),
-                CreateClientScope(5, 2, Constants.EcommerceIs4Scopes.USER),
-                CreateClientScope(6, 3, Constants.EcommerceIs4Scopes.USER));
+                CreateClientScope(1, 1, IdentityServerConstants.StandardScopes.OpenId),
+                CreateClientScope(2, 1, IdentityServerConstants.StandardScopes.Profile),
+                CreateClientScope(3, 1, Constants.EcommerceIs4Scopes.MANAGEMENT),
+                CreateClientScope(4, 1, Constants.EcommerceIs4Scopes.USER),
+                CreateClientScope(5, 2, IdentityServerConstants.StandardScopes.OpenId),
+                CreateClientScope(6, 2, IdentityServerConstants.StandardScopes.Profile),
+                CreateClientScope(7, 2, Constants.EcommerceIs4Scopes.USER));
 
             modelBuilder.Entity<ClientSecret>().HasData(
-                CreateClientSecret(1, 1, "f=?gHr/t3nzpk4PEa{{r8Wg3", now),
-                CreateClientSecret(2, 2, "R7(Lf(W9V]{P?Q?Z3AFeUt,3", now),
-                CreateClientSecret(3, 3, "gCU_$w,&4E7L'YgjYuDG:.$)", now)
+                CreateClientSecret(1, 1, "R7(Lf(W9V]{P?Q?Z3AFeUt,3", now),
+                CreateClientSecret(2, 2, "gCU_$w,&4E7L'YgjYuDG:.$)", now)
             );
 
             modelBuilder.Entity<ClientRedirectUri>().HasData(
-                new ClientRedirectUri() { Id = 1, RedirectUri = "/nguoi-dung/dang-nhap", ClientId = 3 }
+                new ClientRedirectUri() { Id = 1, RedirectUri = "/nguoi-dung/dang-nhap", ClientId = 2 }
             );
 
             modelBuilder.Entity<ClientPostLogoutRedirectUri>().HasData(
-                new ClientPostLogoutRedirectUri() { Id = 1, PostLogoutRedirectUri = "/nguoi-dung/dang-xuat", ClientId = 3 } 
+                new ClientPostLogoutRedirectUri() { Id = 1, PostLogoutRedirectUri = "/nguoi-dung/dang-xuat", ClientId = 2 } 
             );
 
             #endregion
