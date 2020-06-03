@@ -83,10 +83,9 @@ namespace Doitsu.Service.Core.Extensions
         {
             var isConfiguration = configuration.GetSection(nameof(IdentityServerConfiguration)).Get<IdentityServerConfiguration>();
             services
-                .AddAuthentication(opt =>
-                {
-                    opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    opt.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                .AddAuthentication(opts => {
+                    opts.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    opts.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
                 })
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                 {
@@ -113,7 +112,7 @@ namespace Doitsu.Service.Core.Extensions
                     options.RequireHttpsMetadata = false;
 
                     options.ClientId = isConfiguration.MvcFrontEndAppClientId;
-                    options.ClientSecret = isConfiguration.MvcFrontEndAppClientSecret;
+                    options.ClientSecret = isConfiguration.MvcFrontEndAppClientSecret + "123123";
                     options.ResponseType = "code id_token";
                     options.SaveTokens = true;
                     options.GetClaimsFromUserInfoEndpoint = true;
@@ -135,12 +134,7 @@ namespace Doitsu.Service.Core.Extensions
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.Default.GetBytes(DoitsuJWTValidators.SecretKey))
                     };
                 });
-            // .AddIdentityServerAuthentication(options =>
-            // {
-            //     options.Authority = isConfiguration.ServerUrl;
-            //     options.ApiName = isConfiguration.SystemName;
-            //     options.RequireHttpsMetadata = false;
-            // });
+
             return services;
         }
 
