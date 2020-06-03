@@ -30,8 +30,8 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data
 
             #region Constants
             const int defaultAccessTokenLifetime = 28800;
-            const string managerClientId = "2d916f81-43b0-42eb-b6ea-750a5ab7d3cc";
-            const string userClientId = "68dcf419-d41b-4af6-9222-cfa0be6cb347";
+            const string spaAdminApp = "2d916f81-43b0-42eb-b6ea-750a5ab7d3cc";
+            const string mvcFrontEndApp = "68dcf419-d41b-4af6-9222-cfa0be6cb347";
             #endregion
 
             var now = new DateTime(2020, 06, 14, 00, 00, 00, 000, DateTimeKind.Utc).ToVietnamDateTime();
@@ -50,14 +50,15 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data
             #region Client
 
             modelBuilder.Entity<Client>().HasData(
-                CreateClient(1, managerClientId, "Manager Client", defaultAccessTokenLifetime, now, false),
-                CreateClient(2, userClientId, "User Client", defaultAccessTokenLifetime, now, false));
+                CreateClient(1, spaAdminApp, "doitsu.ecommerce.spa_admin_app", defaultAccessTokenLifetime, now, false),
+                CreateClient(2, mvcFrontEndApp, "doitsu.ecommerce.mvc_front_end_app", defaultAccessTokenLifetime, now, false));
 
             modelBuilder.Entity<ClientGrantType>().HasData(
-                CreateClientGrantType(1, 1, GrantType.ResourceOwnerPassword),
-                CreateClientGrantType(2, 1, GrantType.AuthorizationCode),
-                CreateClientGrantType(3, 2, GrantType.ResourceOwnerPassword),
-                CreateClientGrantType(4, 2, GrantType.AuthorizationCode));
+                CreateClientGrantType(1, 1, GrantType.Hybrid),
+                CreateClientGrantType(2, 1, GrantType.ResourceOwnerPassword),
+                CreateClientGrantType(3, 1, GrantType.AuthorizationCode),
+                CreateClientGrantType(4, 2, GrantType.Hybrid),
+                CreateClientGrantType(5, 2, GrantType.ClientCredentials));
 
             modelBuilder.Entity<ClientScope>().HasData(
                 CreateClientScope(1, 1, IdentityServerConstants.StandardScopes.OpenId),
@@ -74,11 +75,11 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data
             );
 
             modelBuilder.Entity<ClientRedirectUri>().HasData(
-                new ClientRedirectUri() { Id = 1, RedirectUri = "/nguoi-dung/dang-nhap", ClientId = 2 }
+                new ClientRedirectUri() { Id = 1, RedirectUri = "https://localhost:5001/signin-oidc", ClientId = 2 }
             );
 
             modelBuilder.Entity<ClientPostLogoutRedirectUri>().HasData(
-                new ClientPostLogoutRedirectUri() { Id = 1, PostLogoutRedirectUri = "/nguoi-dung/dang-xuat", ClientId = 2 }
+                new ClientPostLogoutRedirectUri() { Id = 1, PostLogoutRedirectUri = "https://localhost:5001/signout-oidc", ClientId = 2 }
             );
 
             #endregion
@@ -199,7 +200,10 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data
                 RefreshTokenExpiration = 1,
                 AccessTokenType = 0,
                 EnableLocalLogin = true,
-                Created = created
+                Created = created,
+                RedirectUris = {},
+                PostLogoutRedirectUris = {},
+                FrontChannelLogoutUri = {},
             };
 
         protected ClientGrantType CreateClientGrantType(int id, int clientId, string grantType) =>

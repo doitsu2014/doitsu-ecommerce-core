@@ -1,3 +1,4 @@
+using System.Reflection.Metadata;
 using System.IO.Compression;
 using System.Net;
 using System.Text;
@@ -10,6 +11,7 @@ using Doitsu.Service.Core.Interfaces;
 using Doitsu.Service.Core.Services.EmailService;
 using IdentityServer4.EntityFramework.DbContexts;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -17,6 +19,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using static Doitsu.Ecommerce.Core.Abstraction.Constants;
+using Doitsu.Ecommerce.Core.Abstraction;
+using IdentityServer4;
 
 namespace Doitsu.Service.Core.Extensions
 {
@@ -52,6 +56,11 @@ namespace Doitsu.Service.Core.Extensions
                     options.Events.RaiseFailureEvents = true;
                     options.Events.RaiseSuccessEvents = true;
                     options.Discovery.CustomEntries.Add("identity_endpoint", "~/api/identity");
+                    options.UserInteraction.LoginUrl = "/nguoi-dung/dang-nhap";
+                    options.UserInteraction.LogoutUrl = "/api/is4/logout";
+                    options.UserInteraction.ConsentUrl = "/api/is4/consent";
+                    options.UserInteraction.ErrorUrl = "/api/is4/error";
+                    options.UserInteraction.DeviceVerificationUrl = "/api/is4/device-verification";
                 })
                 .AddDeveloperSigningCredential()
                 .AddConfigurationStore<EcommerceIs4ConfigurationDbContext>(options =>
@@ -77,11 +86,11 @@ namespace Doitsu.Service.Core.Extensions
                 .AddAuthentication(opt =>
                 {
                     opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    opt.DefaultChallengeScheme = "oidc";
+                    opt.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
                 })
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                 {
-                    options.Cookie.HttpOnly = true;
+                    // options.Cookie.HttpOnly = true;
                     options.LoginPath = new PathString("/nguoi-dung/dang-nhap");
                     options.LogoutPath = new PathString("/nguoi-dung/dang-xuat");
                     options.Events.OnRedirectToLogin = ctx =>
@@ -97,15 +106,21 @@ namespace Doitsu.Service.Core.Extensions
                         return Task.FromResult(0);
                     };
                 })
-                .AddOpenIdConnect("oidc", options =>
+                .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
                 {
-                    options.Authority = isConfiguration.ServerUrl;
+                    options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.Authority = isConfiguration.AuthorityUrl;
                     options.RequireHttpsMetadata = false;
 
-                    options.ClientId = isConfiguration.ClientId;
-                    options.ClientSecret = isConfiguration.ClientSecret;
-                    options.ResponseType = "code";
+                    options.ClientId = isConfiguration.MvcFrontEndAppClientId;
+                    options.ClientSecret = isConfiguration.MvcFrontEndAppClientSecret;
+                    options.ResponseType = "code id_token";
                     options.SaveTokens = true;
+                    options.GetClaimsFromUserInfoEndpoint = true;
+
+                    options.Scope.Add(Constants.EcommerceIs4Scopes.USER);
+                    options.Scope.Add(IdentityServerConstants.StandardScopes.OpenId);
+                    options.Scope.Add(IdentityServerConstants.StandardScopes.Profile);
                 })
                 .AddJwtBearer(DoitsuAuthenticationSchemes.JWT_SCHEME, options =>
                 {

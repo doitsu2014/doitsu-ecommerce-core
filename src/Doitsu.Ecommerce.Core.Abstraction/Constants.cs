@@ -1,6 +1,8 @@
-﻿namespace Doitsu.Ecommerce.Core.Abstraction
+﻿using System;
+
+namespace Doitsu.Ecommerce.Core.Abstraction
 {
-    public class Constants
+    public static class Constants
     {
         public static class ClaimTypeConstants
         {
@@ -148,11 +150,26 @@
             public const string SERVER_ERROR = "SERVER_ERROR";
         }
 
-        public static class EcommerceIs4Scopes 
-        { 
+        public static class EcommerceIs4Scopes
+        {
             public const string ALL = "ecommerce_all";
             public const string MANAGEMENT = "ecommerce_management";
             public const string USER = "ecommerce_user";
+        }
+
+        public static class AccountOptions
+        {
+            public static bool AllowLocalLogin = true;
+            public static bool AllowRememberLogin = true;
+            public static TimeSpan RememberMeLoginDuration = TimeSpan.FromDays(30);
+
+            public static bool ShowLogoutPrompt = true;
+            public static bool AutomaticRedirectAfterSignOut = false;
+
+            // if user uses windows auth, should we load the groups from windows
+            public static bool IncludeWindowsGroups = false;
+
+            public static string InvalidCredentialsErrorMessage = "Invalid username or password";
         }
     }
 }

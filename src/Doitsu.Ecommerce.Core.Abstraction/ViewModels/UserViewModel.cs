@@ -156,6 +156,10 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
             get;
             set;
         }
+
+        public string ReturnUrl { get; set; }
+
+        public bool EnableLocalLogin { get; set; }
     }
 
     public class LoginByPhoneViewModel : LoginViewModel

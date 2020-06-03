@@ -66,7 +66,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         new
                         {
                             Id = 1,
-                            Created = new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770),
+                            Created = new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430),
                             DisplayName = "Doitsu Ecommerce System",
                             Enabled = true,
                             Name = "doitsu_ecommerce_system",
@@ -413,8 +413,8 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                             BackChannelLogoutSessionRequired = true,
                             ClientClaimsPrefix = "client_",
                             ClientId = "2d916f81-43b0-42eb-b6ea-750a5ab7d3cc",
-                            ClientName = "Manager Client",
-                            Created = new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770),
+                            ClientName = "doitsu.ecommerce.spa_admin_app",
+                            Created = new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430),
                             DeviceCodeLifetime = 300,
                             EnableLocalLogin = true,
                             Enabled = true,
@@ -447,8 +447,8 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                             BackChannelLogoutSessionRequired = true,
                             ClientClaimsPrefix = "client_",
                             ClientId = "68dcf419-d41b-4af6-9222-cfa0be6cb347",
-                            ClientName = "User Client",
-                            Created = new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770),
+                            ClientName = "doitsu.ecommerce.mvc_front_end_app",
+                            Created = new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430),
                             DeviceCodeLifetime = 300,
                             EnableLocalLogin = true,
                             Enabled = true,
@@ -542,25 +542,31 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         {
                             Id = 1,
                             ClientId = 1,
-                            GrantType = "password"
+                            GrantType = "hybrid"
                         },
                         new
                         {
                             Id = 2,
                             ClientId = 1,
-                            GrantType = "authorization_code"
+                            GrantType = "password"
                         },
                         new
                         {
                             Id = 3,
-                            ClientId = 2,
-                            GrantType = "password"
+                            ClientId = 1,
+                            GrantType = "authorization_code"
                         },
                         new
                         {
                             Id = 4,
                             ClientId = 2,
-                            GrantType = "authorization_code"
+                            GrantType = "hybrid"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            ClientId = 2,
+                            GrantType = "client_credentials"
                         });
                 });
 
@@ -612,7 +618,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         {
                             Id = 1,
                             ClientId = 2,
-                            PostLogoutRedirectUri = "/nguoi-dung/dang-xuat"
+                            PostLogoutRedirectUri = "https://localhost:5001/signout-oidc"
                         });
                 });
 
@@ -669,7 +675,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         {
                             Id = 1,
                             ClientId = 2,
-                            RedirectUri = "/nguoi-dung/dang-nhap"
+                            RedirectUri = "https://localhost:5001/signin-oidc"
                         });
                 });
 
@@ -780,7 +786,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         {
                             Id = 1,
                             ClientId = 1,
-                            Created = new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770),
+                            Created = new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430),
                             Type = "SharedSecret",
                             Value = "4XVomuenFFTWNqWNtji41KEBQU/gGjgL4jB89ZJcJ6g="
                         },
@@ -788,7 +794,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         {
                             Id = 2,
                             ClientId = 2,
-                            Created = new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770),
+                            Created = new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430),
                             Type = "SharedSecret",
                             Value = "bHvoVitRa8DFPZ5YXS+5o30FMV99Ng96mGXZv0HOVzQ="
                         });
@@ -960,7 +966,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         new
                         {
                             Id = 1,
-                            Created = new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770),
+                            Created = new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430),
                             DisplayName = "Your user identifier",
                             Emphasize = false,
                             Enabled = true,
@@ -972,7 +978,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         new
                         {
                             Id = 2,
-                            Created = new DateTime(2020, 6, 2, 21, 58, 59, 416, DateTimeKind.Utc).AddTicks(770),
+                            Created = new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430),
                             Description = "Your user profile information (first name, last name, etc.)",
                             DisplayName = "User profile",
                             Emphasize = true,
