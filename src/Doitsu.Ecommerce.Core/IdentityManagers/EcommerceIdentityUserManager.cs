@@ -17,6 +17,7 @@ using Optional;
 using Optional.Async;
 using static Doitsu.Ecommerce.Core.Abstraction.Constants;
 using Doitsu.Ecommerce.Core.Abstraction;
+using IdentityServer4;
 
 namespace Doitsu.Ecommerce.Core.IdentitiesExtension
 {
@@ -119,6 +120,7 @@ namespace Doitsu.Ecommerce.Core.IdentitiesExtension
             var userRoles = (await this.GetRolesAsync(user));
             var claims = new List<Claim>
                 {
+                    new Claim("sub", user.Id.ToString()),
                     new Claim(ClaimTypes.Name, user.UserName),
                     new Claim("Fullname", user.Fullname),
                     new Claim(ClaimTypes.Email, user.Email),
@@ -126,7 +128,6 @@ namespace Doitsu.Ecommerce.Core.IdentitiesExtension
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim(Constants.ClaimTypeConstants.USER_ID, user.Id.ToString())
                 };
-
 
             foreach (var userRole in userRoles)
             {
