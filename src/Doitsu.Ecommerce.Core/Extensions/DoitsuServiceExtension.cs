@@ -100,7 +100,6 @@ namespace Doitsu.Service.Core.Extensions
                 })
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                 {
-                    // options.Cookie.HttpOnly = true;
                     options.LoginPath = new PathString("/nguoi-dung/dang-nhap");
                     options.LogoutPath = new PathString("/nguoi-dung/dang-xuat");
                     options.Events.OnRedirectToLogin = ctx =>
