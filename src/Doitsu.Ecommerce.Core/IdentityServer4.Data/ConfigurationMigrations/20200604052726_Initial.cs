@@ -481,7 +481,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                 schema: "is4cf",
                 table: "ApiResources",
                 columns: new[] { "Id", "Created", "Description", "DisplayName", "Enabled", "LastAccessed", "Name", "NonEditable", "Updated" },
-                values: new object[] { 1, new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430), null, "Doitsu Ecommerce System", true, null, "doitsu_ecommerce_system", false, null });
+                values: new object[] { 1, new DateTime(2020, 6, 4, 12, 27, 26, 477, DateTimeKind.Utc).AddTicks(9470), null, "Doitsu Ecommerce System", true, null, "doitsu_ecommerce_system", false, null });
 
             migrationBuilder.InsertData(
                 schema: "is4cf",
@@ -489,8 +489,8 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                 columns: new[] { "Id", "AbsoluteRefreshTokenLifetime", "AccessTokenLifetime", "AccessTokenType", "AllowAccessTokensViaBrowser", "AllowOfflineAccess", "AllowPlainTextPkce", "AllowRememberConsent", "AlwaysIncludeUserClaimsInIdToken", "AlwaysSendClientClaims", "AuthorizationCodeLifetime", "BackChannelLogoutSessionRequired", "BackChannelLogoutUri", "ClientClaimsPrefix", "ClientId", "ClientName", "ClientUri", "ConsentLifetime", "Created", "Description", "DeviceCodeLifetime", "EnableLocalLogin", "Enabled", "FrontChannelLogoutSessionRequired", "FrontChannelLogoutUri", "IdentityTokenLifetime", "IncludeJwtId", "LastAccessed", "LogoUri", "NonEditable", "PairWiseSubjectSalt", "ProtocolType", "RefreshTokenExpiration", "RefreshTokenUsage", "RequireClientSecret", "RequireConsent", "RequirePkce", "SlidingRefreshTokenLifetime", "UpdateAccessTokenClaimsOnRefresh", "Updated", "UserCodeType", "UserSsoLifetime" },
                 values: new object[,]
                 {
-                    { 1, 2592000, 28800, 0, false, false, false, true, false, false, 300, true, null, "client_", "2d916f81-43b0-42eb-b6ea-750a5ab7d3cc", "doitsu.ecommerce.spa_admin_app", null, null, new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430), null, 300, true, true, true, null, 300, false, null, null, false, null, "oidc", 1, 1, true, true, false, 1296000, false, null, null, null },
-                    { 2, 2592000, 28800, 0, false, false, false, true, false, false, 300, true, null, "client_", "68dcf419-d41b-4af6-9222-cfa0be6cb347", "doitsu.ecommerce.mvc_front_end_app", null, null, new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430), null, 300, true, true, true, null, 300, false, null, null, false, null, "oidc", 1, 1, true, true, false, 1296000, false, null, null, null }
+                    { 1, 2592000, 28800, 0, false, false, false, false, false, false, 300, false, null, "client_", "2d916f81-43b0-42eb-b6ea-750a5ab7d3cc", "doitsu.ecommerce.spa_admin_app", null, null, new DateTime(2020, 6, 4, 12, 27, 26, 477, DateTimeKind.Utc).AddTicks(9470), null, 300, true, true, false, null, 300, false, null, null, false, null, "oidc", 1, 1, true, false, false, 1296000, false, null, null, null },
+                    { 2, 2592000, 28800, 0, false, false, false, false, false, false, 300, false, null, "client_", "68dcf419-d41b-4af6-9222-cfa0be6cb347", "doitsu.ecommerce.mvc_front_end_app", null, null, new DateTime(2020, 6, 4, 12, 27, 26, 477, DateTimeKind.Utc).AddTicks(9470), null, 300, true, true, false, null, 300, false, null, null, false, null, "oidc", 1, 1, true, false, false, 1296000, false, null, null, null }
                 });
 
             migrationBuilder.InsertData(
@@ -499,8 +499,8 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                 columns: new[] { "Id", "Created", "Description", "DisplayName", "Emphasize", "Enabled", "Name", "NonEditable", "Required", "ShowInDiscoveryDocument", "Updated" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430), null, "Your user identifier", false, true, "openid", false, true, true, null },
-                    { 2, new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430), "Your user profile information (first name, last name, etc.)", "User profile", true, true, "profile", false, false, true, null }
+                    { 1, new DateTime(2020, 6, 4, 12, 27, 26, 477, DateTimeKind.Utc).AddTicks(9470), null, "Your user identifier", false, true, "openid", false, true, true, null },
+                    { 2, new DateTime(2020, 6, 4, 12, 27, 26, 477, DateTimeKind.Utc).AddTicks(9470), "Your user profile information (first name, last name, etc.)", "User profile", true, true, "profile", false, false, true, null }
                 });
 
             migrationBuilder.InsertData(
@@ -559,8 +559,8 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                 columns: new[] { "Id", "ClientId", "Created", "Description", "Expiration", "Type", "Value" },
                 values: new object[,]
                 {
-                    { 2, 2, new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430), null, null, "SharedSecret", "bHvoVitRa8DFPZ5YXS+5o30FMV99Ng96mGXZv0HOVzQ=" },
-                    { 1, 1, new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430), null, null, "SharedSecret", "4XVomuenFFTWNqWNtji41KEBQU/gGjgL4jB89ZJcJ6g=" }
+                    { 2, 2, new DateTime(2020, 6, 4, 12, 27, 26, 477, DateTimeKind.Utc).AddTicks(9470), null, null, "SharedSecret", "bHvoVitRa8DFPZ5YXS+5o30FMV99Ng96mGXZv0HOVzQ=" },
+                    { 1, 1, new DateTime(2020, 6, 4, 12, 27, 26, 477, DateTimeKind.Utc).AddTicks(9470), null, null, "SharedSecret", "4XVomuenFFTWNqWNtji41KEBQU/gGjgL4jB89ZJcJ6g=" }
                 });
 
             migrationBuilder.InsertData(

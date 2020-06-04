@@ -3,7 +3,7 @@
     <PropertyGroup>
         <LangVersion>8.0</LangVersion>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <PackageVersion>7.0.64</PackageVersion>
+        <PackageVersion>7.0.65</PackageVersion>
         <Title>Doitsu.Ecommerce.Core</Title>
         <PackageId>Doitsu.Ecommerce.Core</PackageId>
         <Authors>Doitsu Technology</Authors>
@@ -32,6 +32,11 @@
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.4" />
         <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.4" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.4" />
+        <PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.1.4" />
+        <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.1.4" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.4" />
+        <PackageReference Include="Microsoft.AspNetCore.Razor.Language" Version="3.1.4" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.4" />
         <PackageReference Include="SixLabors.ImageSharp.Web" Version="1.0.0-rc0001" />
         <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.4" />

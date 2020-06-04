@@ -21,6 +21,7 @@ using Microsoft.IdentityModel.Tokens;
 using static Doitsu.Ecommerce.Core.Abstraction.Constants;
 using Doitsu.Ecommerce.Core.Abstraction;
 using IdentityServer4;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Doitsu.Service.Core.Extensions
 {
@@ -55,12 +56,12 @@ namespace Doitsu.Service.Core.Extensions
                     options.Events.RaiseInformationEvents = true;
                     options.Events.RaiseFailureEvents = true;
                     options.Events.RaiseSuccessEvents = true;
-                    options.Discovery.CustomEntries.Add("identity_endpoint", "~/api/identity");
+                    // options.Discovery.CustomEntries.Add("identity_endpoint", "~/api/identity");
                     options.UserInteraction.LoginUrl = "/nguoi-dung/dang-nhap";
-                    options.UserInteraction.LogoutUrl = "/api/is4/logout";
-                    options.UserInteraction.ConsentUrl = "/api/is4/consent";
-                    options.UserInteraction.ErrorUrl = "/api/is4/error";
-                    options.UserInteraction.DeviceVerificationUrl = "/api/is4/device-verification";
+                    options.UserInteraction.LogoutUrl = "/nguoi-dung/dang-xuat";
+                    // options.UserInteraction.ConsentUrl = "/api/is4/consent";
+                    // options.UserInteraction.ErrorUrl = "/api/is4/error";
+                    // options.UserInteraction.DeviceVerificationUrl = "/api/is4/device-verification";
                 })
                 .AddDeveloperSigningCredential()
                 .AddConfigurationStore<EcommerceIs4ConfigurationDbContext>(options =>
@@ -81,10 +82,20 @@ namespace Doitsu.Service.Core.Extensions
 
         private static IServiceCollection AddEcommerceIs4Authentication(this IServiceCollection services, IConfiguration configuration)
         {
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
             var isConfiguration = configuration.GetSection(nameof(IdentityServerConfiguration)).Get<IdentityServerConfiguration>();
             services
-                .AddAuthentication(opts => {
-                    opts.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                .AddAuthentication(opts =>
+                {
+                    opts.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     opts.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
                 })
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
@@ -109,10 +120,10 @@ namespace Doitsu.Service.Core.Extensions
                 {
                     options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     options.Authority = isConfiguration.AuthorityUrl;
-                    options.RequireHttpsMetadata = false;
+                    options.RequireHttpsMetadata = true;
 
                     options.ClientId = isConfiguration.MvcFrontEndAppClientId;
-                    options.ClientSecret = isConfiguration.MvcFrontEndAppClientSecret + "123123";
+                    options.ClientSecret = isConfiguration.MvcFrontEndAppClientSecret;
                     options.ResponseType = "code id_token";
                     options.SaveTokens = true;
                     options.GetClaimsFromUserInfoEndpoint = true;

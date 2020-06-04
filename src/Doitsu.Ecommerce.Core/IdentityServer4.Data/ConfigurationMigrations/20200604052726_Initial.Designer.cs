@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
 {
     [DbContext(typeof(EcommerceIs4ConfigurationDbContext))]
-    [Migration("20200603030617_Initial")]
+    [Migration("20200604052726_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -68,7 +68,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         new
                         {
                             Id = 1,
-                            Created = new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430),
+                            Created = new DateTime(2020, 6, 4, 12, 27, 26, 477, DateTimeKind.Utc).AddTicks(9470),
                             DisplayName = "Doitsu Ecommerce System",
                             Enabled = true,
                             Name = "doitsu_ecommerce_system",
@@ -408,19 +408,19 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                             AllowAccessTokensViaBrowser = false,
                             AllowOfflineAccess = false,
                             AllowPlainTextPkce = false,
-                            AllowRememberConsent = true,
+                            AllowRememberConsent = false,
                             AlwaysIncludeUserClaimsInIdToken = false,
                             AlwaysSendClientClaims = false,
                             AuthorizationCodeLifetime = 300,
-                            BackChannelLogoutSessionRequired = true,
+                            BackChannelLogoutSessionRequired = false,
                             ClientClaimsPrefix = "client_",
                             ClientId = "2d916f81-43b0-42eb-b6ea-750a5ab7d3cc",
                             ClientName = "doitsu.ecommerce.spa_admin_app",
-                            Created = new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430),
+                            Created = new DateTime(2020, 6, 4, 12, 27, 26, 477, DateTimeKind.Utc).AddTicks(9470),
                             DeviceCodeLifetime = 300,
                             EnableLocalLogin = true,
                             Enabled = true,
-                            FrontChannelLogoutSessionRequired = true,
+                            FrontChannelLogoutSessionRequired = false,
                             IdentityTokenLifetime = 300,
                             IncludeJwtId = false,
                             NonEditable = false,
@@ -428,7 +428,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                             RefreshTokenExpiration = 1,
                             RefreshTokenUsage = 1,
                             RequireClientSecret = true,
-                            RequireConsent = true,
+                            RequireConsent = false,
                             RequirePkce = false,
                             SlidingRefreshTokenLifetime = 1296000,
                             UpdateAccessTokenClaimsOnRefresh = false
@@ -442,19 +442,19 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                             AllowAccessTokensViaBrowser = false,
                             AllowOfflineAccess = false,
                             AllowPlainTextPkce = false,
-                            AllowRememberConsent = true,
+                            AllowRememberConsent = false,
                             AlwaysIncludeUserClaimsInIdToken = false,
                             AlwaysSendClientClaims = false,
                             AuthorizationCodeLifetime = 300,
-                            BackChannelLogoutSessionRequired = true,
+                            BackChannelLogoutSessionRequired = false,
                             ClientClaimsPrefix = "client_",
                             ClientId = "68dcf419-d41b-4af6-9222-cfa0be6cb347",
                             ClientName = "doitsu.ecommerce.mvc_front_end_app",
-                            Created = new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430),
+                            Created = new DateTime(2020, 6, 4, 12, 27, 26, 477, DateTimeKind.Utc).AddTicks(9470),
                             DeviceCodeLifetime = 300,
                             EnableLocalLogin = true,
                             Enabled = true,
-                            FrontChannelLogoutSessionRequired = true,
+                            FrontChannelLogoutSessionRequired = false,
                             IdentityTokenLifetime = 300,
                             IncludeJwtId = false,
                             NonEditable = false,
@@ -462,7 +462,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                             RefreshTokenExpiration = 1,
                             RefreshTokenUsage = 1,
                             RequireClientSecret = true,
-                            RequireConsent = true,
+                            RequireConsent = false,
                             RequirePkce = false,
                             SlidingRefreshTokenLifetime = 1296000,
                             UpdateAccessTokenClaimsOnRefresh = false
@@ -788,7 +788,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         {
                             Id = 1,
                             ClientId = 1,
-                            Created = new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430),
+                            Created = new DateTime(2020, 6, 4, 12, 27, 26, 477, DateTimeKind.Utc).AddTicks(9470),
                             Type = "SharedSecret",
                             Value = "4XVomuenFFTWNqWNtji41KEBQU/gGjgL4jB89ZJcJ6g="
                         },
@@ -796,7 +796,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         {
                             Id = 2,
                             ClientId = 2,
-                            Created = new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430),
+                            Created = new DateTime(2020, 6, 4, 12, 27, 26, 477, DateTimeKind.Utc).AddTicks(9470),
                             Type = "SharedSecret",
                             Value = "bHvoVitRa8DFPZ5YXS+5o30FMV99Ng96mGXZv0HOVzQ="
                         });
@@ -968,7 +968,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         new
                         {
                             Id = 1,
-                            Created = new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430),
+                            Created = new DateTime(2020, 6, 4, 12, 27, 26, 477, DateTimeKind.Utc).AddTicks(9470),
                             DisplayName = "Your user identifier",
                             Emphasize = false,
                             Enabled = true,
@@ -980,7 +980,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data.ConfigurationMigrations
                         new
                         {
                             Id = 2,
-                            Created = new DateTime(2020, 6, 3, 10, 6, 16, 558, DateTimeKind.Utc).AddTicks(1430),
+                            Created = new DateTime(2020, 6, 4, 12, 27, 26, 477, DateTimeKind.Utc).AddTicks(9470),
                             Description = "Your user profile information (first name, last name, etc.)",
                             DisplayName = "User profile",
                             Emphasize = true,

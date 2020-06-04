@@ -28,6 +28,12 @@ using Doitsu.Ecommerce.Core.DeliveryIntegration;
 using Doitsu.Service.Core.Interfaces;
 using Doitsu.Ecommerce.Core.IdentityServer4.Data;
 using Doitsu.Ecommerce.Core.Extensions;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.SpaServices.AngularCli;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Doitsu.Ecommerce.Core
 {
@@ -130,6 +136,40 @@ namespace Doitsu.Ecommerce.Core
                 options.SupportedUICultures = LocalizationOptions.SupportedUICultures;
             });
             #endregion
+            
+            
+            #region Last
+            services.ConfigDeliveryIntegration(configuration);
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders =
+                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
+
+            services.Configure<RazorViewEngineOptions>(options =>
+            {
+                options.AreaViewLocationFormats.Clear();
+                options.AreaViewLocationFormats.Add("/Areas/{2}/Views/{1}/{0}.cshtml");
+                options.AreaViewLocationFormats.Add("/Areas/{2}/Views/Shared/{0}.cshtml");
+                options.AreaViewLocationFormats.Add("/Views/Shared/{0}.cshtml");
+            });
+
+            services.AddControllersWithViews(opts =>
+                {
+                    opts.MaxModelValidationErrors = 50;
+                    opts.EnableEndpointRouting = false;
+                })
+                .AddRazorRuntimeCompilation()
+                .AddNewtonsoftJson()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            
+            // In production, the Angular files will be served from this directory
+            services.AddSpaStaticFiles(configuration =>
+            {
+                configuration.RootPath = "ClientApp/dist";
+            });
+            #endregion
+
             return services;
         }
 
@@ -165,8 +205,11 @@ namespace Doitsu.Ecommerce.Core
         #endregion
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public static void UseDoitsuEcommerceCoreHosting(this IApplicationBuilder app, bool isConfigImageSharpWeb = false, bool isUsingIdentityServer = false)
+        public static void UseDoitsuEcommerceCoreHosting(this IApplicationBuilder app, IWebHostEnvironment env, bool isConfigImageSharpWeb = false, bool isUsingIdentityServer = false)
         {
+            app.UseForwardedHeaders();
+            app.UseHttpsRedirection();
+            app.UseDefaultFiles();
             // Using authorize
             if (isUsingIdentityServer)
             {
@@ -177,7 +220,6 @@ namespace Doitsu.Ecommerce.Core
                 app.UseAuthentication();
             }
 
-            app.UseCookiePolicy();
             // Using resource files
             app.UseResponseCompression();
             if (isConfigImageSharpWeb)
@@ -185,6 +227,45 @@ namespace Doitsu.Ecommerce.Core
 
             // Using localization
             app.UseRequestLocalization(LocalizationOptions);
+
+            app.UseStaticFiles();
+            app.UseSpaStaticFiles();
+            app.UseCookiePolicy();
+            app.UseRouting();
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+            });
+
+            // app.UseMvc(routes =>
+            // {
+            //     routes.MapRoute(
+            //         "default",
+            //         "{controller=Home}/{action=Index}/{id?}");
+
+            //     routes.MapSpaFallbackRoute(
+            //         name: "spa-fallback-admin",
+            //         defaults: new
+            //         {
+            //             controller = "Admin",
+            //             action = "Index"
+            //         }
+            //     );
+            // });
+
+            app.UseSpa(spa =>
+            {
+                // To learn more about options for serving an Angular SPA from ASP.NET Core,
+                // see https://go.microsoft.com/fwlink/?linkid=864501
+                spa.Options.SourcePath = "ClientApp";
+                if (env.IsDevelopment())
+                {
+                    spa.UseAngularCliServer(npmScript: "start");
+                }
+            });
         }
     }
 }
