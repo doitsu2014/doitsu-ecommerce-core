@@ -102,6 +102,11 @@ namespace Doitsu.Ecommerce.Core.Abstraction
         public static int TakeUserIdFromClaims(this ClaimsPrincipal claims)
         {
             int.TryParse(claims.FindFirstValue(Constants.ClaimTypeConstants.USER_ID), out var userId);
+            if(userId == 0) 
+            {
+                int.TryParse(claims.FindFirstValue("sub"), out var sub);
+                return sub;
+            }
             return userId;
         }
 
