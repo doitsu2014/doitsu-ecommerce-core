@@ -27,26 +27,6 @@ namespace Doitsu.Ecommerce.Core.Tests
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDoitsuEcommerceCore(Configuration, databaseConfigurer, true);
-            services.Configure<ForwardedHeadersOptions>(options =>
-            {
-                options.ForwardedHeaders =
-                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-            });
-
-            services.Configure<CookiePolicyOptions>(options =>
-            {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
-            });
-
-            services.AddControllersWithViews(opts =>
-                {
-                    opts.MaxModelValidationErrors = 50;
-                    opts.EnableEndpointRouting = false;
-                })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -62,18 +42,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
-            app.UseForwardedHeaders();
-            app.UseHttpsRedirection();
-            app.UseDefaultFiles();
-            app.UseDoitsuEcommerceCoreHosting(true);
-            app.UseStaticFiles();
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    "default",
-                    "{controller=Home}/{action=Index}/{id?}");
-            });
+            app.UseDoitsuEcommerceCoreHosting(env,true);
         }
     }
 }
