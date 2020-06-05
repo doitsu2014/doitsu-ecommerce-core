@@ -119,7 +119,7 @@ namespace Doitsu.Service.Core.Extensions
                 {
                     options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     options.Authority = isConfiguration.AuthorityUrl;
-                    options.RequireHttpsMetadata = true;
+                    options.RequireHttpsMetadata = false;
 
                     options.ClientId = isConfiguration.MvcFrontEndAppClientId;
                     options.ClientSecret = isConfiguration.MvcFrontEndAppClientSecret;
