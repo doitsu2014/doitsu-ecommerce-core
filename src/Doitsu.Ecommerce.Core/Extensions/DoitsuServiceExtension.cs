@@ -22,6 +22,8 @@ using static Doitsu.Ecommerce.Core.Abstraction.Constants;
 using Doitsu.Ecommerce.Core.Abstraction;
 using IdentityServer4;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Logging;
+using System;
 
 namespace Doitsu.Service.Core.Extensions
 {
@@ -49,6 +51,8 @@ namespace Doitsu.Service.Core.Extensions
             services.AddDbContext<PersistedGrantDbContext>(builder =>
                     databaseConfigurer.Configure(builder, typeof(EcommerceIs4PersistedGrantDbContext).Assembly.GetName().Name),
                     ServiceLifetime.Scoped);
+
+           IdentityModelEventSource.ShowPII = true; //To show detail of error and see the problem
 
             services.AddIdentityServer(options =>
                 {
@@ -91,7 +95,7 @@ namespace Doitsu.Service.Core.Extensions
 
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
-            var isConfiguration = configuration.GetSection(nameof(IdentityServerConfiguration)).Get<IdentityServerConfiguration>();
+            var mvcFeAppConfiguration = configuration.GetSection(nameof(MvcFrontEndAppConfiguration)).Get<MvcFrontEndAppConfiguration>();
             services
                 .AddAuthentication(opts =>
                 {
@@ -100,8 +104,8 @@ namespace Doitsu.Service.Core.Extensions
                 })
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                 {
-                    options.LoginPath = new PathString("/nguoi-dung/dang-nhap");
-                    options.LogoutPath = new PathString("/nguoi-dung/dang-xuat");
+                    options.LoginPath = new PathString(mvcFeAppConfiguration.CookieLoginPath.IsNullOrEmpty() ? "/nguoi-dung/dang-nhap" : mvcFeAppConfiguration.CookieLoginPath);
+                    options.LogoutPath = new PathString(mvcFeAppConfiguration.CookieLogoutPath.IsNullOrEmpty() ? "/nguoi-dung/dang-xuat" : mvcFeAppConfiguration.CookieLogoutPath);
                     options.Events.OnRedirectToLogin = ctx =>
                     {
                         if (ctx.Request.Path.StartsWithSegments("/api"))
@@ -118,15 +122,13 @@ namespace Doitsu.Service.Core.Extensions
                 .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
                 {
                     options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.Authority = isConfiguration.AuthorityUrl;
-                    options.RequireHttpsMetadata = false;
-
-                    options.ClientId = isConfiguration.MvcFrontEndAppClientId;
-                    options.ClientSecret = isConfiguration.MvcFrontEndAppClientSecret;
+                    options.Authority = mvcFeAppConfiguration.AuthorityUrl;
+                    options.RequireHttpsMetadata = mvcFeAppConfiguration.OidcRequireHttpsMetadata;
+                    options.ClientId = mvcFeAppConfiguration.ClientId;
+                    options.ClientSecret = mvcFeAppConfiguration.ClientSecret;
                     options.ResponseType = "code id_token";
                     options.SaveTokens = true;
                     options.GetClaimsFromUserInfoEndpoint = true;
-
                     options.Scope.Add(Constants.EcommerceIs4Scopes.USER);
                     options.Scope.Add(IdentityServerConstants.StandardScopes.OpenId);
                     options.Scope.Add(IdentityServerConstants.StandardScopes.Profile);
