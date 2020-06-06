@@ -10,8 +10,17 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 name: "Property",
                 table: "Products");
 
+            migrationBuilder.AlterColumn<long>(
+                name: "InventoryQuantity",
+                table: "ProductVariants",
+                nullable: false,
+                defaultValue: 0L,
+                oldClrType: typeof(long),
+                oldType: "bigint",
+                oldDefaultValue: -1L);
+
             migrationBuilder.AddColumn<long>(
-                name: "IventoryQuantity",
+                name: "InventoryQuantity",
                 table: "Products",
                 nullable: false,
                 defaultValue: 0L);
@@ -96,7 +105,7 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "IventoryQuantity",
+                name: "InventoryQuantity",
                 table: "Products");
 
             migrationBuilder.DropColumn(
@@ -122,6 +131,15 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "Ward",
                 table: "AspNetUsers");
+
+            migrationBuilder.AlterColumn<long>(
+                name: "InventoryQuantity",
+                table: "ProductVariants",
+                type: "bigint",
+                nullable: false,
+                defaultValue: -1L,
+                oldClrType: typeof(long),
+                oldDefaultValue: 0L);
 
             migrationBuilder.AddColumn<string>(
                 name: "Property",

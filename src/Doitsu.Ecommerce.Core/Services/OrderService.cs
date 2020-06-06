@@ -33,6 +33,7 @@ namespace Doitsu.Ecommerce.Core.Services
     {
         private readonly IEmailService emailService;
         private readonly IProductService productService;
+        private readonly IProductVariantService productVariantService;
         private readonly IUserTransactionService userTransactionService;
         private readonly EcommerceIdentityUserManager<EcommerceIdentityUser> userManager;
         private readonly IServiceScopeFactory serviceScopeFactory;
@@ -46,6 +47,7 @@ namespace Doitsu.Ecommerce.Core.Services
             EcommerceIdentityUserManager<EcommerceIdentityUser> userManager,
             IUserTransactionService userTransactionService,
             IServiceScopeFactory serviceScopeFactory,
+            IProductVariantService productVariantService,
             IDeliveryIntegrator deliveryIntegrator) : base(dbContext, mapper, logger)
         {
             this.emailService = emailService;
@@ -54,6 +56,7 @@ namespace Doitsu.Ecommerce.Core.Services
             this.userTransactionService = userTransactionService;
             this.serviceScopeFactory = serviceScopeFactory;
             this.deliveryIntegrator = deliveryIntegrator;
+            this.productVariantService = productVariantService;
         }
 
         public async Task<Option<string, string>> CheckoutCartAsync(CheckoutCartViewModel data, EcommerceIdentityUser user)
@@ -283,7 +286,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
                     foreach (var orderItem in d.OrderItems)
                     {
-                        var productVariant = await productService.FindProductVariantFromOptionsAsync(orderItem.ProductOptionValues);
+                        var productVariant = await productVariantService.FindProductVariantFromOptionsAsync(orderItem.ProductOptionValues);
                         if (productVariant == null)
                         {
                             return Option.None<CreateOrderWithOptionViewModel, string>("Không tìm thấy 1 sản phẩm mà bạn muốn đặt hàng.");
@@ -377,7 +380,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 var productIds = productFilter.Select(pf => pf.Id);
                 query = query.Where(o => o.OrderItems.Select(oi => oi.ProductId).Any(pi => productIds.Contains(pi)));
 
-                var productVariantIds = await productService.GetProductVariantIdsFromProductFilterParamsAsync(productFilter);
+                var productVariantIds = await productVariantService.GetProductVariantIdsFromProductFilterParamsAsync(productFilter);
                 if (productVariantIds != null && productVariantIds.Length > 0)
                 {
                     query = query.Where(o => o.OrderItems.Select(oi => oi.ProductVariantId).Any(pvId => productVariantIds.Contains(pvId)));

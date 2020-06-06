@@ -44,6 +44,9 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
             builder.Property(e => e.Weight)
                 .HasDefaultValue(0);
 
+            builder.Property(p => p.InventoryQuantity)
+                .HasDefaultValue(0);
+
             builder.HasOne(d => d.Cate)
                 .WithMany(p => p.Products)
                 .HasForeignKey(d => d.CateId);
