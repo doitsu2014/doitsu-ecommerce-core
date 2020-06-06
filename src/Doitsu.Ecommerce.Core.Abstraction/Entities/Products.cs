@@ -20,7 +20,7 @@ namespace Doitsu.Ecommerce.Core.Abstraction.Entities
         public decimal Price { get; set; }
         public string Slug { get; set; }
         public float Weight { get; set; }
-        public long IventoryQuantity { get; set; }
+        public long InventoryQuantity { get; set; }
 
         public virtual Categories Cate { get; set; }
         public virtual ICollection<OrderItems> OrderItems { get; set; }

@@ -1,12 +1,18 @@
 namespace Doitsu.Ecommerce.Core.Abstraction.Configuration
 {
-    public class IdentityServerConfiguration
+    public class MvcFrontEndAppConfiguration
     {
         public string AuthorityUrl { get; set; }
-        public string SystemName { get; set; }
-        public string MvcFrontEndAppClientId { get; set; }
-        public string MvcFrontEndAppClientSecret { get; set; }
-        public string SpaAdminAppClientId { get; set; }
-        public string SpaAdminEndAppClientId { get; set; }
+        public string ClientId { get; set; }
+        public string ClientSecret { get; set; }
+        public bool OidcRequireHttpsMetadata { get; set; }
+        public string CookieLoginPath { get; set; }
+        public string CookieLogoutPath { get; set; }
+    }
+
+    public class SpaAdminAppConfiguration {
+        public string AuthorityUrl { get; set; }
+        public string ClientId { get; set; }
+        public string ClientSecret { get; set; }
     }
 }

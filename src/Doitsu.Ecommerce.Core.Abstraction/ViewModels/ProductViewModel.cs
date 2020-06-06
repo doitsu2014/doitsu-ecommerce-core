@@ -60,9 +60,6 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         [JsonProperty("imageUrls")]
         public string ImageUrls { get; set; }
 
-        [JsonProperty("property")]
-        public string Property { get; set; }
-
         [Required]
         [JsonProperty("cateId")]
         public int? CateId { get; set; }
@@ -76,7 +73,7 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         public float Weight { get; set; }
 
         [JsonProperty("inventoryQuantity")]
-        public long IventoryQuantity { get; set; }
+        public long InventoryQuantity { get; set; }
     
         [JsonProperty("vers")]
         public byte[] Vers { get; set; }

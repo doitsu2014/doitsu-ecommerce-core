@@ -84,6 +84,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                 {
                     // Add Products
                     var productService = scope.ServiceProvider.GetService<IProductService>();
+                    var productVariantService = scope.ServiceProvider.GetService<IProductVariantService>();
                     var logger = scope.ServiceProvider.GetService<ILogger<ProductServiceTest>>();
                     var productFilterParams = new List<ProductFilterParamViewModel>()
                     {
@@ -107,7 +108,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                             }).ToArray()
                         }
                     }.ToArray();
-                    var result = await productService.GetProductVariantIdsFromProductFilterParamsAsync(productFilterParams);
+                    var result = await productVariantService.GetProductVariantIdsFromProductFilterParamsAsync(productFilterParams);
                     Assert.True(result.Count() == 1);
                 }
             }
@@ -124,6 +125,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                 {
                     // Add Products
                     var productService = scope.ServiceProvider.GetService<IProductService>();
+                    var productVariantService = scope.ServiceProvider.GetService<IProductVariantService>();
                     var listProductOptionValues = (await productService.Get(pro => pro.Code == _fixture.ProductData.First().Code)
                         .Include(p => p.ProductOptions)
                             .ThenInclude(po => po.ProductOptionValues)
@@ -132,7 +134,7 @@ namespace Doitsu.Ecommerce.Core.Tests
                     .Select(x => productService.Mapper.Map<ProductOptionValueViewModel>(x.ProductOptionValues.First()))
                     .ToImmutableList();
 
-                    var result = await productService.FindProductVariantFromOptionsAsync(listProductOptionValues);
+                    var result = await productVariantService.FindProductVariantFromOptionsAsync(listProductOptionValues);
                     Assert.True(result != null);
                 }
             }

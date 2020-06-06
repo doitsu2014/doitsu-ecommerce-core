@@ -1135,7 +1135,7 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<long>("InventoryQuantity")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasDefaultValue(-1L);
+                        .HasDefaultValue(0L);
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
@@ -1202,8 +1202,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<string>("ImageUrls")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("IventoryQuantity")
-                        .HasColumnType("bigint");
+                    b.Property<long>("InventoryQuantity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(0L);
 
                     b.Property<string>("Name")
                         .IsRequired()

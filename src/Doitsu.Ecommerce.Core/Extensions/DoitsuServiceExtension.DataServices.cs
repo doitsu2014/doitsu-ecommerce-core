@@ -12,6 +12,8 @@ namespace Doitsu.Ecommerce.Core.Extensions
             services.AddTransient(typeof(IMemCacheService), typeof(MemCacheService));
             services.AddTransient(typeof(ICategoryService), typeof(CategoryService));
             services.AddTransient(typeof(IProductService), typeof(ProductService));
+            services.AddTransient(typeof(IProductVariantService), typeof(ProductVariantService));
+            services.AddTransient(typeof(IProductOptionService), typeof(ProductOptionService));
             services.AddTransient(typeof(IBrandService), typeof(BrandService));
             services.AddTransient(typeof(IOrderService), typeof(OrderService));
             services.AddTransient(typeof(IOrderItemService), typeof(OrderItemService));
@@ -26,8 +28,6 @@ namespace Doitsu.Ecommerce.Core.Extensions
             services.AddTransient(typeof(ICatalogueService), typeof(CatalogueService));
             services.AddTransient(typeof(IPromotionDetailService), typeof(PromotionDetailService));
             services.AddTransient(typeof(IUserTransactionService), typeof(UserTransactionService));
-            services.AddTransient(typeof(IProductVariantService), typeof(ProductVariantService));
-            services.AddTransient(typeof(IProductOptionService), typeof(ProductOptionService));
             services.AddTransient(typeof(IUserService), typeof(UserService));
             services.AddTransient(typeof(IBaseService<DeliveryInformation>), typeof(BaseService<DeliveryInformation>));
             services.AddHttpContextAccessor();

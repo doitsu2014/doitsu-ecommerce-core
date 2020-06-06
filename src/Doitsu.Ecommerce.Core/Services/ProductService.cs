@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 using AutoMapper;
@@ -14,7 +13,6 @@ using Doitsu.Ecommerce.Core.Data;
 using Doitsu.Ecommerce.Core.Abstraction.Entities;
 using Doitsu.Ecommerce.Core.Abstraction.ViewModels;
 using Doitsu.Service.Core;
-using Doitsu.Utils;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -52,23 +50,12 @@ namespace Doitsu.Ecommerce.Core.Services
 
         Task<Option<int, string>> UpdateProductWithOptionAsync(UpdateProductViewModel data);
 
-        Task<Option<int, string>> UpdateProductVariantsAsync(ProductVariantViewModel data);
-
-        Task<ProductVariantDetailViewModel> FindProductVariantFromOptionsAsync(ICollection<ProductOptionValueViewModel> listProductOptions);
-
-        Task<Option<int, string>> UpdateProductVariantAnotherDiscountAsync(int productId, int productVariantId, float anotherDiscount);
-
-        Task<Option<int, string>> UpdateProductVariantAnotherPriceAsync(int productId, int productVariantId, decimal anotherPrice);
-
-        Task<Option<int, string>> UpdateProductVariantStatusAsync(int productId, int productVariantId, ProductVariantStatusEnum value);
-
         Task<Option<int, string>> CreateProductOptionAsync(int productId, ProductOptionViewModel data);
 
         Task<Option<int, string>> UpdateProductOptionAsync(int productId, int productOptionId, ProductOptionViewModel data);
 
         Task<Option<int, string>> DeleteProductOptionByKeyAsync(int productId, int productOptionId);
 
-        Task<ImmutableArray<int?>> GetProductVariantIdsFromProductFilterParamsAsync(ProductFilterParamViewModel[] productFilterParams);
     }
 
     public class ProductService : BaseService<Products>, IProductService
@@ -221,107 +208,9 @@ namespace Doitsu.Ecommerce.Core.Services
             return productsQuery;
         }
 
-        private string GetSkuAttributeString(string value, int length = 0)
-        {
-            if (value.IsNullOrEmpty())
-            {
-                return string.Empty;
-            }
+      
 
-            var noWhiteSpace = value.Replace(" ", "_").ToUpper();
-
-            if (noWhiteSpace.Length <= length || length == 0)
-            {
-                return noWhiteSpace;
-            }
-            else
-            {
-                noWhiteSpace = noWhiteSpace.Substring(0, length);
-                return noWhiteSpace;
-            }
-        }
-
-        private ImmutableList<ProductVariants> BuildListProductVariant(Products product)
-        {
-
-            Func<ProductOptions, bool> predicatePoExistAndActive = po => po.Id == 0 || (po.Id != 0 && po.Active);
-            if (product.ProductOptions == null || product.ProductOptions.Where(predicatePoExistAndActive).Count() == 0)
-            {
-                return ImmutableList<ProductVariants>.Empty;
-            }
-
-            var productVariants = product.ProductOptions
-                .Where(predicatePoExistAndActive)
-                .Select(po => po.ProductOptionValues)
-                .CartesianProduct()
-                // Mapping cartesian to product variant
-                .Select(listProductOptionValues =>
-                {
-                    var productVariant = new ProductVariants()
-                    {
-                        ProductId = product.Id,
-                        AnotherPrice = 0,
-                        AnotherDiscount = 0,
-                        InventoryQuantity = 0,
-                        Sku = $"{product.Code}",
-                        Product = product,
-                        ProductVariantOptionValues = new List<ProductVariantOptionValues>()
-                    };
-
-                    foreach (var productOptionValue in listProductOptionValues)
-                    {
-                        var productOption = product.ProductOptions.FirstOrDefault(po => po.ProductOptionValues.Any(pov => pov.Value == productOptionValue.Value));
-                        productVariant.Sku = string.Join('/', new string[] { productVariant.Sku, GetSkuAttributeString(productOptionValue.Value) });
-                        productVariant.ProductVariantOptionValues.Add(new ProductVariantOptionValues()
-                        {
-                            ProductOptionId = productOption.Id,
-                            ProductOptionValueId = productOptionValue.Id,
-                            ProductOptionValue = productOptionValue,
-                            ProductOption = productOption
-                        });
-                    }
-
-                    return productVariant;
-                })
-                .Select(productVariant =>
-                {
-                    var listDbProductVariants = product.ProductVariants?.ToList() ?? new List<ProductVariants>();
-                    var exist = listDbProductVariants.FirstOrDefault(dbPv =>
-                    {
-                        if (dbPv.ProductVariantOptionValues.Count != productVariant.ProductVariantOptionValues.Count)
-                        {
-                            return false;
-                        }
-                        var listDbPvovIds = dbPv.ProductVariantOptionValues.Select(dbPvov => dbPvov.ProductOptionValueId);
-                        var listCurrentPvovIds = productVariant.ProductVariantOptionValues.Select(dbPvov => dbPvov.ProductOptionValueId);
-                        if (listDbPvovIds.Except(listCurrentPvovIds).Count() > 0)
-                        {
-                            return false;
-                        }
-                        return true;
-                    });
-
-                    if (exist != null)
-                    {
-                        productVariant.Id = exist.Id;
-                        productVariant.AnotherPrice = exist.AnotherPrice;
-                        productVariant.AnotherDiscount = exist.AnotherDiscount;
-                        productVariant.InventoryQuantity = exist.InventoryQuantity;
-
-                        productVariant.ProductVariantOptionValues = productVariant.ProductVariantOptionValues.Select(pvov =>
-                        {
-                            pvov.Id = pvov.Id;
-                            pvov.ProductVariantId = exist.Id;
-                            return pvov;
-                        }).ToImmutableList();
-                    }
-
-                    return productVariant;
-                })
-                .ToImmutableList();
-
-            return productVariants;
-        }
+        
 
         public async Task<Option<int, string>> CreateProductWithOptionAsync(CreateProductViewModel data)
         {
@@ -332,7 +221,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     .MapAsync(async d =>
                     {
                         var productEnt = this.Mapper.Map<Products>(d);
-                        var listProductVariants = this.BuildListProductVariant(productEnt);
+                        var listProductVariants = productVariantService.BuildListProductVariant(productEnt);
                         productEnt.ProductVariants = listProductVariants;
 
                         await CreateAsync(productEnt);
@@ -341,11 +230,6 @@ namespace Doitsu.Ecommerce.Core.Services
                         return productEnt.Id;
                     });
             }
-        }
-
-        Task<Option<int, string>> IProductService.UpdateProductVariantsAsync(ProductVariantViewModel data)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<Option<int[], string>> CreateProductWithOptionAsync(ICollection<CreateProductViewModel> data)
@@ -360,7 +244,7 @@ namespace Doitsu.Ecommerce.Core.Services
                         foreach (var prodMapping in d)
                         {
                             var productEnt = this.Mapper.Map<Products>(prodMapping);
-                            var listProductVariants = this.BuildListProductVariant(productEnt);
+                            var listProductVariants = productVariantService.BuildListProductVariant(productEnt);
                             productEnt.ProductVariants = listProductVariants;
                             await CreateAsync(productEnt);
                             result.Add(productEnt);
@@ -371,50 +255,6 @@ namespace Doitsu.Ecommerce.Core.Services
                         return result.Select(x => x.Id).ToArray();
                     });
             }
-        }
-
-        public async Task<ProductVariantDetailViewModel> FindProductVariantFromOptionsAsync(ICollection<ProductOptionValueViewModel> listProductOptions)
-        {
-            var poIds = listProductOptions.Where(po => po != null).Select(po => po.Id);
-            var totalIds = poIds.Count();
-
-            return await this.DbContext.ProductVariants.AsNoTracking()
-                .Where(pv => pv.ProductVariantOptionValues.Count() == totalIds &&
-                    pv.ProductVariantOptionValues.Select(pvov => pvov.ProductOptionValueId ?? int.MinValue).All(pvovPovId => poIds.Contains(pvovPovId)))
-                .ProjectTo<ProductVariantDetailViewModel>(this.Mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task<Option<int, string>> UpdateProductVariantAnotherDiscountAsync(int productId, int productVariantId, float anotherDiscount)
-        {
-            return await (productId, productVariantId, anotherDiscount).SomeNotNull()
-                .WithException(string.Empty)
-                .FilterAsync(async req => await DbContext.Products.AnyAsync(p => p.Id == productId), "Không tồn tại sản phẩm này.")
-                .FilterAsync(async req => await DbContext.ProductVariants.AnyAsync(pv => pv.Id == productVariantId), "Không tồn tại biến thể này.")
-                .MapAsync(async req =>
-                {
-                    var productVariant = await productVariantService.FindByKeysAsync(productVariantId);
-                    productVariant.AnotherDiscount = anotherDiscount;
-                    productVariantService.Update(productVariant);
-                    await this.CommitAsync();
-                    return productVariant.Id;
-                });
-        }
-
-        public async Task<Option<int, string>> UpdateProductVariantAnotherPriceAsync(int productId, int productVariantId, decimal anotherPrice)
-        {
-            return await (productId, productVariantId, anotherPrice).SomeNotNull()
-                .WithException(string.Empty)
-                .FilterAsync(async req => await DbContext.Products.AnyAsync(p => p.Id == productId), "Không tồn tại sản phẩm này.")
-                .FilterAsync(async req => await DbContext.ProductVariants.AnyAsync(pv => pv.Id == productVariantId), "Không tồn tại biến thể này.")
-                .MapAsync(async req =>
-                {
-                    var productVariant = await productVariantService.FindByKeysAsync(productVariantId);
-                    productVariant.AnotherPrice = anotherPrice;
-                    productVariantService.Update(productVariant);
-                    await this.CommitAsync();
-                    return productVariant.Id;
-                });
         }
 
         public async Task<Option<int, string>> CreateProductOptionAsync(int productId, ProductOptionViewModel data)
@@ -499,7 +339,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     })
                     .MapAsync(async productEnt =>
                     {
-                        var listGeneratedProductVariants = this.BuildListProductVariant(productEnt);
+                        var listGeneratedProductVariants = productVariantService.BuildListProductVariant(productEnt);
                         listGeneratedProductVariants.ForEach(gPv =>
                         {
                             if (productEnt.ProductVariants.Any(pv => pv.Id == gPv.Id && pv.Id > 0))
@@ -578,7 +418,7 @@ namespace Doitsu.Ecommerce.Core.Services
                             .ThenInclude(p => p.ProductVariantOptionValues)
                             .FirstOrDefaultAsync();
 
-                        var listGeneratedProductVariants = this.BuildListProductVariant(productEnt);
+                        var listGeneratedProductVariants = productVariantService.BuildListProductVariant(productEnt);
                         foreach (var gPv in listGeneratedProductVariants.Where(gPv => gPv.Id == 0).ToImmutableList())
                         {
                             await this.productVariantService.CreateAsync(gPv);
@@ -589,47 +429,5 @@ namespace Doitsu.Ecommerce.Core.Services
                     });
             }
         }
-
-        public async Task<Option<int, string>> UpdateProductVariantStatusAsync(int productId, int productVariantId, ProductVariantStatusEnum value)
-        {
-            return await (productId, productVariantId, value).SomeNotNull()
-                .WithException(string.Empty)
-                .FilterAsync(async req => await DbContext.Products.AnyAsync(p => p.Id == productId), "Không tồn tại sản phẩm này.")
-                .FilterAsync(async req => await DbContext.ProductVariants.AnyAsync(pv => pv.Id == productVariantId), "Không tồn tại biến thể này.")
-                .MapAsync(async req =>
-                {
-                    var productVariant = await productVariantService.FindByKeysAsync(productVariantId);
-                    productVariant.Status = value;
-                    productVariantService.Update(productVariant);
-                    await this.CommitAsync();
-                    return productVariant.Id;
-                });
-        }
-
-        public async Task<ImmutableArray<int?>> GetProductVariantIdsFromProductFilterParamsAsync(ProductFilterParamViewModel[] productFilterParams)
-        {
-            var productIds = productFilterParams.Select(pf => pf.Id);
-            var listProductFilterParams = productFilterParams.AsEnumerable();
-            var listCondition = new List<Expression<Func<ProductVariants, bool>>>();
-            foreach (var item in productFilterParams)
-            {
-                var selectedValueIds = item.ProductOptions.Select(po => po.SelectedValueId).ToArray();
-                var countSelectedValue = selectedValueIds.Count();
-                listCondition.Add((pv =>
-                    pv.ProductId == item.Id &&
-                    (
-                        countSelectedValue == 0 || pv.ProductVariantOptionValues.Select(pvov => pvov.ProductOptionValueId).All(pvovId => selectedValueIds.Contains(pvovId))
-                    )));
-            }
-            var productVariants = this.DbContext
-                    .ProductVariants
-                    .AsNoTracking();
-            foreach (var condition in listCondition)
-            {
-                productVariants = productVariants.Where(condition);
-            }
-            return (await productVariants.Select(pv => (int?)pv.Id).ToListAsync()).ToImmutableArray();
-        }
-
     }
 }
