@@ -56,6 +56,9 @@ namespace Doitsu.Ecommerce.Core.Services
 
         Task<Option<int, string>> DeleteProductOptionByKeyAsync(int productId, int productOptionId);
 
+        Task<Option<int, string>> DecreaseInventoryQuantity(int productId, int quantity = 0);
+
+        Task<Option<int, string>> IncreaseInventoryQuantity(int productId, int quantity = 0);
     }
 
     public class ProductService : BaseService<Products>, IProductService
@@ -429,5 +432,45 @@ namespace Doitsu.Ecommerce.Core.Services
                     });
             }
         }
+
+        public async Task<Option<int, string>> IncreaseInventoryQuantity(int productId, int quantity = 0)
+        {
+            return await (productId, quantity).SomeNotNull()
+                .WithException(string.Empty)
+                .Filter(req => quantity >= 0, $"Không thể thêm số lượng sản phẩm trong kho vì số lượng bạn nhập {quantity} nhỏ hơn 0.")
+                .MapAsync(async req => (product: await this.DbContext.Products.FindAsync(req.productId), quantity))
+                .FilterAsync(async req => await Task.FromResult(req.product != null), "Không tồn tại sản phẩm theo id đang thao tác.")
+                .MapAsync(async req =>
+                {
+                    req.product.InventoryQuantity += quantity;
+                    this.Update(req.product);
+                    await this.CommitAsync();
+                    return req.product.Id;
+                });
+        }
+
+        public async Task<Option<int, string>> DecreaseInventoryQuantity(int productId, int quantity = 0)
+        {
+            return await (productId, quantity).SomeNotNull()
+                .WithException(string.Empty)
+                .Filter(req => quantity >= 0, $"Không thể giảm số lượng sản phẩm trong kho vì số lượng truyền vào {quantity} nhỏ hơn 0.")
+                .MapAsync(async req => (product: await this.DbContext.Products.FindAsync(req.productId), quantity))
+                .FilterAsync(async req => await Task.FromResult(req.product != null), "Không tồn tại sản phẩm theo id đang thao tác.")
+                .FlatMapAsync(async req =>
+                {
+                    if (req.product.InventoryQuantity < quantity)
+                    {
+                        return Option.None<int, string>("Sản phẩm hiện tại không còn đủ số lượng để xuất kho.");
+                    }
+                    else
+                    {
+                        req.product.InventoryQuantity -= quantity;
+                        this.Update(req.product);
+                        await this.CommitAsync();
+                        return Option.Some<int, string>(req.product.Id);
+                    }
+                });
+        }
+
     }
 }

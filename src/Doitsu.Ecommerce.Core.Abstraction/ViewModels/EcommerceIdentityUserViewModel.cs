@@ -1,45 +1,51 @@
 using System.Collections.Generic;
+using Doitsu.Ecommerce.Core.Abstraction.Identities;
 using Newtonsoft.Json;
 
 namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
 {
-    public class EcommerceIdentityUserViewModel
+    public class EcommerceIdentityUserViewModel : EcommerceIdentityUser
     {
         [JsonProperty("id")]
-        public int Id { get; set; }
+        public override int Id { get; set; }
+
         [JsonProperty("userName")]
-        public string UserName { get; set; }
+        public override string UserName { get; set; }
+
         [JsonProperty("email")]
-        public string Email { get; set; }
+        public override string Email { get; set; }
+
         [JsonProperty("phoneNumber")]
-        public string PhoneNumber { get; set; }
+        public override string PhoneNumber { get; set; }
+
         [JsonProperty("fullName")]
-        public string Fullname { get; set; }
+        public new  string Fullname { get; set; }
+
         [JsonProperty("address")]
-        public string Address
+        public new string Address
         {
             get;
             set;
         }
 
         [JsonProperty("balance")]
-        public decimal Balance
+        public new decimal Balance
         {
             get;
             set;
         }
 
         [JsonProperty("gender")]
-        public int Gender
+        public new int Gender
         {
             get;
             set;
         }
+        
+        [JsonProperty("deliveryInformation")]
+        public new List<DeliveryInformationViewModel> DeliveryInformations { get; set; }
 
         [JsonProperty("roleName")]
-        public List<EcommerceIdentityRoleViewModel> EcommerceIdentityRoles { get; set; }
-
-        [JsonProperty("deliveryInformation")]
-        public List<DeliveryInformationViewModel> DeliveryInformations { get; set; }
+        public List<EcommerceIdentityRoleViewModel> EcommerceIdentityRoles { get; set; } 
     }
 }

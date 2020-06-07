@@ -58,6 +58,7 @@ namespace Doitsu.Ecommerce.Core.Abstraction
             CreateMap<ProductVariants, ProductVariantDetailViewModel>();
             CreateMap<ProductVariantOptionValues, ProductVariantOptionValueViewModel>();
             CreateMap<ProductVariantViewModel, ProductVariants>();
+            CreateMap<ProductVariantDetailViewModel, ProductVariants>();
             CreateMap<ProductVariantOptionValueViewModel, ProductVariantOptionValues>();
             #endregion
             #region Catalogues
@@ -71,14 +72,20 @@ namespace Doitsu.Ecommerce.Core.Abstraction
             #region Orders
             CreateMap<OrderViewModel, Orders>();
             CreateMap<CreateOrderWithOptionViewModel, Orders>();
+            CreateMap<OrderDetailViewModel, Orders>();
+            
             CreateMap<Orders, OrderViewModel>();
             CreateMap<Orders, OrderDetailViewModel>().MaxDepth(3);
+
+            CreateMap<CreateOrderWithOptionViewModel, OrderDetailViewModel>();
+            CreateMap<OrderDetailViewModel, OrderViewModel>();
 
             CreateMap<OrderItems, OrderItemViewModel>().ReverseMap();
             CreateMap<OrderItemViewModel, OrderItems>();
             CreateMap<CreateOrderItemWithOptionViewModel, OrderItems>()
                 .ForMember(o => o.ProductVariant, opt => opt.Ignore())
                 .ForMember(o => o.Product, opt => opt.Ignore());
+
             #endregion
             CreateMap<Blogs, BlogDetailViewModel>();
             CreateMap<Blogs, BlogOverviewViewModel>();

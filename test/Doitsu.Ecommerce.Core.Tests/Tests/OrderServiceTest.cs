@@ -128,16 +128,16 @@ namespace Doitsu.Ecommerce.Core.Tests
             {
                 await InitialDatabaseAsync(webhost);
                 var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
-                using (var scope = scopeFactory.CreateScope())
+                var orders1 = PrepareOrders(0);
+                foreach (var order in orders1)
                 {
-                    // Add Products
-                    var userManager = scope.ServiceProvider.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
-                    var orderService = scope.ServiceProvider.GetService<IOrderService>();
-                    var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
-
-                    var orders1 = PrepareOrders(user.Id);
-                    foreach (var order in orders1)
+                    using (var scope = scopeFactory.CreateScope())
                     {
+                        // Add Products
+                        var userManager = scope.ServiceProvider.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
+                        var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
+                        order.UserId = user.Id;
+                        var orderService = scope.ServiceProvider.GetService<IOrderService>();
                         (await orderService.CreateSaleOrderWithOptionAsync(order))
                             .MatchNone(error => Assert.True(error.IsNullOrEmpty()));
                     }
@@ -153,16 +153,16 @@ namespace Doitsu.Ecommerce.Core.Tests
             {
                 await InitialDatabaseAsync(webhost);
                 var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
-                using (var scope = scopeFactory.CreateScope())
+                var orders1 = PrepareOrdersWithManyProductInOne(0);
+                foreach (var order in orders1)
                 {
-                    // Add Products
-                    var userManager = scope.ServiceProvider.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
-                    var orderService = scope.ServiceProvider.GetService<IOrderService>();
-                    var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
-
-                    var orders1 = PrepareOrdersWithManyProductInOne(user.Id);
-                    foreach (var order in orders1)
+                    using (var scope = scopeFactory.CreateScope())
                     {
+                        // Add Products
+                        var userManager = scope.ServiceProvider.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
+                        var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
+                        order.UserId = user.Id;
+                        var orderService = scope.ServiceProvider.GetService<IOrderService>();
                         (await orderService.CreateNormalOrderWithOptionAsync(order))
                             .MatchNone(error => Assert.True(error.IsNullOrEmpty()));
                     }
@@ -187,16 +187,16 @@ namespace Doitsu.Ecommerce.Core.Tests
             {
                 await InitialDatabaseAsync(webhost);
                 var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
-                using (var scope = scopeFactory.CreateScope())
+                var orders1 = PrepareOrders(0);
+                foreach (var order in orders1)
                 {
-                    // Add Products
-                    var userManager = scope.ServiceProvider.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
-                    var orderService = scope.ServiceProvider.GetService<IOrderService>();
-                    var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
-
-                    var orders1 = PrepareOrders(user.Id);
-                    foreach (var order in orders1)
+                    using (var scope = scopeFactory.CreateScope())
                     {
+                        // Add Products
+                        var userManager = scope.ServiceProvider.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
+                        var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
+                        var orderService = scope.ServiceProvider.GetService<IOrderService>();
+                        order.UserId = user.Id;
                         (await orderService.CreateSaleOrderWithOptionAsync(order))
                             .MatchNone(error => Assert.True(error.IsNullOrEmpty()));
                     }
@@ -248,16 +248,16 @@ namespace Doitsu.Ecommerce.Core.Tests
             {
                 await InitialDatabaseAsync(webhost);
                 var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
-                using (var scope = scopeFactory.CreateScope())
+                var orders1 = PrepareOrders(0);
+                foreach (var order in orders1)
                 {
-                    // Add Products
-                    var userManager = scope.ServiceProvider.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
-                    var orderService = scope.ServiceProvider.GetService<IOrderService>();
-                    var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
-
-                    var orders1 = PrepareOrders(user.Id);
-                    foreach (var order in orders1)
+                    using (var scope = scopeFactory.CreateScope())
                     {
+                        // Add Products
+                        var userManager = scope.ServiceProvider.GetService<EcommerceIdentityUserManager<EcommerceIdentityUser>>();
+                        var orderService = scope.ServiceProvider.GetService<IOrderService>();
+                        var user = await userManager.FindByEmailAsync("duc.tran@doitsu.tech");
+                        order.UserId = user.Id;
                         (await orderService.CreateSaleOrderWithOptionAsync(order))
                             .MatchNone(error => Assert.True(error.IsNullOrEmpty()));
                     }

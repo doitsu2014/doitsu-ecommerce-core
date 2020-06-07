@@ -1,9 +1,11 @@
+using Doitsu.Ecommerce.Core.Abstraction.Identities;
+
 namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
 {
-    public class EcommerceIdentityRoleViewModel
+    public class EcommerceIdentityRoleViewModel : EcommerceIdentityRole
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string NormalizedName { get; set; }
+        public override int Id { get; set; }
+        public override string Name { get; set; }
+        public override string NormalizedName { get; set; }
     }
 }

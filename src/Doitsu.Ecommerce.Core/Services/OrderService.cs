@@ -136,29 +136,27 @@ namespace Doitsu.Ecommerce.Core.Services
             return result;
         }
 
+        public async Task<Option<OrderDetailViewModel, string>> CreateOrderWithOptionAsync(CreateOrderWithOptionViewModel request)
+        {
+            return await request.SomeNotNull()
+                    .WithException("Dữ liệu truyền lên rỗng.")
+                    .Filter(d => d.UserId > 0, "Thông tin người đặt hàng không hợp lệ.")
+                    .FlatMapAsync(async d => await MapOrderWithOptionToSaleOrderAsync(d))
+                    .MapAsync(async d => {
+                        await this.CreateAsync<CreateOrderWithOptionViewModel>(d);
+                        await this.CommitAsync();
+                        return this.Mapper.Map<OrderDetailViewModel>(d);
+                    });
+        }
+
         public async Task<Option<OrderViewModel, string>> CreateNormalOrderWithOptionAsync(CreateOrderWithOptionViewModel request)
         {
             using (var transaction = await this.CreateTransactionAsync())
             {
-                return await request.SomeNotNull()
-                    .WithException("Dữ liệu truyền lên rỗng.")
-                    .Filter(d => d.UserId > 0, "Không tìm thấy thông tin người đặt hàng.")
-                    .FlatMapAsync(async d => await MappingFromOrderWithOptionToSaleOrder(d))
-                    .FlatMapAsync(async d =>
-                    {
-                        var user = await userManager.FindByIdAsync(d.UserId.ToString());
-                        if (user == null) return Option.None<Orders, string>("Không tìm thấy thông tin người đặt hàng.");
-                        else
-                        {
-                            d.User = user;
-                            return Option.Some<Orders, string>(d);
-                        }
-                    })
+                return await CreateOrderWithOptionAsync(request) 
                     .MapAsync(async o =>
                     {
-                        await SendEmailToUsersAsync(o);
-                        await this.CreateAsync(o);
-                        await this.CommitAsync();
+                        await SendEmailToUsersAsync(this.Mapper.Map<Orders>(o));
                         await transaction.CommitAsync();
                         return this.Mapper.Map<OrderViewModel>(o);
                     });
@@ -169,31 +167,20 @@ namespace Doitsu.Ecommerce.Core.Services
         {
             using (var transaction = await this.CreateTransactionAsync())
             {
-                return await request.SomeNotNull()
-                    .WithException("Dữ liệu truyền lên rỗng.")
-                    .Filter(d => d.UserId > 0, "Không tìm thấy thông tin người đặt hàng.")
-                    .MapAsync(async d => (optionOrder: await MappingFromOrderWithOptionToSaleOrder(d), productVariants: d.OrderItems.Select(oi => oi.ProductVariant).ToImmutableList()))
-                    .FlatMapAsync(async d =>
+                return await CreateOrderWithOptionAsync(request)  
+                    .MapAsync(async data => await Task.FromResult((createdOrder: data, productVariants: data.OrderItems.Select(oi => oi.ProductVariant).ToImmutableList())))
+                    .MapAsync(async data =>
                     {
-                        return await d.optionOrder.FlatMapAsync(async o =>
-                        {
-                            var user = await userManager.FindByIdAsync(o.UserId.ToString());
-                            var userTransaction = this.userTransactionService.PrepareUserTransaction(o, d.productVariants, user);
-                            var result = await userTransactionService.UpdateUserBalanceAsync(userTransaction, user);
-                            return result.Map(u =>
-                            {
-                                o.User = user;
-                                return o;
-                            });
-                        });
+                        var userTransaction = this.userTransactionService.PrepareUserTransaction(data.createdOrder, data.productVariants, data.createdOrder.UserId);
+                        var result = await userTransactionService.UpdateUserBalanceAsync(userTransaction, data.createdOrder.UserId);
+                        return data.createdOrder;
                     })
-                    .MapAsync(async o =>
+                    .MapAsync(async orderDetail =>
                     {
-                        await SendEmailToUsersAsync(o);
-                        await this.CreateAsync(o);
-                        await this.CommitAsync();
+                        var entityOrder = this.Mapper.Map<Orders>(orderDetail);
+                        await SendEmailToUsersAsync(entityOrder);
                         await transaction.CommitAsync();
-                        return this.Mapper.Map<OrderViewModel>(o);
+                        return this.Mapper.Map<OrderViewModel>(orderDetail);
                     });
             }
 
@@ -227,25 +214,26 @@ namespace Doitsu.Ecommerce.Core.Services
                     order.CreatedDate = DateTime.UtcNow.ToVietnamDateTime();
                     order.Type = OrderTypeEnum.Withdrawal;
                     order.Status = (int)OrderStatusEnum.Processing;
-                    // prepare transaction
-                    var user = await userManager.FindByIdAsync(order.UserId.ToString());
-                    var userTransaction = this.userTransactionService.PrepareUserTransaction(order, ImmutableList<ProductVariantViewModel>.Empty, user, UserTransactionTypeEnum.Withdrawal);
-                    return (order, userTransaction, user);
+                    await this.CreateAsync(order);
+                    await this.CommitAsync();
+                    return (order);
                 })
                 .FlatMapAsync(async d =>
                 {
-                    return (await userTransactionService.UpdateUserBalanceAsync(d.userTransaction, d.user))
-                        .Map(updateBalanceRes =>
+                    // prepare transaction
+                    var userTransaction = this.userTransactionService.PrepareUserTransaction(this.Mapper.Map<OrderDetailViewModel>(d),
+                                                                                             ImmutableList<ProductVariantViewModel>.Empty,
+                                                                                             d.UserId,
+                                                                                             UserTransactionTypeEnum.Withdrawal);
+                    return (await userTransactionService.UpdateUserBalanceAsync(userTransaction, d.UserId))
+                        .Map(res =>
                         {
-                            d.order.User = updateBalanceRes;
-                            return d.order;
+                            return d;
                         });
                 })
                 .MapAsync(async o =>
                 {
                     await SendEmailToUsersAsync(o);
-                    await this.CreateAsync(o);
-                    await this.CommitAsync();
                     await transaction.CommitAsync();
                     return this.Mapper.Map<OrderViewModel>(o);
                 });
@@ -275,7 +263,7 @@ namespace Doitsu.Ecommerce.Core.Services
             }
         }
 
-        private async Task<Option<Orders, string>> MappingFromOrderWithOptionToSaleOrder(CreateOrderWithOptionViewModel request)
+        private async Task<Option<CreateOrderWithOptionViewModel, string>> MapOrderWithOptionToSaleOrderAsync(CreateOrderWithOptionViewModel request)
         {
             return (await request.SomeNotNull()
                 .WithException("Thông tin đơn hàng rỗng")
@@ -340,12 +328,11 @@ namespace Doitsu.Ecommerce.Core.Services
                         d.FinalPrice += (originPrice * priorityValue);
                     }
 
-                    var order = this.Mapper.Map<Orders>(request);
-                    order.Code = DataUtils.GenerateCode(Constants.OrderInformation.ORDER_CODE_LENGTH);
-                    order.CreatedDate = DateTime.UtcNow.ToVietnamDateTime();
-                    order.Type = OrderTypeEnum.Sale;
-                    order.Status = (int)OrderStatusEnum.New;
-                    return order;
+                    d.Code = DataUtils.GenerateCode(Constants.OrderInformation.ORDER_CODE_LENGTH);
+                    d.CreatedDate = DateTime.UtcNow.ToVietnamDateTime();
+                    d.Type = OrderTypeEnum.Sale;
+                    d.Status = (int)OrderStatusEnum.New;
+                    return d;
                 });
         }
 
@@ -414,13 +401,14 @@ namespace Doitsu.Ecommerce.Core.Services
                 })
                 .FlatMapAsync(async o =>
                 {
-                    var user = await userManager.FindByIdAsync(o.UserId.ToString());
-                    var userTransaction = this.userTransactionService.PrepareUserTransaction(o, ImmutableList<ProductVariantViewModel>.Empty, user, UserTransactionTypeEnum.Income);
-                    var updateBalanceResult = await userTransactionService.UpdateUserBalanceAsync(userTransaction, user);
+                    var userTransaction = this.userTransactionService.PrepareUserTransaction(this.Mapper.Map<OrderDetailViewModel>(o),
+                                                                                             ImmutableList<ProductVariantViewModel>.Empty,
+                                                                                             o.UserId,
+                                                                                             UserTransactionTypeEnum.Income);
+                    var updateBalanceResult = await userTransactionService.UpdateUserBalanceAsync(userTransaction, o.UserId);
                     return updateBalanceResult.Match<Option<Orders, string>>(
                         res =>
                         {
-                            o.User = user;
                             return Option.Some<Orders, string>(o);
                         },
                         error => { return Option.None<Orders, string>(error); }
@@ -428,24 +416,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 })
                 .MapAsync(async o =>
                 {
-                    try
-                    {
-                        var user = await userManager.FindByIdAsync(o.UserId.ToString());
-                        var messagePayloads = new List<MessagePayload>()
-                        {
-                            await emailService.PrepareLeaderOrderMailConfirmAsync(o.User, o),
-                            await emailService.PrepareCustomerOrderMailConfirm(o.User, o)
-                        };
-
-                        var emailResult = await emailService.SendEmailWithBachMocWrapperAsync(messagePayloads);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.LogError(ex, $"Process email for order {o.Code} failure.");
-                    }
-
-                    await this.CreateAsync(o);
-                    await this.CommitAsync();
+                    await SendEmailToUsersAsync(o);
                     return this.Mapper.Map<OrderViewModel>(o);
                 });
         }
