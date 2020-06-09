@@ -140,10 +140,10 @@ namespace Doitsu.Ecommerce.Core
             
             #region Last
             services.ConfigDeliveryIntegration(configuration);
-            services.Configure<ForwardedHeadersOptions>(options =>
-            {
-                options.ForwardedHeaders = ForwardedHeaders.All;
-            });
+            // services.Configure<ForwardedHeadersOptions>(options =>
+            // {
+                // options.ForwardedHeaders = ForwardedHeaders.All;
+            // });
 
             services.Configure<RazorViewEngineOptions>(options =>
             {
@@ -206,7 +206,10 @@ namespace Doitsu.Ecommerce.Core
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public static void UseDoitsuEcommerceCoreHosting(this IApplicationBuilder app, IWebHostEnvironment env, bool isConfigImageSharpWeb = false, bool isUsingIdentityServer = false)
         {
-            app.UseForwardedHeaders();
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.All
+            });
             app.UseHttpsRedirection();
             app.UseDefaultFiles();
             // Using authorize
