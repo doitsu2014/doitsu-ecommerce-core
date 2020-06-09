@@ -210,6 +210,15 @@ namespace Doitsu.Ecommerce.Core
             {
                 ForwardedHeaders = ForwardedHeaders.All
             });
+            app.Use((context, next) =>
+            {
+                if (context.Request.Headers.TryGetValue("X-Forwarded-Proto", out StringValues proto))
+                {
+                    context.Request.Protocol = proto;
+                    context.Request.Scheme = proto;
+                }
+                return next();
+            });
             app.UseHttpsRedirection();
             app.UseDefaultFiles();
             // Using authorize
