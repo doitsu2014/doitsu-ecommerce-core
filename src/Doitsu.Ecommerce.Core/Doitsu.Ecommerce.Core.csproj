@@ -3,7 +3,7 @@
     <PropertyGroup>
         <LangVersion>8.0</LangVersion>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <PackageVersion>7.0.76</PackageVersion>
+        <PackageVersion>7.0.77</PackageVersion>
         <Title>Doitsu.Ecommerce.Core</Title>
         <PackageId>Doitsu.Ecommerce.Core</PackageId>
         <Authors>Doitsu Technology</Authors>
