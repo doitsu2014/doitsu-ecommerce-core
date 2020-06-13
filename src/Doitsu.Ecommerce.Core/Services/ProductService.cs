@@ -27,6 +27,8 @@ namespace Doitsu.Ecommerce.Core.Services
     public interface IProductService : IBaseService<Products>
     {
         Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsByCateIdAsync(string cateSlug);
+        
+        Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsWithIQGreaterThanZeroAsync(string cateSlug);
 
         Task<ProductDetailViewModel> GetProductDetailBySlugAsync(string productSlug);
 
@@ -472,5 +474,11 @@ namespace Doitsu.Ecommerce.Core.Services
                 });
         }
 
+        public async Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsWithIQGreaterThanZeroAsync(string cateSlug)
+        {
+            return (await this.Get<ProductOverviewViewModel>(p => p.InventoryQuantity > 0 
+                    && p.ProductVariants.Where(pv => pv.InventoryQuantity > 0).Count() > 0)
+                .ToListAsync()).ToImmutableList();
+        }
     }
 }
