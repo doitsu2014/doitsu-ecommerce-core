@@ -35,6 +35,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using Doitsu.Ecommerce.Core.SEO;
 
 namespace Doitsu.Ecommerce.Core
 {
@@ -105,6 +106,7 @@ namespace Doitsu.Ecommerce.Core
             #region Config service
             services.AddDoitsuEcommerceCoreServices();
             services.ConfigDeliveryIntegration(configuration);
+            services.ConfigSeo(configuration);
             #endregion
 
             #region Mapper Config
@@ -126,6 +128,7 @@ namespace Doitsu.Ecommerce.Core
 
             services.Configure<SmtpMailServerOptions>(configuration.GetSection("SmtpMailServerOptions"));
             services.Configure<LeaderMail>(configuration.GetSection("LeaderEmail"));
+
             services.AddDoitsuEmailService();
 
             #region Localization
