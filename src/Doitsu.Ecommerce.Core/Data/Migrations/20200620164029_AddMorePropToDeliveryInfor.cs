@@ -10,6 +10,34 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 name: "Property",
                 table: "Products");
 
+            migrationBuilder.AlterColumn<decimal>(
+                name: "DestinationBalance",
+                table: "UserTransactions",
+                type: "decimal(18,4)",
+                nullable: false,
+                defaultValue: 0m,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,2)");
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "CurrentBalance",
+                table: "UserTransactions",
+                type: "decimal(18,4)",
+                nullable: false,
+                defaultValue: 0m,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,2)");
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "Amount",
+                table: "UserTransactions",
+                type: "decimal(18,4)",
+                nullable: false,
+                defaultValue: 0m,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,2)",
+                oldDefaultValue: 0m);
+
             migrationBuilder.AlterColumn<long>(
                 name: "InventoryQuantity",
                 table: "ProductVariants",
@@ -18,6 +46,22 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 oldClrType: typeof(long),
                 oldType: "bigint",
                 oldDefaultValue: -1L);
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "AnotherPrice",
+                table: "ProductVariants",
+                type: "decimal(18,4)",
+                nullable: false,
+                defaultValue: 0m,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,2)",
+                oldDefaultValue: 0m);
+
+            migrationBuilder.AddColumn<int>(
+                name: "InventoryStatus",
+                table: "ProductVariants",
+                nullable: false,
+                defaultValue: 1);
 
             migrationBuilder.AddColumn<long>(
                 name: "InventoryQuantity",
@@ -30,6 +74,25 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 table: "Products",
                 maxLength: 255,
                 nullable: true);
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "PaymentValue",
+                table: "Orders",
+                type: "decimal(18,4)",
+                nullable: false,
+                defaultValue: 0m,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,2)",
+                oldDefaultValue: 0m);
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "DeliveryFees",
+                table: "Orders",
+                type: "decimal(18,4)",
+                nullable: true,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,2)",
+                oldNullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "DeliveryProviderCode",
@@ -73,6 +136,14 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 oldMaxLength: 100,
                 oldNullable: true);
 
+            migrationBuilder.AlterColumn<decimal>(
+                name: "Balance",
+                table: "AspNetUsers",
+                type: "decimal(18,4)",
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,2)");
+
             migrationBuilder.AlterColumn<string>(
                 name: "Address",
                 table: "AspNetUsers",
@@ -105,6 +176,10 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
+                name: "InventoryStatus",
+                table: "ProductVariants");
+
+            migrationBuilder.DropColumn(
                 name: "InventoryQuantity",
                 table: "Products");
 
@@ -132,6 +207,34 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 name: "Ward",
                 table: "AspNetUsers");
 
+            migrationBuilder.AlterColumn<decimal>(
+                name: "DestinationBalance",
+                table: "UserTransactions",
+                type: "decimal(18,2)",
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,4)",
+                oldDefaultValue: 0m);
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "CurrentBalance",
+                table: "UserTransactions",
+                type: "decimal(18,2)",
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,4)",
+                oldDefaultValue: 0m);
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "Amount",
+                table: "UserTransactions",
+                type: "decimal(18,2)",
+                nullable: false,
+                defaultValue: 0m,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,4)",
+                oldDefaultValue: 0m);
+
             migrationBuilder.AlterColumn<long>(
                 name: "InventoryQuantity",
                 table: "ProductVariants",
@@ -141,11 +244,40 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 oldClrType: typeof(long),
                 oldDefaultValue: 0L);
 
+            migrationBuilder.AlterColumn<decimal>(
+                name: "AnotherPrice",
+                table: "ProductVariants",
+                type: "decimal(18,2)",
+                nullable: false,
+                defaultValue: 0m,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,4)",
+                oldDefaultValue: 0m);
+
             migrationBuilder.AddColumn<string>(
                 name: "Property",
                 table: "Products",
                 type: "nvarchar(max)",
                 nullable: true);
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "PaymentValue",
+                table: "Orders",
+                type: "decimal(18,2)",
+                nullable: false,
+                defaultValue: 0m,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,4)",
+                oldDefaultValue: 0m);
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "DeliveryFees",
+                table: "Orders",
+                type: "decimal(18,2)",
+                nullable: true,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,4)",
+                oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
                 name: "ZipCode",
@@ -176,6 +308,14 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 oldClrType: typeof(string),
                 oldMaxLength: 60,
                 oldNullable: true);
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "Balance",
+                table: "AspNetUsers",
+                type: "decimal(18,2)",
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,4)");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Address",

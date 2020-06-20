@@ -21,9 +21,13 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
             builder.Property(x => x.Sku).IsRequired().HasMaxLength(256);
 
             builder.Property(x => x.AnotherDiscount).HasDefaultValue(0);
-            builder.Property(x => x.AnotherPrice).HasDefaultValue(0);
+            builder.Property(x => x.AnotherPrice)
+                .HasColumnType("decimal(18,4)")
+                .HasDefaultValue(0);
+
             builder.Property(x => x.InventoryQuantity).HasDefaultValue(0);
             builder.Property(x => x.Status).HasDefaultValue(ProductVariantStatusEnum.Available);
+            builder.Property(x => x.InventoryStatus).HasDefaultValue(ProductVariantInventoryStatusEnum.Exist);
         }
     }
 }

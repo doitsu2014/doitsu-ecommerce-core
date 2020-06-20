@@ -12,6 +12,7 @@ namespace Doitsu.Ecommerce.Core.Abstraction.Entities
         public float AnotherDiscount { get; set; }
         public long InventoryQuantity { get; set; }
         public ProductVariantStatusEnum Status { get; set; }
+        public ProductVariantInventoryStatusEnum InventoryStatus { get; set; }
         public byte[] Vers { get; set; }
         public bool Active { get; set; }
 

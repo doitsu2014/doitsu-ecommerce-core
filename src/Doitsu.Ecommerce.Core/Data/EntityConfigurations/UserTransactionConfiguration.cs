@@ -12,7 +12,19 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
         {
             base.Configure(builder);
             builder.Property(e => e.Description).HasMaxLength(500);
-            builder.Property(e => e.Amount).HasDefaultValue(0);
+
+            builder.Property(e => e.Amount)
+                .HasColumnType("decimal(18,4)")
+                .HasDefaultValue(0);
+
+            builder.Property(e => e.CurrentBalance)
+                .HasColumnType("decimal(18,4)")
+                .HasDefaultValue(0);
+
+            builder.Property(e => e.DestinationBalance)
+                .HasColumnType("decimal(18,4)")
+                .HasDefaultValue(0);
+
             builder.Property(e => e.CreatedTime).HasDefaultValueSql("(getutcdate())");
 
             builder.HasOne(e => e.User)

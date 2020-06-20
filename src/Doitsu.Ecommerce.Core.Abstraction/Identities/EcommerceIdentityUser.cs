@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Doitsu.Ecommerce.Core.Abstraction.Entities;
 using Doitsu.Service.Core.Interfaces.EfCore;
 using Microsoft.AspNetCore.Identity;
@@ -27,6 +28,8 @@ namespace Doitsu.Ecommerce.Core.Abstraction.Identities
         [DefaultValue(GenderEnum.Unknown)]
         public int Gender { get; set; }
         public bool Active { get; set; }
+
+        [Column(TypeName = "decimal(18,4)")]
         [DefaultValue(0)]
         public decimal Balance { get; set; }
 
