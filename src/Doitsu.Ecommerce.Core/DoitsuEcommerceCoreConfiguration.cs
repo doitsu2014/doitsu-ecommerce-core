@@ -34,6 +34,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
+using Doitsu.Ecommerce.Core.SEO;
 
 namespace Doitsu.Ecommerce.Core
 {
@@ -104,6 +106,7 @@ namespace Doitsu.Ecommerce.Core
             #region Config service
             services.AddDoitsuEcommerceCoreServices();
             services.ConfigDeliveryIntegration(configuration);
+            services.ConfigSeo(configuration);
             #endregion
 
             #region Mapper Config
@@ -125,6 +128,7 @@ namespace Doitsu.Ecommerce.Core
 
             services.Configure<SmtpMailServerOptions>(configuration.GetSection("SmtpMailServerOptions"));
             services.Configure<LeaderMail>(configuration.GetSection("LeaderEmail"));
+
             services.AddDoitsuEmailService();
 
             #region Localization
@@ -140,10 +144,10 @@ namespace Doitsu.Ecommerce.Core
             
             #region Last
             services.ConfigDeliveryIntegration(configuration);
-            services.Configure<ForwardedHeadersOptions>(options =>
-            {
-                options.ForwardedHeaders = ForwardedHeaders.All;
-            });
+            // services.Configure<ForwardedHeadersOptions>(options =>
+            // {
+                // options.ForwardedHeaders = ForwardedHeaders.All;
+            // });
 
             services.Configure<RazorViewEngineOptions>(options =>
             {
@@ -206,7 +210,19 @@ namespace Doitsu.Ecommerce.Core
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public static void UseDoitsuEcommerceCoreHosting(this IApplicationBuilder app, IWebHostEnvironment env, bool isConfigImageSharpWeb = false, bool isUsingIdentityServer = false)
         {
-            app.UseForwardedHeaders();
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.All
+            });
+            app.Use((context, next) =>
+            {
+                if (context.Request.Headers.TryGetValue("X-Forwarded-Proto", out StringValues proto))
+                {
+                    context.Request.Protocol = proto;
+                    context.Request.Scheme = proto;
+                }
+                return next();
+            });
             app.UseHttpsRedirection();
             app.UseDefaultFiles();
             // Using authorize

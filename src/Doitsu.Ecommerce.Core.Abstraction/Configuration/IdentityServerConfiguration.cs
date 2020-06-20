@@ -1,5 +1,12 @@
 namespace Doitsu.Ecommerce.Core.Abstraction.Configuration
 {
+    public class IdentityServerConfiguration
+    {
+        public bool IsProduction { get; set; }
+        public string CertificatePath { get; set; }
+        public string CertificatePassword { get; set; }
+    }
+
     public class MvcFrontEndAppConfiguration
     {
         public string AuthorityUrl { get; set; }
@@ -10,7 +17,8 @@ namespace Doitsu.Ecommerce.Core.Abstraction.Configuration
         public string CookieLogoutPath { get; set; }
     }
 
-    public class SpaAdminAppConfiguration {
+    public class SpaAdminAppConfiguration
+    {
         public string AuthorityUrl { get; set; }
         public string ClientId { get; set; }
         public string ClientSecret { get; set; }

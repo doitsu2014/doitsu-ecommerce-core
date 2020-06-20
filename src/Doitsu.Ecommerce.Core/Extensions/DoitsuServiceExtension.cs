@@ -24,6 +24,9 @@ using IdentityServer4;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Logging;
 using System;
+using System.IO;
+using System.Security.Cryptography.X509Certificates;
+using IdentityServer4.Configuration;
 
 namespace Doitsu.Service.Core.Extensions
 {
@@ -42,19 +45,11 @@ namespace Doitsu.Service.Core.Extensions
 
         public static IServiceCollection AddEcommerceIs4Server(this IServiceCollection services, IDatabaseConfigurer databaseConfigurer, string migrationAssembly, IConfiguration configuration)
         {
-            // services.AddTransient(typeof(ICache<>), typeof(IdentityServers4Cache<>));
+            var isc = configuration.GetSection(nameof(IdentityServerConfiguration)).Get<IdentityServerConfiguration>();
 
-            services.AddDbContext<ConfigurationDbContext>(builder =>
-                    databaseConfigurer.Configure(builder, typeof(EcommerceIs4ConfigurationDbContext).Assembly.GetName().Name),
-                    ServiceLifetime.Scoped);
-
-            services.AddDbContext<PersistedGrantDbContext>(builder =>
-                    databaseConfigurer.Configure(builder, typeof(EcommerceIs4PersistedGrantDbContext).Assembly.GetName().Name),
-                    ServiceLifetime.Scoped);
-
-           IdentityModelEventSource.ShowPII = true; //To show detail of error and see the problem
-
-            services.AddIdentityServer(options =>
+            Func<IIdentityServerBuilder> AddAndGetIdentityServerBuilder = () => 
+            {
+                return services.AddIdentityServer(options =>
                 {
                     options.Events.RaiseErrorEvents = true;
                     options.Events.RaiseInformationEvents = true;
@@ -67,7 +62,6 @@ namespace Doitsu.Service.Core.Extensions
                     // options.UserInteraction.ErrorUrl = "/api/is4/error";
                     // options.UserInteraction.DeviceVerificationUrl = "/api/is4/device-verification";
                 })
-                .AddDeveloperSigningCredential()
                 .AddConfigurationStore<EcommerceIs4ConfigurationDbContext>(options =>
                 {
                     options.ConfigureDbContext = builder => databaseConfigurer.Configure(builder, migrationAssembly);
@@ -79,6 +73,29 @@ namespace Doitsu.Service.Core.Extensions
                     options.TokenCleanupInterval = 3600;
                 })
                 .AddAspNetIdentity<EcommerceIdentityUser>();
+            };
+
+            Func<X509Certificate2> GetX509Certificate2 = () =>
+            {
+                if (!File.Exists(isc.CertificatePath))
+                    throw new InvalidOperationException($"No certificate by name '{isc.CertificatePath}'");
+                return new X509Certificate2(isc.CertificatePath, isc.CertificatePassword, X509KeyStorageFlags.MachineKeySet);
+            };
+            // services.AddTransient(typeof(ICache<>), typeof(IdentityServers4Cache<>));
+
+            services.AddDbContext<ConfigurationDbContext>(builder =>
+                    databaseConfigurer.Configure(builder, typeof(EcommerceIs4ConfigurationDbContext).Assembly.GetName().Name),
+                    ServiceLifetime.Scoped);
+
+            services.AddDbContext<PersistedGrantDbContext>(builder =>
+                    databaseConfigurer.Configure(builder, typeof(EcommerceIs4PersistedGrantDbContext).Assembly.GetName().Name),
+                    ServiceLifetime.Scoped);
+
+            IdentityModelEventSource.ShowPII = true; //To show detail of error and see the problem
+
+            var isBuilder = isc.IsProduction 
+                ? AddAndGetIdentityServerBuilder().AddSigningCredential(GetX509Certificate2()) 
+                : AddAndGetIdentityServerBuilder().AddDeveloperSigningCredential();
 
             services.AddEcommerceIs4Authentication(configuration);
             return services;
@@ -209,6 +226,7 @@ namespace Doitsu.Service.Core.Extensions
                 });
             return services;
         }
+
 
         public static IServiceCollection AddGzip(this IServiceCollection services)
         {
