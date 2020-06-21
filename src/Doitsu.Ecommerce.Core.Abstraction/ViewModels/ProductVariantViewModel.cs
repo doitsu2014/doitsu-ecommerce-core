@@ -21,12 +21,13 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         public byte[] Vers { get; set; }
         [JsonProperty("status")]
         public ProductVariantStatusEnum Status { get; set; }
-
         [JsonProperty("productPrice")]
         public decimal ProductPrice { get; set; }
-
         [JsonProperty("productWeight")]
         public float ProductWeight { get; set; }
+
+        [JsonProperty("inventoryStatus")]
+        public ProductVariantInventoryStatusEnum InventoryStatus { get; set; }
 
         [JsonProperty("productVariantOptionValues")]
         public virtual ICollection<ProductVariantOptionValueViewModel> ProductVariantOptionValues { get; set; }

@@ -29,6 +29,7 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<Option<int, string>> UpdateProductVariantAnotherDiscountAsync(int productId, int productVariantId, float anotherDiscount);
         Task<Option<int, string>> UpdateProductVariantAnotherPriceAsync(int productId, int productVariantId, decimal anotherPrice);
         Task<Option<int, string>> UpdateProductVariantStatusAsync(int productId, int productVariantId, ProductVariantStatusEnum value);
+        Task<Option<int, string>> UpdateProductVariantInventoryStatusAsync(int productId, int productVariantId, ProductVariantInventoryStatusEnum value);
         ImmutableList<ProductVariants> BuildListProductVariant(Products product);
         Task<Option<int, string>> IncreaseInventoryQuantityAsync(int productId, int productVariantId, int quantity = 0);
         Task<Option<int, string>> DecreaseInventoryQuantityAsync(int productId, int productVariantId, int quantity = 0);
@@ -332,5 +333,20 @@ namespace Doitsu.Ecommerce.Core.Services
                 });
         }
 
+        public async Task<Option<int, string>> UpdateProductVariantInventoryStatusAsync(int productId, int productVariantId, ProductVariantInventoryStatusEnum value)
+        {
+            return await (productId, productVariantId, value).SomeNotNull()
+             .WithException(string.Empty)
+             .FilterAsync(async req => await DbContext.Products.AnyAsync(p => p.Id == productId), "Không tồn tại sản phẩm này.")
+             .FilterAsync(async req => await DbContext.ProductVariants.AnyAsync(pv => pv.Id == productVariantId), "Không tồn tại biến thể này.")
+             .MapAsync(async req =>
+             {
+                 var productVariant = await this.FindByKeysAsync(productVariantId);
+                 productVariant.InventoryStatus = value;
+                 this.Update(productVariant);
+                 await this.CommitAsync();
+                 return productVariant.Id;
+             });
+        }
     }
 }
