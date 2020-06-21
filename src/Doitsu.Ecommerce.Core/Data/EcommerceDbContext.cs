@@ -59,7 +59,7 @@ namespace Doitsu.Ecommerce.Core.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            
+
             builder.Entity<EcommerceIdentityUser>()
                 .HasMany(e => e.UserRoles)
                 .WithOne()
@@ -96,6 +96,10 @@ namespace Doitsu.Ecommerce.Core.Data
 
         public async Task<int> SaveChangesWithBeforeSavingAsync() => await SaveChangesWithBeforeSavingAsync(true);
 
+        public async Task<int> SaveChangesWithoutBeforeSavingAsync(bool acceptAllChangesOnSuccess = true, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
 
         public Option<object[], string> GetPrimaryKey<T>(T entity) where T : class
         {
@@ -142,6 +146,24 @@ namespace Doitsu.Ecommerce.Core.Data
                     return Validator.TryValidateObject(e.Entity, new ValidationContext(e.Entity), result) ? null : result;
                 })
                 .Where(r => r != null).SelectMany(r => r).ToImmutableList();
+        }
+
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            OnBeforeSaving();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            OnBeforeSaving();
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+        {
+            OnBeforeSaving();
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
     }
 }

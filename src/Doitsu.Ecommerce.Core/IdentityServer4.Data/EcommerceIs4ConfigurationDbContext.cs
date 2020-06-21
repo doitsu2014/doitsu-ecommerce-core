@@ -10,8 +10,9 @@ using Microsoft.EntityFrameworkCore;
 using ApiResource = IdentityServer4.EntityFramework.Entities.ApiResource;
 using Client = IdentityServer4.EntityFramework.Entities.Client;
 using IdentityResource = IdentityServer4.EntityFramework.Entities.IdentityResource;
-using IdentityClaim = IdentityServer4.EntityFramework.Entities.IdentityClaim;
+using IdentityClaim = IdentityServer4.EntityFramework.Entities.IdentityResourceClaim;
 using IdentityProperty = IdentityServer4.EntityFramework.Entities.IdentityResourceProperty;
+using ApiScope = IdentityServer4.EntityFramework.Entities.ApiScope;
 using System.Linq;
 
 namespace Doitsu.Ecommerce.Core.IdentityServer4.Data
@@ -219,7 +220,7 @@ namespace Doitsu.Ecommerce.Core.IdentityServer4.Data
             new ApiResource { Id = id, Name = name, DisplayName = displayName, Created = created, Enabled = true };
 
         protected ApiScope CreateApiScope(int id, int apiResourceId, string name, string displayName) =>
-            new ApiScope { Id = id, ApiResourceId = apiResourceId, Name = name, DisplayName = displayName, ShowInDiscoveryDocument = true };
+            new ApiScope { Id = id, Name = name, DisplayName = displayName, ShowInDiscoveryDocument = true };
 
         #endregion
     }

@@ -26,7 +26,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
     public interface IProductService : IBaseService<Products>
     {
-        Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsByCateIdAsync(string cateSlug);
+        Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsByCateIdAsync(string cateSlug, int limit = 0);
         
         Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsWithIQGreaterThanZeroAsync(string cateSlug);
 
@@ -77,15 +77,26 @@ namespace Doitsu.Ecommerce.Core.Services
             this.productOptionService = productOptionService;
         }
 
-        private async Task<CategoryWithProductOverviewViewModel> GetFirstCategoryWithProductByCateSlug(string slug) => await DbContext.Set<Categories>()
-            .Include(c => c.InverseParentCate)
-                .ThenInclude(c => c.InverseParentCate)
-                    .ThenInclude(c => c.Products)
-            .Include(c => c.Products)
-            .Where(c => c.Slug == slug).ProjectTo<CategoryWithProductOverviewViewModel>(Mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync();
+        private async Task<CategoryWithProductOverviewViewModel> GetFirstCategoryWithProductByCateSlug(string slug, int limit = 0) {
 
-        public async Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsByCateIdAsync(string cateSlug)
+            var query = DbContext.Set<Categories>()
+                .Include(c => c.InverseParentCate)
+                    .ThenInclude(c => c.InverseParentCate)
+                        .ThenInclude(c => c.Products)
+                .Include(c => c.Products)
+                .Where(c => c.Slug == slug);
+
+            if(limit > 0) {
+                // query = query.Select(c => c.Products.OrderByDescending(cp => cp).Skip(0))
+            }
+
+
+            return await query 
+                .ProjectTo<CategoryWithProductOverviewViewModel>(Mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsByCateIdAsync(string cateSlug, int limit = 0)
         {
             var category = await GetFirstCategoryWithProductByCateSlug(cateSlug);
             if (category == null)
@@ -230,7 +241,7 @@ namespace Doitsu.Ecommerce.Core.Services
                         productEnt.ProductVariants = listProductVariants;
 
                         await CreateAsync(productEnt);
-                        await DbContext.SaveChangesAsync();
+                        await DbContext.SaveChangesWithBeforeSavingAsync();
                         await transaction.CommitAsync();
                         return productEnt.Id;
                     });
@@ -255,7 +266,7 @@ namespace Doitsu.Ecommerce.Core.Services
                             result.Add(productEnt);
                         }
 
-                        await DbContext.SaveChangesAsync();
+                        await DbContext.SaveChangesWithBeforeSavingAsync();
                         await transaction.CommitAsync();
                         return result.Select(x => x.Id).ToArray();
                     });
@@ -411,7 +422,7 @@ namespace Doitsu.Ecommerce.Core.Services
                         DbContext.ProductOptionValues.RemoveRange(po.ProductOptionValues);
                         DbContext.ProductVariantOptionValues.RemoveRange(po.ProductOptionValues.SelectMany(pov => pov.ProductVariantOptionValues));
                         DbContext.ProductVariants.RemoveRange(po.ProductOptionValues.SelectMany(pov => pov.ProductVariantOptionValues.Select(pvov => pvov.ProductVariant)));
-                        await this.CommitAsync();
+                        await this.DbContext.SaveChangesWithoutBeforeSavingAsync();
                         return req;
                     })
                     .MapAsync(async req =>
@@ -428,7 +439,7 @@ namespace Doitsu.Ecommerce.Core.Services
                         {
                             await this.productVariantService.CreateAsync(gPv);
                         };
-                        await this.CommitAsync();
+                        await this.DbContext.SaveChangesWithoutBeforeSavingAsync();
                         await transaction.CommitAsync();
                         return req.productOptionId;
                     });

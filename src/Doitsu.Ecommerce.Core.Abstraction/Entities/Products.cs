@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Doitsu.Service.Core.Interfaces.EfCore;
 using EFCore.Abstractions.Models;
 
 namespace Doitsu.Ecommerce.Core.Abstraction.Entities
 {
-    public class Products : Entity<int>, IConcurrencyCheckVers, IActivable
+    public class Products : Entity<int>, IConcurrencyCheckVers, IActivable, IAuditable
     {
         public string Code { get; set; }
         public string Name { get; set; }
@@ -21,6 +22,8 @@ namespace Doitsu.Ecommerce.Core.Abstraction.Entities
         public string Slug { get; set; }
         public float Weight { get; set; }
         public long InventoryQuantity { get; set; }
+        public DateTime? LastUpdatedDate { get; set; }
+        public DateTime? CreatedDate { get; set; }
 
         public virtual Categories Cate { get; set; }
         public virtual ICollection<OrderItems> OrderItems { get; set; }

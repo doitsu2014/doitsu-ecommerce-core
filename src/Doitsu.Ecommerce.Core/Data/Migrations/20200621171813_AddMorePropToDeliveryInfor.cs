@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
@@ -57,17 +58,37 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 oldType: "decimal(18,2)",
                 oldDefaultValue: 0m);
 
+            migrationBuilder.AddColumn<DateTime>(
+                name: "CreatedDate",
+                table: "ProductVariants",
+                nullable: true);
+
             migrationBuilder.AddColumn<int>(
                 name: "InventoryStatus",
                 table: "ProductVariants",
                 nullable: false,
                 defaultValue: 1);
 
+            migrationBuilder.AddColumn<DateTime>(
+                name: "LastUpdatedDate",
+                table: "ProductVariants",
+                nullable: true);
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "CreatedDate",
+                table: "Products",
+                nullable: true);
+
             migrationBuilder.AddColumn<long>(
                 name: "InventoryQuantity",
                 table: "Products",
                 nullable: false,
                 defaultValue: 0L);
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "LastUpdatedDate",
+                table: "Products",
+                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "ShortDescription",
@@ -176,11 +197,27 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
+                name: "CreatedDate",
+                table: "ProductVariants");
+
+            migrationBuilder.DropColumn(
                 name: "InventoryStatus",
                 table: "ProductVariants");
 
             migrationBuilder.DropColumn(
+                name: "LastUpdatedDate",
+                table: "ProductVariants");
+
+            migrationBuilder.DropColumn(
+                name: "CreatedDate",
+                table: "Products");
+
+            migrationBuilder.DropColumn(
                 name: "InventoryQuantity",
+                table: "Products");
+
+            migrationBuilder.DropColumn(
+                name: "LastUpdatedDate",
                 table: "Products");
 
             migrationBuilder.DropColumn(
