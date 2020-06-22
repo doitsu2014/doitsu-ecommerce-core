@@ -21,7 +21,7 @@ using Doitsu.Utils;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public interface IProductVariantService : IBaseService<ProductVariants>
+    public interface IProductVariantService : IEcommerceBaseService<ProductVariants>
     {
         Task<ProductVariantDetailViewModel> FindProductVariantFromOptionsAsync(ICollection<ProductOptionValueViewModel> listProductOptions);
         Task<ImmutableArray<int?>> GetProductVariantIdsFromProductFilterParamsAsync(ProductFilterParamViewModel[] productFilterParams);
@@ -37,9 +37,9 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<Option<int[], string>> DecreaseBatchPvInventoryQuantityAsync(int[] productVariantIds, int quantity = 0);
     }
 
-    public class ProductVariantService : BaseService<ProductVariants>, IProductVariantService
+    public class ProductVariantService : EcommerceBaseService<ProductVariants>, IProductVariantService
     {
-        public ProductVariantService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<ProductVariants, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
+        public ProductVariantService(EcommerceDbContext dbContext, IMapper mapper, ILogger<EcommerceBaseService<ProductVariants>> logger) : base(dbContext, mapper, logger)
         {
         }
 

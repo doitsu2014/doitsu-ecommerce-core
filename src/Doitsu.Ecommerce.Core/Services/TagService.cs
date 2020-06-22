@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper.QueryableExtensions;
-using Doitsu.Service.Core;
 using Doitsu.Ecommerce.Core.Abstraction.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Doitsu.Ecommerce.Core.Abstraction.Entities;
-
-using Doitsu.Ecommerce.Core.Abstraction;
 using System.Collections.Generic;
 using AutoMapper;
 using Doitsu.Ecommerce.Core.Data;
@@ -18,17 +13,17 @@ using Doitsu.Ecommerce.Core.Services.Interface;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public interface ITagService : IBaseService<Tag>
+    public interface ITagService : IEcommerceBaseService<Tag>
     {
         Task<ImmutableList<TagViewModel>> GetTopBlogTagsAsync(int limit);
         Task<ImmutableList<TagViewModel>> ExceptNotExistName(List<string> titles);
     }
 
-    public class TagService : BaseService<Tag>, ITagService
+    public class TagService : EcommerceBaseService<Tag>, ITagService
     {
         public TagService(EcommerceDbContext dbContext,
                           IMapper mapper,
-                          ILogger<BaseService<Tag, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
+                          ILogger<EcommerceBaseService<Tag>> logger) : base(dbContext, mapper, logger)
         {
         }
 

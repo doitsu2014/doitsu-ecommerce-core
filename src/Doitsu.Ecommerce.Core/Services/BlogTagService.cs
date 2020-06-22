@@ -14,15 +14,15 @@ using Doitsu.Ecommerce.Core.Services.Interface;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public interface IBlogTagService : IBaseService<BlogTags>
+    public interface IBlogTagService : IEcommerceBaseService<BlogTags>
     {
         Task DeleteAllByBlogIdAsync(int blogId);
         Task AddBlogTagFromTagTitles(int blogId, List<int> tagIds);
     }
 
-    public class BlogTagService : BaseService<BlogTags>, IBlogTagService
+    public class BlogTagService : EcommerceBaseService<BlogTags>, IBlogTagService
     {
-        public BlogTagService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<BlogTags, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
+        public BlogTagService(EcommerceDbContext dbContext, IMapper mapper, ILogger<EcommerceBaseService<BlogTags>> logger) : base(dbContext, mapper, logger)
         {
         }
 

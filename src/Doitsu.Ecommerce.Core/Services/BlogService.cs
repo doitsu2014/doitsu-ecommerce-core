@@ -20,7 +20,7 @@ using Doitsu.Ecommerce.Core.Services.Interface;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public interface IBlogService : IBaseService<Blogs>
+    public interface IBlogService : IEcommerceBaseService<Blogs>
     {
         Task<DoitsuPaginatedList<BlogOverviewViewModel>> GetAllDetailBlogsByCategoryWithPagingAsync(string blogCategorySlug, int page = 0, int limit = 4);
         Task<BlogDetailViewModel> GetBlogDetailBySlugAsync(string slug);
@@ -30,13 +30,13 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<int> CreateWithConstraintAsync(BlogDetailViewModel data, EcommerceIdentityUser publisher, EcommerceIdentityUser creater);
     }
 
-    public class BlogService : BaseService<Blogs>, IBlogService
+    public class BlogService : EcommerceBaseService<Blogs>, IBlogService
     {
         private readonly IBlogTagService blogTagService;
 
         public BlogService(EcommerceDbContext dbContext,
                            IMapper mapper,
-                           ILogger<BaseService<Blogs, EcommerceDbContext>> logger,
+                           ILogger<EcommerceBaseService<Blogs>> logger,
                            IBlogTagService blogTagService) : base(dbContext, mapper, logger)
         {
             this.blogTagService = blogTagService;
@@ -82,7 +82,7 @@ namespace Doitsu.Ecommerce.Core.Services
             {
                 // remove all blog tags
                 await blogTagService.DeleteAllByBlogIdAsync(data.Id);
-                await CommitWithoutBeforeSavingAsync();
+                await DbContext.SaveChangesWithoutBeforeSavingAsync();
 
                 var blogEntity = await FirstOrDefaultAsync(x => x.Id == data.Id);
                 blogEntity = Mapper.Map(data, blogEntity);

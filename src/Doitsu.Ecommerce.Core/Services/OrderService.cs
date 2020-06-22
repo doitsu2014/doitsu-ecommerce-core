@@ -29,7 +29,7 @@ using Optional.Async;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public partial class OrderService : BaseService<Orders>, IOrderService
+    public partial class OrderService : EcommerceBaseService<Orders>, IOrderService
     {
         private readonly IEmailService emailService;
         private readonly IProductService productService;
@@ -41,7 +41,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public OrderService(EcommerceDbContext dbContext,
             IMapper mapper,
-            ILogger<BaseService<Orders, EcommerceDbContext>> logger,
+            ILogger<EcommerceBaseService<Orders>> logger,
             IEmailService emailService,
             IProductService productService,
             EcommerceIdentityUserManager<EcommerceIdentityUser> userManager,

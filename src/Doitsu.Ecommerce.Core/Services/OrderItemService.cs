@@ -7,13 +7,13 @@ using Doitsu.Ecommerce.Core.Services.Interface;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public interface IOrderItemService : IBaseService<OrderItems>
+    public interface IOrderItemService : IEcommerceBaseService<OrderItems>
     {
     }
 
-    public class OrderItemService : BaseService<OrderItems>, IOrderItemService
+    public class OrderItemService : EcommerceBaseService<OrderItems>, IOrderItemService
     {
-        public OrderItemService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<OrderItems, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
+        public OrderItemService(EcommerceDbContext dbContext, IMapper mapper, ILogger<EcommerceBaseService<OrderItems>> logger) : base(dbContext, mapper, logger)
         {
         }
     }

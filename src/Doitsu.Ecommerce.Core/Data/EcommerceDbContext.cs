@@ -88,14 +88,6 @@ namespace Doitsu.Ecommerce.Core.Data
             }
         }
 
-        private async Task<int> SaveChangesWithBeforeSavingAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
-        {
-            OnBeforeSaving();
-            return await SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-        }
-
-        public async Task<int> SaveChangesWithBeforeSavingAsync() => await SaveChangesWithBeforeSavingAsync(true);
-
         public async Task<int> SaveChangesWithoutBeforeSavingAsync(bool acceptAllChangesOnSuccess = true, CancellationToken cancellationToken = new CancellationToken())
         {
             return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
@@ -121,9 +113,6 @@ namespace Doitsu.Ecommerce.Core.Data
                 .NotNull(() => $"Invalid entity type {entityType.FullName}")
                 .Map(et => et.FindPrimaryKey().Properties.ToArray());
         }
-
-        // public virtual async Task<Option<int, ImmutableList<ValidationResult>>> SaveChangesWithValidationAsync(CancellationToken cancellationToken = new CancellationToken())
-        //     => await SaveChangesWithValidationAsync(true, cancellationToken);
 
         protected virtual void OnBeforeSaving()
         {

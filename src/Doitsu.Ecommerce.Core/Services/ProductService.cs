@@ -24,7 +24,7 @@ using Doitsu.Ecommerce.Core.Services.Interface;
 namespace Doitsu.Ecommerce.Core.Services
 {
 
-    public interface IProductService : IBaseService<Products>
+    public interface IProductService : IEcommerceBaseService<Products>
     {
         Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsByCateIdAsync(string cateSlug, int limit = 0);
         
@@ -63,13 +63,13 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<Option<int, string>> IncreaseInventoryQuantity(int productId, int quantity = 0);
     }
 
-    public class ProductService : BaseService<Products>, IProductService
+    public class ProductService : EcommerceBaseService<Products>, IProductService
     {
         private readonly IProductVariantService productVariantService;
         private readonly IProductOptionService productOptionService;
         public ProductService(EcommerceDbContext dbContext,
             IMapper mapper,
-            ILogger<BaseService<Products, EcommerceDbContext>> logger,
+            ILogger<EcommerceBaseService<Products>> logger,
             IProductVariantService productVariantService,
             IProductOptionService productOptionService) : base(dbContext, mapper, logger)
         {
@@ -241,7 +241,7 @@ namespace Doitsu.Ecommerce.Core.Services
                         productEnt.ProductVariants = listProductVariants;
 
                         await CreateAsync(productEnt);
-                        await DbContext.SaveChangesWithBeforeSavingAsync();
+                        await CommitAsync();
                         await transaction.CommitAsync();
                         return productEnt.Id;
                     });
@@ -266,7 +266,7 @@ namespace Doitsu.Ecommerce.Core.Services
                             result.Add(productEnt);
                         }
 
-                        await DbContext.SaveChangesWithBeforeSavingAsync();
+                        await CommitAsync();
                         await transaction.CommitAsync();
                         return result.Select(x => x.Id).ToArray();
                     });

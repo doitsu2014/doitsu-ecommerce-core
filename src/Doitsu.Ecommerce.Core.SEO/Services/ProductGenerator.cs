@@ -1,6 +1,7 @@
 ﻿using Doitsu.Ecommerce.Core.Abstraction.ViewModels;
 using Doitsu.Ecommerce.Core.SEO.Helpers;
 using Doitsu.Ecommerce.Core.SEO.Interfaces;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Schema.NET;
 using System;
@@ -12,9 +13,13 @@ namespace Doitsu.Ecommerce.Core.SEO.Services
     public class ProductGenerator : IProductGenerator
     {
         private string baseUri;
-        public ProductGenerator(IOptions<DomainModel> domainModel)
+        private readonly ILogger<ProductGenerator> logger;
+
+        public ProductGenerator(IOptions<DomainModel> domainModel, ILogger<ProductGenerator> logger)
         {
             this.baseUri = domainModel.Value.BaseUri;
+            this.logger = logger;
+
         }
 
         public List<Product> GenerateProductFromProductDetail(ProductDetailViewModel product, Organization organization)
@@ -231,6 +236,7 @@ namespace Doitsu.Ecommerce.Core.SEO.Services
             }
             catch (Exception ex)
             {
+                this.logger.LogError("WebsiteGenerator exception: {ex}", ex);
                 return null;
             }
         }

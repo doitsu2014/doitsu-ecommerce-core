@@ -19,7 +19,7 @@ using Doitsu.Ecommerce.Core.Services.Interface;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public interface ICategoryService : IBaseService<Categories>
+    public interface ICategoryService : IEcommerceBaseService<Categories>
     {
         Task<ImmutableList<CategoryMenuViewModel>> GetProductCategoryForMenuAsync();
         Task<ImmutableList<CategoryViewModel>> GetBuildingCategoryChildrenAsync();
@@ -41,11 +41,11 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<ImmutableList<CategoryWithInverseParentViewModel>> GetAllParentCategoryWithInverseCategory(int depth = 1);
     }
 
-    public class CategoryService : BaseService<Categories>, ICategoryService
+    public class CategoryService : EcommerceBaseService<Categories>, ICategoryService
     {
         public CategoryService(EcommerceDbContext dbContext,
                                IMapper mapper,
-                               ILogger<BaseService<Categories, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
+                               ILogger<EcommerceBaseService<Categories>> logger) : base(dbContext, mapper, logger)
         {
         }
 

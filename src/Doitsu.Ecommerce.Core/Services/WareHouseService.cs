@@ -9,9 +9,9 @@ using Doitsu.Ecommerce.Core.Services.Interface;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public class WareHouseService : BaseService<WareHouse>, IBaseService<WareHouse>
+    public class WareHouseService : EcommerceBaseService<WareHouse>, IEcommerceBaseService<WareHouse>
     {
-        public WareHouseService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<WareHouse, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
+        public WareHouseService(EcommerceDbContext dbContext, IMapper mapper, ILogger<EcommerceBaseService<WareHouse>> logger) : base(dbContext, mapper, logger)
         {
         }
     }

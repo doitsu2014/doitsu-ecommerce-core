@@ -15,10 +15,10 @@ variables:
 steps:
 
 - task: DotNetCoreCLI@2
-  displayName: "Building Doitsu.Ecommerce.Core Process"
+  displayName: "Building Doitsu.Service.Core Process"
   inputs:
     command: 'build'
-    projects: 'src/Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj'
+    projects: 'src/Doitsu.Service.Core/Doitsu.Service.Core.csproj'
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
@@ -26,6 +26,13 @@ steps:
   inputs:
     command: 'build'
     projects: 'src/Doitsu.Ecommerce.Core.Abstraction/Doitsu.Ecommerce.Core.Abstraction.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+    
+- task: DotNetCoreCLI@2
+  displayName: "Building Doitsu.Ecommerce.Core Process"
+  inputs:
+    command: 'build'
+    projects: 'src/Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj'
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
@@ -50,20 +57,29 @@ steps:
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
-  displayName: "Packing Doitsu.Ecommerce.Core Process"
+  displayName: "Packing Doitsu.Service.Core Process"
   inputs:
     command: 'pack'
     arguments: '--configuration $(buildConfiguration)'
-    packagesToPack: 'src/Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj'
+    packagesToPack: 'src/Doitsu.Service.Core/Doitsu.Service.Core.csproj'
     nobuild: true
     versioningScheme: 'off'
-
+    
 - task: DotNetCoreCLI@2
   displayName: "Packing Doitsu.Ecommerce.Core.Abstraction Process"
   inputs:
     command: 'pack'
     arguments: '--configuration $(buildConfiguration)'
     packagesToPack: 'src/Doitsu.Ecommerce.Core.Abstraction/Doitsu.Ecommerce.Core.Abstraction.csproj'
+    nobuild: true
+    versioningScheme: 'off'
+
+- task: DotNetCoreCLI@2
+  displayName: "Packing Doitsu.Ecommerce.Core Process"
+  inputs:
+    command: 'pack'
+    arguments: '--configuration $(buildConfiguration)'
+    packagesToPack: 'src/Doitsu.Ecommerce.Core/Doitsu.Ecommerce.Core.csproj'
     nobuild: true
     versioningScheme: 'off'
 

@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <PackageVersion>7.0.20</PackageVersion>
+        <PackageId>Doitsu.Service.Core</PackageId>
+        <Authors>Doitsu Technology</Authors>
+        <Copyright>2018</Copyright>
+        <NeutralLanguage>en</NeutralLanguage>
+        <Owners>Doitsu Technology</Owners>
+        <PackageProjectUrl>https://dev.azure.com/doitsutechnology/Doitsu.Technology.Core</PackageProjectUrl>
+        <PackageIcon>doitsu-logo.png</PackageIcon>
+        <Summary>Core of doitsu api website service</Summary>
+        <PackageTags>util methods, service extensions, ef core extensions, identity extensions</PackageTags>
+        <Title>Doitsu.Service.Core</Title>
+        <Description>Doitsu.Service.Core is a util platform to support AspNetCore using patterns UOW, ViewModel, Service. Some utils like logger, identity. The main target to help my company coding faster.</Description>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <RepositoryUrl>https://doitsutechnology@dev.azure.com/doitsutechnology/Doitsu.Technology.Core/_git/Doitsu.Technology.Core</RepositoryUrl>
+        <RepositoryType>Azure Repos</RepositoryType>
+        <PackageReleaseNotes>Update version</PackageReleaseNotes>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="AutoMapper" Version="9.0.0" />
+        <PackageReference Include="AutoMapper.Collection.EntityFrameworkCore" Version="1.0.1" />
+        <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
+        <PackageReference Include="AsyncEnumerator" Version="4.0.2" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.4" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.4" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.4" />
+        <PackageReference Include="Optional" Version="5.0.0-alpha" />
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Images\doitsu-logo.png" Pack="true" PackagePath="" />
+    </ItemGroup>
+</Project>
