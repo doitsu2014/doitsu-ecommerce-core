@@ -26,6 +26,7 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<ImmutableList<BlogOverviewViewModel>> GetRandomBlogOverviewAsync(int take, int timeCache = 30);
         Task<ImmutableList<BlogDetailViewModel>> GetPromotionBlogDetailsAsync(int take, int cachingMinutes = 30);
         Task<ImmutableList<CategoryWithInverseParentViewModel>> GetInverseCategoryMenuAsync(int timeCache = 30);
+        Task<ImmutableList<CategoryWithProductOverviewViewModel>> GetProductsFromExistCategoryAsync(string parentSlug = "", int limit = 0, int timeCache = 30);
     }
 
 
@@ -257,6 +258,17 @@ namespace Doitsu.Ecommerce.Core.Services
                 memoryCache.Set(key, tags.ToImmutableList(), TimeSpan.FromMinutes(cachingMinutes));
             }
             return topTags;
+        }
+
+        public async Task<ImmutableList<CategoryWithProductOverviewViewModel>> GetProductsFromExistCategoryAsync(string parentSlug = "", int limit = 0, int timeCache = 30)
+        {
+            var key = $"{Constants.CacheKey.PRODUCTS_FROM_EXIST_CATEGORIES}_{limit}";
+            if (!memoryCache.TryGetValue(key, out ImmutableList<CategoryWithProductOverviewViewModel> listCategoryWithProducts))
+            {
+                listCategoryWithProducts = await this.categoryService.GetAllCategoriesWithProductAsync(parentSlug, limit);
+                memoryCache.Set(key, listCategoryWithProducts, TimeSpan.FromMinutes(timeCache));
+            }
+            return listCategoryWithProducts;
         }
     }
 }

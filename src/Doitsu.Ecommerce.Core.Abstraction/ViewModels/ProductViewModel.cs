@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
@@ -67,14 +68,14 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         [Required]
         [JsonProperty("slug")]
         public string Slug { get; set; }
-        
+
         [Required]
         [JsonProperty("weight")]
         public float Weight { get; set; }
 
         [JsonProperty("inventoryQuantity")]
         public long InventoryQuantity { get; set; }
-    
+
         [JsonProperty("vers")]
         public byte[] Vers { get; set; }
 
@@ -86,6 +87,12 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
 
         [JsonProperty("categoryRecursive")]
         public CategoryWithParentViewModel Cate { get; set; }
+
+        [JsonProperty("lastUpdatedDate")]
+        public DateTime? LastUpdatedDate { get; set; }
+
+        [JsonProperty("createdDate")]
+        public DateTime? CreatedDate { get; set; }
     }
 
     public class ProductDetailViewModel : ProductOverviewViewModel
@@ -100,7 +107,7 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
 
     public class UpdateProductViewModel : ProductDetailViewModel
     {
-    } 
+    }
 
     public class ProductDetailWrapperViewModel
     {
