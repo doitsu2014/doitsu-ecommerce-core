@@ -60,9 +60,14 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
 
             builder.Property(e => e.PaymentProofImageUrl).HasMaxLength(300);
 
-            builder.Property(e => e.PaymentValue).HasDefaultValue(0);
+            builder.Property(e => e.PaymentValue)
+                .HasColumnType("decimal(18,4)")
+                .HasDefaultValue(0);
 
             builder.Property(e => e.Status).HasDefaultValue(OrderTypeEnum.Sale);
+
+            builder.Property(e => e.DeliveryFees)
+                .HasColumnType("decimal(18,4)");
 
             builder.HasOne(d => d.User)
                 .WithMany(p => p.Orders)

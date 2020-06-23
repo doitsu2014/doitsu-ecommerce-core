@@ -22,7 +22,7 @@ using Doitsu.Ecommerce.Core.Services.Interface;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public interface IUserTransactionService : IBaseService<UserTransaction>
+    public interface IUserTransactionService : IEcommerceBaseService<UserTransaction>
     {
         UserTransaction PrepareUserTransaction(OrderDetailViewModel orders, ImmutableList<ProductVariantViewModel> productVariants, int userId, UserTransactionTypeEnum type = UserTransactionTypeEnum.Expense);
         Task<Option<EcommerceIdentityUser, string>> UpdateUserBalanceAsync(UserTransaction userTransaction, int userId);
@@ -32,13 +32,13 @@ namespace Doitsu.Ecommerce.Core.Services
     /// <summary>
     /// should use entity on this service
     /// </summary>
-    public class UserTransactionService : BaseService<UserTransaction>, IUserTransactionService
+    public class UserTransactionService : EcommerceBaseService<UserTransaction>, IUserTransactionService
     {
         private readonly EcommerceIdentityUserManager<EcommerceIdentityUser> userManager;
 
         public UserTransactionService(EcommerceDbContext dbContext,
                           IMapper mapper,
-                          ILogger<BaseService<UserTransaction, EcommerceDbContext>> logger,
+                          ILogger<EcommerceBaseService<UserTransaction>> logger,
                           EcommerceIdentityUserManager<EcommerceIdentityUser> userManager) : base(dbContext, mapper, logger)
         {
             this.userManager = userManager;

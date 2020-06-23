@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
         <LangVersion>8.0</LangVersion>
-        <PackageVersion>7.0.10</PackageVersion>
+        <PackageVersion>7.0.12</PackageVersion>
         <Title>Doitsu.Ecommerce.Core.DeliveryIntegration</Title>
         <PackageId>Doitsu.Ecommerce.Core.DeliveryIntegration</PackageId>
         <Authors>Doitsu Technology</Authors>
@@ -23,7 +23,6 @@
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Doitsu.Service.Core" Version="7.0.16" />
     </ItemGroup>
     <ItemGroup>
         <Folder Include="Resources\" />

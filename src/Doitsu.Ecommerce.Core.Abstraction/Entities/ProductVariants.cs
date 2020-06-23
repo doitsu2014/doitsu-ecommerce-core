@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Doitsu.Service.Core.Interfaces.EfCore;
 using EFCore.Abstractions.Models;
 
 namespace Doitsu.Ecommerce.Core.Abstraction.Entities
 {
-    public class ProductVariants : Entity<int>, IConcurrencyCheckVers, IActivable
+    public class ProductVariants : Entity<int>, IConcurrencyCheckVers, IActivable, IAuditable
     {
         public int ProductId { get; set; }
         public string Sku { get; set; }
@@ -12,8 +13,11 @@ namespace Doitsu.Ecommerce.Core.Abstraction.Entities
         public float AnotherDiscount { get; set; }
         public long InventoryQuantity { get; set; }
         public ProductVariantStatusEnum Status { get; set; }
+        public ProductVariantInventoryStatusEnum InventoryStatus { get; set; }
         public byte[] Vers { get; set; }
         public bool Active { get; set; }
+        public DateTime? LastUpdatedDate { get; set; }
+        public DateTime? CreatedDate { get; set; }
 
         public virtual Products Product { get; set; }
         public virtual ICollection<ProductVariantOptionValues> ProductVariantOptionValues { get; set; }

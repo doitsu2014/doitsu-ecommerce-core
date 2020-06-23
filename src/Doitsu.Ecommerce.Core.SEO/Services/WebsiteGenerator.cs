@@ -1,6 +1,7 @@
 ﻿using Doitsu.Ecommerce.Core.Abstraction.ViewModels;
 using Doitsu.Ecommerce.Core.SEO.Helpers;
 using Doitsu.Ecommerce.Core.SEO.Interfaces;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Schema.NET;
 using System;
@@ -12,9 +13,11 @@ namespace Doitsu.Ecommerce.Core.SEO.Services
     public class WebsiteGenerator : IWebsiteGenerator
     {
         private string baseUri;
-        public WebsiteGenerator(IOptions<DomainModel> domainModel)
+        private readonly ILogger<WebsiteGenerator> logger;
+        public WebsiteGenerator(IOptions<DomainModel> domainModel, ILogger<WebsiteGenerator> logger)
         {
             this.baseUri = domainModel.Value.BaseUri;
+            this.logger = logger;
         }
 
         public WebSite GenerateWebsite()
@@ -38,6 +41,7 @@ namespace Doitsu.Ecommerce.Core.SEO.Services
             }
             catch (Exception ex)
             {
+                this.logger.LogError("WebsiteGenerator exception: {ex}", ex);
                 return null;
             }
         }
@@ -89,6 +93,7 @@ namespace Doitsu.Ecommerce.Core.SEO.Services
             }
             catch (Exception ex)
             {
+                this.logger.LogError("WebsiteGenerator exception: {ex}", ex);
                 return null;
             }
         }

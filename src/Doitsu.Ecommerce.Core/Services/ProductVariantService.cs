@@ -21,7 +21,7 @@ using Doitsu.Utils;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public interface IProductVariantService : IBaseService<ProductVariants>
+    public interface IProductVariantService : IEcommerceBaseService<ProductVariants>
     {
         Task<ProductVariantDetailViewModel> FindProductVariantFromOptionsAsync(ICollection<ProductOptionValueViewModel> listProductOptions);
         Task<ImmutableArray<int?>> GetProductVariantIdsFromProductFilterParamsAsync(ProductFilterParamViewModel[] productFilterParams);
@@ -29,6 +29,7 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<Option<int, string>> UpdateProductVariantAnotherDiscountAsync(int productId, int productVariantId, float anotherDiscount);
         Task<Option<int, string>> UpdateProductVariantAnotherPriceAsync(int productId, int productVariantId, decimal anotherPrice);
         Task<Option<int, string>> UpdateProductVariantStatusAsync(int productId, int productVariantId, ProductVariantStatusEnum value);
+        Task<Option<int, string>> UpdateProductVariantInventoryStatusAsync(int productId, int productVariantId, ProductVariantInventoryStatusEnum value);
         ImmutableList<ProductVariants> BuildListProductVariant(Products product);
         Task<Option<int, string>> IncreaseInventoryQuantityAsync(int productId, int productVariantId, int quantity = 0);
         Task<Option<int, string>> DecreaseInventoryQuantityAsync(int productId, int productVariantId, int quantity = 0);
@@ -36,9 +37,9 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<Option<int[], string>> DecreaseBatchPvInventoryQuantityAsync(int[] productVariantIds, int quantity = 0);
     }
 
-    public class ProductVariantService : BaseService<ProductVariants>, IProductVariantService
+    public class ProductVariantService : EcommerceBaseService<ProductVariants>, IProductVariantService
     {
-        public ProductVariantService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<ProductVariants, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
+        public ProductVariantService(EcommerceDbContext dbContext, IMapper mapper, ILogger<EcommerceBaseService<ProductVariants>> logger) : base(dbContext, mapper, logger)
         {
         }
 
@@ -332,5 +333,20 @@ namespace Doitsu.Ecommerce.Core.Services
                 });
         }
 
+        public async Task<Option<int, string>> UpdateProductVariantInventoryStatusAsync(int productId, int productVariantId, ProductVariantInventoryStatusEnum value)
+        {
+            return await (productId, productVariantId, value).SomeNotNull()
+             .WithException(string.Empty)
+             .FilterAsync(async req => await DbContext.Products.AnyAsync(p => p.Id == productId), "Không tồn tại sản phẩm này.")
+             .FilterAsync(async req => await DbContext.ProductVariants.AnyAsync(pv => pv.Id == productVariantId), "Không tồn tại biến thể này.")
+             .MapAsync(async req =>
+             {
+                 var productVariant = await this.FindByKeysAsync(productVariantId);
+                 productVariant.InventoryStatus = value;
+                 this.Update(productVariant);
+                 await this.CommitAsync();
+                 return productVariant.Id;
+             });
+        }
     }
 }

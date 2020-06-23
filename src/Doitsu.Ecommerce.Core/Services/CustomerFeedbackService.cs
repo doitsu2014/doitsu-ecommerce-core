@@ -21,13 +21,13 @@ using Doitsu.Ecommerce.Core.Services.Interface;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public interface ICustomerFeedbackService : IBaseService<CustomerFeedbacks>
+    public interface ICustomerFeedbackService : IEcommerceBaseService<CustomerFeedbacks>
     {
         Task<CustomerFeedbacks> CreateWithConstraintAsync(CustomerFeedbackViewModel data, int userId);
         Task<ImmutableList<CustomerFeedbackOverviewViewModel>> GetAllByTypeAsync(CustomerFeedBackTypeEnum type);
     }
 
-    public class CustomerFeedbackService : BaseService<CustomerFeedbacks>, ICustomerFeedbackService
+    public class CustomerFeedbackService : EcommerceBaseService<CustomerFeedbacks>, ICustomerFeedbackService
     {
         private readonly IEmailService emailService;
         private readonly IBrandService brandService;
@@ -35,7 +35,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public CustomerFeedbackService(EcommerceDbContext dbContext,
         IMapper mapper,
-        ILogger<BaseService<CustomerFeedbacks>> logger,
+        ILogger<EcommerceBaseService<CustomerFeedbacks>> logger,
         IEmailService emailService,
         IBrandService brandService,
         IOptionsMonitor<LeaderMail> leaderMail) : base(dbContext, mapper, logger)

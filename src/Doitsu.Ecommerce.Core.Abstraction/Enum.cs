@@ -61,6 +61,12 @@ namespace Doitsu.Ecommerce.Core.Abstraction
         Available = 1
     }
 
+    public enum ProductVariantInventoryStatusEnum
+    {
+        Exist = 1, 
+        NeedToPreOrder = 2
+    }
+
     public enum GenderEnum
     {
         [Display(Name = "Không rõ")]

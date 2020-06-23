@@ -9,16 +9,16 @@ using Doitsu.Ecommerce.Core.Services.Interface;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public interface IMarketingCustomerService : IBaseService<MarketingCustomers>
+    public interface IMarketingCustomerService : IEcommerceBaseService<MarketingCustomers>
     {
 
         Task<MarketingCustomers> CreateWithConstraintAsync(MarketingCustomerViewModel data, int userId);
 
     }
 
-    public class MarketingCustomerService : BaseService<MarketingCustomers>, IMarketingCustomerService
+    public class MarketingCustomerService : EcommerceBaseService<MarketingCustomers>, IMarketingCustomerService
     {
-        public MarketingCustomerService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<MarketingCustomers, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
+        public MarketingCustomerService(EcommerceDbContext dbContext, IMapper mapper, ILogger<EcommerceBaseService<MarketingCustomers>> logger) : base(dbContext, mapper, logger)
         {
         }
 

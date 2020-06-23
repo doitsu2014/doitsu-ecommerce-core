@@ -16,13 +16,16 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore.Query;
 using Doitsu.Ecommerce.Core.Extensions;
 using Doitsu.Ecommerce.Core.Services.Interface;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public interface ICategoryService : IBaseService<Categories>
+    public interface ICategoryService : IEcommerceBaseService<Categories>
     {
         Task<ImmutableList<CategoryMenuViewModel>> GetProductCategoryForMenuAsync();
+
         Task<ImmutableList<CategoryViewModel>> GetBuildingCategoryChildrenAsync();
+
         Task<ImmutableList<CategoryMenuViewModel>> GetProductCategoryChildrenAsync();
 
         /// <summary>
@@ -31,6 +34,7 @@ namespace Doitsu.Ecommerce.Core.Services
         /// <param name="parentCateSlug"></param>
         /// <returns></returns>
         Task<ImmutableList<CategoryViewModel>> GetCategoryForParentCateSlugAsync(string parentCateSlug);
+
         /// <summary>
         /// Get category with inverse parent category
         /// </summary>
@@ -38,14 +42,17 @@ namespace Doitsu.Ecommerce.Core.Services
         /// <param name="depth">The depth of list including inverse parent category</param>
         /// <returns></returns>
         Task<ImmutableList<CategoryWithInverseParentViewModel>> GetInverseCategory(string slug = Constants.SuperFixedCategorySlug.PRODUCT, int depth = 1);
+
         Task<ImmutableList<CategoryWithInverseParentViewModel>> GetAllParentCategoryWithInverseCategory(int depth = 1);
+
+        Task<ImmutableList<CategoryWithProductOverviewViewModel>> GetAllCategoriesWithProductAsync(string parentSlug = "", int limit = 0);
     }
 
-    public class CategoryService : BaseService<Categories>, ICategoryService
+    public class CategoryService : EcommerceBaseService<Categories>, ICategoryService
     {
         public CategoryService(EcommerceDbContext dbContext,
                                IMapper mapper,
-                               ILogger<BaseService<Categories, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
+                               ILogger<EcommerceBaseService<Categories>> logger) : base(dbContext, mapper, logger)
         {
         }
 
@@ -98,7 +105,7 @@ namespace Doitsu.Ecommerce.Core.Services
             return listCategory.ToImmutableList();
         }
 
-        public async Task<ImmutableList<CategoryWithInverseParentViewModel>> GetAllParentCategoryWithInverseCategory( int depth = 1)
+        public async Task<ImmutableList<CategoryWithInverseParentViewModel>> GetAllParentCategoryWithInverseCategory(int depth = 1)
         {
             var query = this.Get(cate => cate.ParentCateId == null && cate.IsFixed)
                             .IncludeByDepth(cate => cate.InverseParentCate, depth);
@@ -107,6 +114,56 @@ namespace Doitsu.Ecommerce.Core.Services
             var listCategory = result.Select(c => Mapper.Map<CategoryWithInverseParentViewModel>(c)).ToList();
 
             return listCategory.ToImmutableList();
+        }
+
+        public async Task<ImmutableList<CategoryWithProductOverviewViewModel>> GetAllCategoriesWithProductAsync(string parentSlug, int limit = 0)
+        {
+            if (parentSlug.IsNullOrEmpty()) return ImmutableList<CategoryWithProductOverviewViewModel>.Empty;
+            var query = this.Get(c => c.Slug == parentSlug)
+                // Filter certainly parent category
+                .Where(c => c.InverseParentCate.Count > 0)
+                .Include(c => c.InverseParentCate)
+                    .ThenInclude(c => c.Products)
+                .SelectMany(c => c.InverseParentCate)
+                .Select(c =>
+                    new Categories
+                    {
+                        Id = c.Id,
+                        Name = c.Name,
+                        Slug = c.Slug,
+                        Vers = c.Vers,
+                        Active = c.Active,
+                        ParentCateId = c.ParentCateId,
+                        IsFixed = c.IsFixed,
+                        Products = limit > 0
+                            ? c.Products
+                                .AsQueryable()
+                                .Include(p => p.ProductVariants)
+                                    .ThenInclude(pv => pv.ProductVariantOptionValues)
+                                        .ThenInclude(pv => pv.ProductOptionValue)
+                                .Include(p => p.ProductOptions)
+                                    .ThenInclude(po => po.ProductOptionValues)
+                                .OrderByDescending(p => p.CreatedDate)
+                                .Take(limit)
+                                .ToList()
+
+                            : c.Products
+                                .AsQueryable()
+                                .Include(p => p.ProductVariants)
+                                    .ThenInclude(p => p.ProductVariantOptionValues)
+                                .Include(p => p.ProductOptions)
+                                    .ThenInclude(p => p.ProductOptionValues)
+                                        .ThenInclude(pov => pov.ProductVariantOptionValues)
+                                .OrderByDescending(p => p.CreatedDate)
+                                .ToList()
+                    }
+                );
+
+            var result = (await query
+                .ToListAsync())
+                .Select(c => this.Mapper.Map<CategoryWithProductOverviewViewModel>(c));
+
+            return result.ToImmutableList();
         }
     }
 }

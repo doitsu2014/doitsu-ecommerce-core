@@ -9,13 +9,13 @@ using Doitsu.Ecommerce.Core.Services.Interface;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public interface ICatalogueService : IBaseService<Catalogues>
+    public interface ICatalogueService : IEcommerceBaseService<Catalogues>
     {
     }
 
-    public class CatalogueService : BaseService<Catalogues>, ICatalogueService
+    public class CatalogueService : EcommerceBaseService<Catalogues>, ICatalogueService
     {
-        public CatalogueService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<Catalogues, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
+        public CatalogueService(EcommerceDbContext dbContext, IMapper mapper, ILogger<EcommerceBaseService<Catalogues>> logger) : base(dbContext, mapper, logger)
         {
         }
     }

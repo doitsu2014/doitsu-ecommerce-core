@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using AutoMapper;
 using Doitsu.Ecommerce.Core.Abstraction.Entities;
@@ -7,6 +8,23 @@ using Newtonsoft.Json;
 
 namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
 {
+    public class SimpleCategoryViewModel
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+        [JsonProperty("name")]
+        public string Name { get; set; }
+        [JsonProperty("active")]
+        public bool Active { get; set; }
+        [JsonProperty("slug")]
+        public string Slug { get; set; }
+        [JsonProperty("isFixed")]
+        public bool IsFixed { get; set; }
+        [JsonProperty("parentCateId")]
+        public int? ParentCateId { get; set; }
+        [JsonProperty("vers")]
+        public byte[] Vers { get; set; }
+    }
     /// <summary>
     /// This is origin view model of Categories Entity
     /// And this is default return type of Categories Services
@@ -35,94 +53,46 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         public int? ParentCateId { get; set; }
         [JsonProperty("vers")]
         public byte[] Vers { get; set; }
+
     }
 
-    public class CategoryWithInverseParentViewModel
+    public class CategoryWithInverseParentViewModel : SimpleCategoryViewModel
     {
-        [JsonProperty("id")]
-        public int Id { get; set; }
-        [JsonProperty("name")]
-        public string Name { get; set; }
-        [JsonProperty("active")]
-        public bool Active { get; set; }
-        [JsonProperty("slug")]
-        public string Slug { get; set; }
-        [JsonProperty("isFixed")]
-        public bool IsFixed { get; set; }
-        [JsonProperty("parentCateId")]
-        public int? ParentCateId { get; set; }
-        [JsonProperty("parentCateName")]
-        public string ParentCateName { get; set; }
-        [JsonProperty("vers")]
-        public string Vers { get; set; }
         [JsonProperty("inverseParentCate")]
         public ICollection<CategoryWithInverseParentViewModel> InverseParentCate { get; set; }
     }
 
-    public class CategoryWithParentViewModel
+    public class CategoryWithParentViewModel : SimpleCategoryViewModel
     {
-        [JsonProperty("id")]
-        public int Id { get; set; }
-        [JsonProperty("name")]
-        public string Name { get; set; }
-        [JsonProperty("active")]
-        public bool Active { get; set; }
-        [JsonProperty("slug")]
-        public string Slug { get; set; }
-        [JsonProperty("vers")]
-        public byte[] Vers { get; set; }
-        [JsonProperty("parentCateId")]
-        public int? ParentCateId { get; set; }
         [JsonProperty("parentCate")]
         public CategoryWithoutParentViewModel ParentCate { get; set; }
     }
 
-    public class CategoryWithoutParentViewModel
+    public class CategoryWithoutParentViewModel : SimpleCategoryViewModel
     {
-        [JsonProperty("id")]
-        public int Id { get; set; }
-        [JsonProperty("name")]
-        public string Name { get; set; }
-        [JsonProperty("active")]
-        public bool Active { get; set; }
-        [JsonProperty("slug")]
-        public string Slug { get; set; }
     }
 
-    public class BaseCategoryViewModel
+    public class BaseCategoryViewModel : SimpleCategoryViewModel
     {
-        public string Name { get; set; }
-        public string Slug { get; set; }
-        public int? ParentCateId { get; set; }
-        public bool IsFixed { get; set; }
     }
 
-    public class CategoryMenuViewModel
+    public class CategoryMenuViewModel : SimpleCategoryViewModel
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Slug { get; set; }
-        public bool IsFixed { get; set; }
-        public int? ParentCateId { get; set; }
-        public string ParentCateName { get; set; }
-        public byte[] Vers { get; set; }
-        public bool Active { get; set; }
         public ICollection<CategoryViewModel> InverseParentCate { get; set; }
     }
 
-    public class CategoryWithProductOverviewViewModel : BaseViewModel<Categories>
+    public class CategoryWithProductOverviewViewModel : SimpleCategoryViewModel
     {
-        public CategoryWithProductOverviewViewModel()
-        {
-        }
-
-        public CategoryWithProductOverviewViewModel(Categories entity, IMapper mapper) : base(entity, mapper)
-        {
-        }
-        public int Id { get; set; }
-        public string Slug { get; set; }
-
+        [JsonProperty("inverseParentCate")]
         public ICollection<CategoryWithProductOverviewViewModel> InverseParentCate { get; set; }
+
+        [JsonProperty("products")]
         public ICollection<ProductOverviewViewModel> Products { get; set; }
+    }
+
+    public class CategoryAndListProductOverviewViewModel
+    {
+        public CategoryWithoutParentViewModel Cate { get; set; }
+        public ImmutableList<ProductOverviewViewModel> Products { get; set; }
     }
 }

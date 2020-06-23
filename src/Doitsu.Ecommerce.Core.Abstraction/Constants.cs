@@ -49,6 +49,8 @@ namespace Doitsu.Ecommerce.Core.Abstraction
             public const string CATALOGUES = "CATALOGUES";
             public const string PROMOTION_BLOGS = "PROMOTION_BLOGS";
             public const string INVERSE_CATEGORY = "INVERSE_CATEGORY";
+            public const string PRODUCTS_FROM_EXIST_CATEGORIES = "PRODUCTS_FROM_EXIST_CATEGORIES";
+
         }
 
         public static class UserRoles

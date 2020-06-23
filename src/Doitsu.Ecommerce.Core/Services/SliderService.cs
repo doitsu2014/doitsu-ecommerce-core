@@ -9,13 +9,13 @@ using Doitsu.Ecommerce.Core.Services.Interface;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public interface ISliderService : IBaseService<Sliders>
+    public interface ISliderService : IEcommerceBaseService<Sliders>
     {
     }
 
-    public class SliderService : BaseService<Sliders>, ISliderService
+    public class SliderService : EcommerceBaseService<Sliders>, ISliderService
     {
-        public SliderService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<Sliders, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
+        public SliderService(EcommerceDbContext dbContext, IMapper mapper, ILogger<EcommerceBaseService<Sliders>> logger) : base(dbContext, mapper, logger)
         {
         }
     }

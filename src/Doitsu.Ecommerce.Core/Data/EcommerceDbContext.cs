@@ -59,7 +59,7 @@ namespace Doitsu.Ecommerce.Core.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            
+
             builder.Entity<EcommerceIdentityUser>()
                 .HasMany(e => e.UserRoles)
                 .WithOne()
@@ -88,14 +88,10 @@ namespace Doitsu.Ecommerce.Core.Data
             }
         }
 
-        private async Task<int> SaveChangesWithBeforeSavingAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<int> SaveChangesWithoutBeforeSavingAsync(bool acceptAllChangesOnSuccess = true, CancellationToken cancellationToken = new CancellationToken())
         {
-            OnBeforeSaving();
-            return await SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+            return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
-
-        public async Task<int> SaveChangesWithBeforeSavingAsync() => await SaveChangesWithBeforeSavingAsync(true);
-
 
         public Option<object[], string> GetPrimaryKey<T>(T entity) where T : class
         {
@@ -118,9 +114,6 @@ namespace Doitsu.Ecommerce.Core.Data
                 .Map(et => et.FindPrimaryKey().Properties.ToArray());
         }
 
-        // public virtual async Task<Option<int, ImmutableList<ValidationResult>>> SaveChangesWithValidationAsync(CancellationToken cancellationToken = new CancellationToken())
-        //     => await SaveChangesWithValidationAsync(true, cancellationToken);
-
         protected virtual void OnBeforeSaving()
         {
             if (_handlers != null && _handlers.Any())
@@ -142,6 +135,24 @@ namespace Doitsu.Ecommerce.Core.Data
                     return Validator.TryValidateObject(e.Entity, new ValidationContext(e.Entity), result) ? null : result;
                 })
                 .Where(r => r != null).SelectMany(r => r).ToImmutableList();
+        }
+
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            OnBeforeSaving();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            OnBeforeSaving();
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+        {
+            OnBeforeSaving();
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
     }
 }

@@ -7,14 +7,14 @@ using Doitsu.Ecommerce.Core.Services.Interface;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public interface IBlogCategoryService : IBaseService<BlogCategories>
+    public interface IBlogCategoryService : IEcommerceBaseService<BlogCategories>
     {
 
     }
 
-    public class BlogCategoryService : BaseService<BlogCategories>, IBlogCategoryService
+    public class BlogCategoryService : EcommerceBaseService<BlogCategories>, IBlogCategoryService
     {
-        public BlogCategoryService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<BlogCategories, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
+        public BlogCategoryService(EcommerceDbContext dbContext, IMapper mapper, ILogger<EcommerceBaseService<BlogCategories>> logger) : base(dbContext, mapper, logger)
         {
         }
     }

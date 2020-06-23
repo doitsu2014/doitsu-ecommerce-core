@@ -9,13 +9,13 @@ using Doitsu.Ecommerce.Core.Services.Interface;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public interface IPromotionDetailService : IBaseService<PromotionDetail>
+    public interface IPromotionDetailService : IEcommerceBaseService<PromotionDetail>
     {
     }
 
-    public class PromotionDetailService : BaseService<PromotionDetail>, IPromotionDetailService
+    public class PromotionDetailService : EcommerceBaseService<PromotionDetail>, IPromotionDetailService
     {
-        public PromotionDetailService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<PromotionDetail, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
+        public PromotionDetailService(EcommerceDbContext dbContext, IMapper mapper, ILogger<EcommerceBaseService<PromotionDetail>> logger) : base(dbContext, mapper, logger)
         {
         }
     }

@@ -29,7 +29,7 @@ namespace Doitsu.Ecommerce.Core.Extensions
             services.AddTransient(typeof(IPromotionDetailService), typeof(PromotionDetailService));
             services.AddTransient(typeof(IUserTransactionService), typeof(UserTransactionService));
             services.AddTransient(typeof(IUserService), typeof(UserService));
-            services.AddTransient(typeof(IBaseService<DeliveryInformation>), typeof(BaseService<DeliveryInformation>));
+            services.AddTransient(typeof(DeliveryInformationService), typeof(DeliveryInformation));
             services.AddHttpContextAccessor();
             return services;
         }

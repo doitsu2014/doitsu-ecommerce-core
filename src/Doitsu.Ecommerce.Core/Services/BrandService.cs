@@ -20,14 +20,14 @@ using Doitsu.Ecommerce.Core.Services.Interface;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public interface IBrandService : IBaseService<Brand>
+    public interface IBrandService : IEcommerceBaseService<Brand>
     {
         Task<Option<Brand, string>> SettingAsync(BrandViewModel data);
     }
 
-    public class BrandService : BaseService<Brand>, IBrandService
+    public class BrandService : EcommerceBaseService<Brand>, IBrandService
     {
-        public BrandService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<Brand, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
+        public BrandService(EcommerceDbContext dbContext, IMapper mapper, ILogger<EcommerceBaseService<Brand>> logger) : base(dbContext, mapper, logger)
         { }
 
         public async Task<Option<Brand, string>> SettingAsync(BrandViewModel data)

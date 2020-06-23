@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
         <LangVersion>8.0</LangVersion>
-        <PackageVersion>7.0.1</PackageVersion>
+        <PackageVersion>7.0.3</PackageVersion>
         <Title>Doitsu.Ecommerce.Core.SEO</Title>
         <PackageId>Doitsu.Ecommerce.Core.SEO</PackageId>
         <Authors>Doitsu Technology</Authors>
@@ -28,7 +28,6 @@
         <None Include="Images\doitsu-logo.png" Pack="true" PackagePath="" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Doitsu.Service.Core" Version="7.0.16" />
         <PackageReference Include="Schema.NET" Version="7.1.0" />
     </ItemGroup>
     <ItemGroup>

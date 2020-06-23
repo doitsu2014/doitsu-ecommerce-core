@@ -12,7 +12,6 @@ using Doitsu.Ecommerce.Core.Abstraction;
 using Doitsu.Ecommerce.Core.Data;
 using Doitsu.Ecommerce.Core.Abstraction.Entities;
 using Doitsu.Ecommerce.Core.Abstraction.ViewModels;
-using Doitsu.Service.Core;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -24,10 +23,10 @@ using Doitsu.Ecommerce.Core.Services.Interface;
 namespace Doitsu.Ecommerce.Core.Services
 {
 
-    public interface IProductService : IBaseService<Products>
+    public interface IProductService : IEcommerceBaseService<Products>
     {
-        Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsByCateIdAsync(string cateSlug);
-        
+        Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsByCateIdAsync(string cateSlug, int limit = 0);
+
         Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsWithIQGreaterThanZeroAsync(string cateSlug);
 
         Task<ProductDetailViewModel> GetProductDetailBySlugAsync(string productSlug);
@@ -63,13 +62,13 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<Option<int, string>> IncreaseInventoryQuantity(int productId, int quantity = 0);
     }
 
-    public class ProductService : BaseService<Products>, IProductService
+    public class ProductService : EcommerceBaseService<Products>, IProductService
     {
         private readonly IProductVariantService productVariantService;
         private readonly IProductOptionService productOptionService;
         public ProductService(EcommerceDbContext dbContext,
             IMapper mapper,
-            ILogger<BaseService<Products, EcommerceDbContext>> logger,
+            ILogger<EcommerceBaseService<Products>> logger,
             IProductVariantService productVariantService,
             IProductOptionService productOptionService) : base(dbContext, mapper, logger)
         {
@@ -77,32 +76,36 @@ namespace Doitsu.Ecommerce.Core.Services
             this.productOptionService = productOptionService;
         }
 
-        private async Task<CategoryWithProductOverviewViewModel> GetFirstCategoryWithProductByCateSlug(string slug) => await DbContext.Set<Categories>()
-            .Include(c => c.InverseParentCate)
-                .ThenInclude(c => c.InverseParentCate)
-                    .ThenInclude(c => c.Products)
-            .Include(c => c.Products)
-            .Where(c => c.Slug == slug).ProjectTo<CategoryWithProductOverviewViewModel>(Mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync();
-
-        public async Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsByCateIdAsync(string cateSlug)
+        public async Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsByCateIdAsync(string cateSlug, int limit = 0)
         {
-            var category = await GetFirstCategoryWithProductByCateSlug(cateSlug);
-            if (category == null)
+            var categories = DbContext.Set<Categories>()
+                .Include(c => c.InverseParentCate)
+                    .ThenInclude(c => c.Products)
+                .Include(c => c.Products)
+                .Where(c => c.Slug == cateSlug);
+                
+            var productsOfInverseCategories = categories
+                .Where(c => c.InverseParentCate.Count() > 0)
+                .SelectMany(c => c.InverseParentCate.SelectMany(cip => cip.Products))
+                .OrderByDescending(p => p.CreatedDate)
+                .AsQueryable();
+
+            var products = categories
+                .Select(c => c.Products)
+                .SelectMany(listP => listP)
+                .OrderByDescending(p => p.CreatedDate)
+                .AsQueryable();
+
+            if(limit > 0) 
             {
-                return (new List<ProductOverviewViewModel>()).ToImmutableList();
-            }
-            if (category.InverseParentCate.Count() > 0)
-            {
-                return category.InverseParentCate.SelectMany(c => c.Products).ToImmutableList();
-            }
-            else
-            {
-                var listProducts = category
-                    .Products
-                    .ToImmutableList();
-                return listProducts;
-            }
+                productsOfInverseCategories = productsOfInverseCategories.Skip(0).Take(limit);
+                products = products.Skip(0).Take(limit);
+            } 
+
+            return ImmutableList<ProductOverviewViewModel>
+                .Empty
+                .AddRange(await products.ProjectTo<ProductOverviewViewModel>(this.Mapper.ConfigurationProvider).ToListAsync())
+                .AddRange(await productsOfInverseCategories.ProjectTo<ProductOverviewViewModel>(this.Mapper.ConfigurationProvider).ToListAsync()); 
         }
 
         public async Task<ImmutableList<OverviewBuildingProductsViewModel>> GetOverviewBuildingProductsAsync(ImmutableList<CategoryViewModel> buildingCategories)
@@ -213,9 +216,9 @@ namespace Doitsu.Ecommerce.Core.Services
             return productsQuery;
         }
 
-      
 
-        
+
+
 
         public async Task<Option<int, string>> CreateProductWithOptionAsync(CreateProductViewModel data)
         {
@@ -230,7 +233,7 @@ namespace Doitsu.Ecommerce.Core.Services
                         productEnt.ProductVariants = listProductVariants;
 
                         await CreateAsync(productEnt);
-                        await DbContext.SaveChangesAsync();
+                        await CommitAsync();
                         await transaction.CommitAsync();
                         return productEnt.Id;
                     });
@@ -255,7 +258,7 @@ namespace Doitsu.Ecommerce.Core.Services
                             result.Add(productEnt);
                         }
 
-                        await DbContext.SaveChangesAsync();
+                        await CommitAsync();
                         await transaction.CommitAsync();
                         return result.Select(x => x.Id).ToArray();
                     });
@@ -411,7 +414,7 @@ namespace Doitsu.Ecommerce.Core.Services
                         DbContext.ProductOptionValues.RemoveRange(po.ProductOptionValues);
                         DbContext.ProductVariantOptionValues.RemoveRange(po.ProductOptionValues.SelectMany(pov => pov.ProductVariantOptionValues));
                         DbContext.ProductVariants.RemoveRange(po.ProductOptionValues.SelectMany(pov => pov.ProductVariantOptionValues.Select(pvov => pvov.ProductVariant)));
-                        await this.CommitAsync();
+                        await this.DbContext.SaveChangesWithoutBeforeSavingAsync();
                         return req;
                     })
                     .MapAsync(async req =>
@@ -428,7 +431,7 @@ namespace Doitsu.Ecommerce.Core.Services
                         {
                             await this.productVariantService.CreateAsync(gPv);
                         };
-                        await this.CommitAsync();
+                        await this.DbContext.SaveChangesWithoutBeforeSavingAsync();
                         await transaction.CommitAsync();
                         return req.productOptionId;
                     });
@@ -476,7 +479,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         public async Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsWithIQGreaterThanZeroAsync(string cateSlug)
         {
-            return (await this.Get<ProductOverviewViewModel>(p => p.InventoryQuantity > 0 
+            return (await this.Get<ProductOverviewViewModel>(p => p.InventoryQuantity > 0
                     && p.ProductVariants.Where(pv => pv.InventoryQuantity > 0).Count() > 0)
                 .ToListAsync()).ToImmutableList();
         }

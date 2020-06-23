@@ -7,13 +7,13 @@ using Doitsu.Ecommerce.Core.Services.Interface;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
-    public interface IProductOptionService : IBaseService<ProductOptions>
+    public interface IProductOptionService : IEcommerceBaseService<ProductOptions>
     {
     }
 
-    public class ProductOptionService : BaseService<ProductOptions>, IProductOptionService
+    public class ProductOptionService : EcommerceBaseService<ProductOptions>, IProductOptionService
     {
-        public ProductOptionService(EcommerceDbContext dbContext, IMapper mapper, ILogger<BaseService<ProductOptions, EcommerceDbContext>> logger) : base(dbContext, mapper, logger)
+        public ProductOptionService(EcommerceDbContext dbContext, IMapper mapper, ILogger<EcommerceBaseService<ProductOptions>> logger) : base(dbContext, mapper, logger)
         {
         }
     }

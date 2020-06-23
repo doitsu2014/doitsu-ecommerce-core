@@ -11,7 +11,7 @@ using Optional;
 
 namespace Doitsu.Ecommerce.Core.Services.Interface
 {
-    public interface IOrderService : IBaseService<Orders>
+    public interface IOrderService : IEcommerceBaseService<Orders>
     {
         /// <summary>
         /// Version on Bach Moc Website
