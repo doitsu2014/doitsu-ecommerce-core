@@ -50,11 +50,11 @@ namespace Doitsu.Ecommerce.Core.Services
         private readonly EcommerceRoleIntManager<EcommerceIdentityRole> roleService;
         private readonly EcommerceIdentityUserManager<EcommerceIdentityUser> userService;
         private readonly IMapper mapper;
-        private readonly IEcommerceBaseService<DeliveryInformation> deliveryInformationService;
+        private readonly IDeliveryInformationService deliveryInformationService;
         public UserService(EcommerceRoleIntManager<EcommerceIdentityRole> roleService,
                            EcommerceIdentityUserManager<EcommerceIdentityUser> userService,
                            IMapper mapper,
-                           IEcommerceBaseService<DeliveryInformation> deliveryInformationService)
+                           IDeliveryInformationService deliveryInformationService)
         {
             this.roleService = roleService;
             this.userService = userService;

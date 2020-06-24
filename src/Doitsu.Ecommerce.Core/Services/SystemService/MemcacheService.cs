@@ -27,6 +27,9 @@ namespace Doitsu.Ecommerce.Core.Services
         Task<ImmutableList<BlogDetailViewModel>> GetPromotionBlogDetailsAsync(int take, int cachingMinutes = 30);
         Task<ImmutableList<CategoryWithInverseParentViewModel>> GetInverseCategoryMenuAsync(int timeCache = 30);
         Task<ImmutableList<CategoryWithProductOverviewViewModel>> GetProductsFromExistCategoryAsync(string parentSlug = "", int limit = 0, int timeCache = 30);
+        Task<ImmutableList<TagViewModel>> GetTopTagsByBlogCategorySlugAsync(string blogCategorySlug, int top, int cachingTime = 15);
+        Task<ImmutableList<BlogOverviewViewModel>> GetTopBlogPostByCategorySlugAsync(string blogCategorySlug, int top, int cachingTime = 15);
+        Task<ImmutableList<BlogOverviewViewModel>> GetTopRandomBlogPostByCategorySlugAsync(int top, int cachingTime = 15);
     }
 
 
@@ -260,6 +263,23 @@ namespace Doitsu.Ecommerce.Core.Services
             return topTags;
         }
 
+        public async Task<ImmutableList<TagViewModel>> GetTopTagsByBlogCategorySlugAsync(string blogCategorySlug, int top, int cachingTime = 15)
+        {
+            var key = $"{Constants.CacheKey.TOP_TAGS}_{top}";
+            if (!memoryCache.TryGetValue(key, out ImmutableList<TagViewModel> topTags))
+            {
+                var tags = this.tagService.GetAll()
+                    .Where(x => x.BlogTags
+                        .Where(bt => bt.Blog.BlogCategory.Slug == blogCategorySlug).Any())
+                    .OrderByDescending(x => x.BlogTags.Count).Skip(0).Take(top);
+
+                var result = await tags.ProjectTo<TagViewModel>(this.tagService.Mapper.ConfigurationProvider).ToListAsync();
+                topTags = result.ToImmutableList();
+                memoryCache.Set(key, topTags, TimeSpan.FromMinutes(cachingTime));
+            }
+            return topTags;
+        }
+
         public async Task<ImmutableList<CategoryWithProductOverviewViewModel>> GetProductsFromExistCategoryAsync(string parentSlug = "", int limit = 0, int timeCache = 30)
         {
             var key = $"{Constants.CacheKey.PRODUCTS_FROM_EXIST_CATEGORIES}_{limit}";
@@ -269,6 +289,35 @@ namespace Doitsu.Ecommerce.Core.Services
                 memoryCache.Set(key, listCategoryWithProducts, TimeSpan.FromMinutes(timeCache));
             }
             return listCategoryWithProducts;
+        }
+
+        public async Task<ImmutableList<BlogOverviewViewModel>> GetTopBlogPostByCategorySlugAsync(string blogCategorySlug, int top, int cachingTime = 15)
+        {
+            var key = $"{Constants.CacheKey.TOP_BLOG_POSTS}_{top}";
+            if (!memoryCache.TryGetValue(key, out ImmutableList<BlogOverviewViewModel> blogPosts))
+            {
+                var list = await this.blogService.Get(bp => bp.BlogCategory.Slug == blogCategorySlug)
+                    .OrderByDescending(x => x.PublishedTime)
+                    .Skip(0)
+                    .Take(top)
+                    .ProjectTo<BlogOverviewViewModel>(this.blogService.Mapper.ConfigurationProvider).ToListAsync();
+
+                blogPosts = list.ToImmutableList();
+                memoryCache.Set(key, blogPosts, TimeSpan.FromMinutes(cachingTime));
+            }
+            return blogPosts;
+        }
+
+        public async Task<ImmutableList<BlogOverviewViewModel>> GetTopRandomBlogPostByCategorySlugAsync(int top, int cachingTime = 15)
+        {
+            var key = $"{Constants.CacheKey.TOP_RANDOM_BLOG_POSTS}_{top}";
+            if (!memoryCache.TryGetValue(key, out ImmutableList<BlogOverviewViewModel> blogPosts))
+            {
+                var list = await this.blogService.GetRandomOverviewAsync(top);
+                blogPosts = list.ToImmutableList();
+                memoryCache.Set(key, blogPosts, TimeSpan.FromMinutes(cachingTime));
+            }
+            return blogPosts;
         }
     }
 }
