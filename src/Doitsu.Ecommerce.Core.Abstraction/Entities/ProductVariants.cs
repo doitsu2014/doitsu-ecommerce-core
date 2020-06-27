@@ -14,6 +14,8 @@ namespace Doitsu.Ecommerce.Core.Abstraction.Entities
         public long InventoryQuantity { get; set; }
         public ProductVariantStatusEnum Status { get; set; }
         public ProductVariantInventoryStatusEnum InventoryStatus { get; set; }
+        public string ImageThumbUrl { get; set; }
+        public string ImageUrls { get; set; }
         public byte[] Vers { get; set; }
         public bool Active { get; set; }
         public DateTime? LastUpdatedDate { get; set; }

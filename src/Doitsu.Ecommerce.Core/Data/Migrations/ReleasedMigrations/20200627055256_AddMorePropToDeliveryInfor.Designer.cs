@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doitsu.Ecommerce.Core.Data.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20200621171813_AddMorePropToDeliveryInfor")]
+    [Migration("20200627055256_AddMorePropToDeliveryInfor")]
     partial class AddMorePropToDeliveryInfor
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1136,6 +1136,13 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
 
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageThumbUrl")
+                        .HasColumnType("nvarchar(1000)")
+                        .HasMaxLength(1000);
+
+                    b.Property<string>("ImageUrls")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("InventoryQuantity")
                         .ValueGeneratedOnAdd()
