@@ -123,7 +123,8 @@ namespace Doitsu.Ecommerce.Core.Services
                 // Filter certainly parent category
                 .Where(c => c.InverseParentCate.Count > 0)
                 .Include(c => c.InverseParentCate)
-                    .ThenInclude(c => c.Products)
+                    .ThenInclude(ipc => ipc.Products)
+                        .ThenInclude(p => p.Cate)
                 .SelectMany(c => c.InverseParentCate)
                 .Select(c =>
                     new Categories
