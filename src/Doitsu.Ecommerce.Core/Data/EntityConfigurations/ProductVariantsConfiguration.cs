@@ -25,6 +25,7 @@ namespace Doitsu.Ecommerce.Core.Data.EntityConfigurations
                 .HasColumnType("decimal(18,4)")
                 .HasDefaultValue(0);
 
+            builder.Property(e => e.ImageThumbUrl).HasMaxLength(1000);
             builder.Property(x => x.InventoryQuantity).HasDefaultValue(0);
             builder.Property(x => x.Status).HasDefaultValue(ProductVariantStatusEnum.Available);
             builder.Property(x => x.InventoryStatus).HasDefaultValue(ProductVariantInventoryStatusEnum.Exist);

@@ -63,6 +63,17 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                 table: "ProductVariants",
                 nullable: true);
 
+            migrationBuilder.AddColumn<string>(
+                name: "ImageThumbUrl",
+                table: "ProductVariants",
+                maxLength: 1000,
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "ImageUrls",
+                table: "ProductVariants",
+                nullable: true);
+
             migrationBuilder.AddColumn<int>(
                 name: "InventoryStatus",
                 table: "ProductVariants",
@@ -198,6 +209,14 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "CreatedDate",
+                table: "ProductVariants");
+
+            migrationBuilder.DropColumn(
+                name: "ImageThumbUrl",
+                table: "ProductVariants");
+
+            migrationBuilder.DropColumn(
+                name: "ImageUrls",
                 table: "ProductVariants");
 
             migrationBuilder.DropColumn(

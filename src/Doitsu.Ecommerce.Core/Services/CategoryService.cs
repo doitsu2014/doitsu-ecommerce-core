@@ -26,7 +26,7 @@ namespace Doitsu.Ecommerce.Core.Services
 
         Task<ImmutableList<CategoryViewModel>> GetBuildingCategoryChildrenAsync();
 
-        Task<ImmutableList<CategoryMenuViewModel>> GetProductCategoryChildrenAsync();
+        Task<ImmutableList<CategoryMenuViewModel>> GetProductCategoryChildrenAsync(string superFixedCategorySlug = Constants.SuperFixedCategorySlug.PRODUCT);
 
         /// <summary>
         /// Return empty list if @parentCateSlug is null or empty
@@ -87,7 +87,7 @@ namespace Doitsu.Ecommerce.Core.Services
                 .ProjectTo<CategoryViewModel>(Mapper.ConfigurationProvider)
                 .ToListAsync()).ToImmutableList();
 
-        public async Task<ImmutableList<CategoryMenuViewModel>> GetProductCategoryChildrenAsync() => (await this.Get(cate => cate.ParentCate.Slug == Constants.SuperFixedCategorySlug.PRODUCT)
+        public async Task<ImmutableList<CategoryMenuViewModel>> GetProductCategoryChildrenAsync(string supertFixedCategorySlug = Constants.SuperFixedCategorySlug.PRODUCT) => (await this.Get(cate => cate.ParentCate.Slug == supertFixedCategorySlug)
                 .Where(cate => cate.IsFixed)
                 .Include(cate => cate.InverseParentCate)
                 .ProjectTo<CategoryMenuViewModel>(Mapper.ConfigurationProvider)
@@ -123,7 +123,8 @@ namespace Doitsu.Ecommerce.Core.Services
                 // Filter certainly parent category
                 .Where(c => c.InverseParentCate.Count > 0)
                 .Include(c => c.InverseParentCate)
-                    .ThenInclude(c => c.Products)
+                    .ThenInclude(ipc => ipc.Products)
+                        .ThenInclude(p => p.Cate)
                 .SelectMany(c => c.InverseParentCate)
                 .Select(c =>
                     new Categories

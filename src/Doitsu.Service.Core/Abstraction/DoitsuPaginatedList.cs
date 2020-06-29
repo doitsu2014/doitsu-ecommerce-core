@@ -54,6 +54,8 @@ namespace Doitsu.Service.Core.Abstraction
             Result = Result.AddRange(items);
         }
 
+        public static DoitsuPaginatedList<T> Empty => new DoitsuPaginatedList<T>(new List<T>(), 0, 0, 0);
+
         [JsonProperty("hasPreviousPage")]
         public bool HasPreviousPage
         {
@@ -75,9 +77,16 @@ namespace Doitsu.Service.Core.Abstraction
 
         public static async Task<DoitsuPaginatedList<T>> CreateAsync(IOrderedQueryable<T> source, int pageIndex, int pageSize)
         {
-            var count = await source.CountAsync();
-            var items = await source.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
-            return new DoitsuPaginatedList<T>(items, count, pageIndex, pageSize);
+            if (pageIndex > 0 && pageSize > 0)
+            {
+                var count = await source.CountAsync();
+                var items = await source.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
+                return new DoitsuPaginatedList<T>(items, count, pageIndex, pageSize);
+            }
+            else
+            {
+                return DoitsuPaginatedList<T>.Empty;
+            }
         }
     }
 }

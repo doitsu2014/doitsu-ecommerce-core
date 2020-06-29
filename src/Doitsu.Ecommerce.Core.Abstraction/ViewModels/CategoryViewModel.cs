@@ -22,9 +22,16 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         public bool IsFixed { get; set; }
         [JsonProperty("parentCateId")]
         public int? ParentCateId { get; set; }
+        [JsonProperty("parentCateName")]
+        public string ParentCateName { get; set; }
+        [JsonProperty("parentCateSlug")]
+        public string ParentCateSlug { get; set; }
+        [JsonProperty("parentCateIsFixed")]
+        public bool ParentCateIsFixed { get; set; }
         [JsonProperty("vers")]
         public byte[] Vers { get; set; }
     }
+
     /// <summary>
     /// This is origin view model of Categories Entity
     /// And this is default return type of Categories Services
@@ -51,9 +58,12 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         public bool IsFixed { get; set; }
         [JsonProperty("parentCateId")]
         public int? ParentCateId { get; set; }
+        [JsonProperty("parentCateName")]
+        public string ParentCateName { get; set; }
+        [JsonProperty("parentCateSlug")]
+        public string ParentCateSlug { get; set; }
         [JsonProperty("vers")]
         public byte[] Vers { get; set; }
-
     }
 
     public class CategoryWithInverseParentViewModel : SimpleCategoryViewModel

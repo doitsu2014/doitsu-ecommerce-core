@@ -1135,6 +1135,13 @@ namespace Doitsu.Ecommerce.Core.Data.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ImageThumbUrl")
+                        .HasColumnType("nvarchar(1000)")
+                        .HasMaxLength(1000);
+
+                    b.Property<string>("ImageUrls")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<long>("InventoryQuantity")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")

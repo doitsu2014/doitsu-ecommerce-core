@@ -22,7 +22,7 @@ namespace Doitsu.Ecommerce.Core.Services
 {
     public interface IBlogService : IEcommerceBaseService<Blogs>
     {
-        Task<DoitsuPaginatedList<BlogOverviewViewModel>> GetAllDetailBlogsByCategoryWithPagingAsync(string blogCategorySlug, int page = 0, int limit = 4);
+        Task<DoitsuPaginatedList<BlogOverviewViewModel>> GetAllOverviewBlogsByCategoryWithPagingAsync(string blogCategorySlug, int page = 0, int limit = 4);
         Task<BlogDetailViewModel> GetBlogDetailBySlugAsync(string slug);
         Task<DoitsuPaginatedList<BlogDetailViewModel>> GetPromotionBlogDetails(int page = 0, int limit = 10);
         Task<ImmutableList<BlogOverviewViewModel>> GetRandomOverviewAsync(int take = 5);
@@ -46,6 +46,7 @@ namespace Doitsu.Ecommerce.Core.Services
         {
             var rand = new Random();
             var blogsQuery = this.GetAll();
+
             var listShuffleOverview =
                 await blogsQuery
                 .ProjectTo<BlogOverviewViewModel>(Mapper.ConfigurationProvider)
@@ -53,10 +54,11 @@ namespace Doitsu.Ecommerce.Core.Services
                 .Skip(0)
                 .Take(take)
                 .ToListAsync();
+
             return listShuffleOverview.ToImmutableList();
         }
 
-        public async Task<DoitsuPaginatedList<BlogOverviewViewModel>> GetAllDetailBlogsByCategoryWithPagingAsync(string blogCategorySlug, int page = 0, int limit = 4)
+        public async Task<DoitsuPaginatedList<BlogOverviewViewModel>> GetAllOverviewBlogsByCategoryWithPagingAsync(string blogCategorySlug, int page = 0, int limit = 4)
         {
             var blogsQuery = this
                 .Get(x => x.BlogCategory.Slug == blogCategorySlug);

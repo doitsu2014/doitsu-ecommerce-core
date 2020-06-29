@@ -50,6 +50,8 @@ namespace Doitsu.Ecommerce.Core.Abstraction
             public const string PROMOTION_BLOGS = "PROMOTION_BLOGS";
             public const string INVERSE_CATEGORY = "INVERSE_CATEGORY";
             public const string PRODUCTS_FROM_EXIST_CATEGORIES = "PRODUCTS_FROM_EXIST_CATEGORIES";
+            public const string TOP_BLOG_POSTS = "TOP_BLOG_POSTS";
+            public const string TOP_RANDOM_BLOG_POSTS = "TOP_RANDOM_BLOG_POSTS";
 
         }
 

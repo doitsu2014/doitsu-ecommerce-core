@@ -7,24 +7,39 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
     {
         [JsonProperty("id")]
         public int Id { get; set; }
+
         [JsonProperty("productId")]
         public int ProductId { get; set; }
+
         [JsonProperty("sku")]
         public string Sku { get; set; }
+
         [JsonProperty("anotherPrice")]
         public decimal AnotherPrice { get; set; }
+
         [JsonProperty("anotherDiscount")]
         public float AnotherDiscount { get; set; }
+
         [JsonProperty("inventoryQuantity")]
         public long InventoryQuantity { get; set; }
+
         [JsonProperty("vers")]
         public byte[] Vers { get; set; }
+
         [JsonProperty("status")]
         public ProductVariantStatusEnum Status { get; set; }
+        
         [JsonProperty("productPrice")]
         public decimal ProductPrice { get; set; }
+
         [JsonProperty("productWeight")]
         public float ProductWeight { get; set; }
+
+        [JsonProperty("imageThumbUrl")]
+        public string ImageThumbUrl { get; set; }
+
+        [JsonProperty("imageUrls")]
+        public string ImageUrls { get; set; }
 
         [JsonProperty("inventoryStatus")]
         public ProductVariantInventoryStatusEnum InventoryStatus { get; set; }
