@@ -288,17 +288,34 @@ namespace Doitsu.Ecommerce.Core.Services
                 .MapAsync(async req =>
                 {
                     var productVariantIds = req.Select(x => x.productVariantId).ToArray();
-                    var aggregateQuantity = req.Select(x => x.quantity).Aggregate((a, b) => a + b);
-                    (await this.Get(pv => productVariantIds.Contains(pv.Id), pv => pv.Include(qPv => qPv.Product)).ToListAsync())
-                    .ForEach(pv =>
-                    {
-                        var pvAndQuantity = req.FirstOrDefault(x => x.productVariantId == pv.Id);
-                        pv.InventoryQuantity += pvAndQuantity.quantity;
-                        this.Update(pv);
+                    var listAvailablePv = (await this.Get(pv => productVariantIds.Contains(pv.Id)).ToListAsync())
+                        .Select(pv => (pv, req.FirstOrDefault(x => x.productVariantId == pv.Id).quantity))
+                        .ToList();
 
-                        pv.Product.InventoryQuantity += pvAndQuantity.quantity;
-                        this.DbContext.Products.Update(pv.Product);
+                    listAvailablePv.ForEach(x =>
+                    {
+                        x.pv.InventoryQuantity += x.quantity;
+                        this.Update(x.pv);
                     });
+
+                    var listProductIdAndQuantity = listAvailablePv.Select(x => (x.pv.ProductId, x.quantity))
+                        .GroupBy(y => y.ProductId)
+                        .Select(y => new {
+                            Key = y.Key,
+                            TotalQuantity = y.Select(iY => iY.quantity).Aggregate((a, b) => a + b)
+                        })
+                        .ToList();
+
+                    var listUpdatedProducts = (await this.DbContext.Products
+                        .Where(p => listProductIdAndQuantity.Select(piaq => piaq.Key)
+                        .Contains(p.Id))
+                        .ToListAsync())
+                        .Select(p => {
+                            p.InventoryQuantity += listProductIdAndQuantity.First(piaq => piaq.Key == p.Id).TotalQuantity;
+                            return p;
+                        });
+                    this.DbContext.Products.UpdateRange(listUpdatedProducts);
+
                     await this.CommitAsync();
                     return productVariantIds;
                 });
@@ -314,20 +331,37 @@ namespace Doitsu.Ecommerce.Core.Services
                     var productVariantIds = req.Select(x => x.productVariantId).ToArray();
                     var aggregateQuantity = req.Select(x => x.quantity).Aggregate((a, b) => a + b);
 
-                    var listPv = (await this.Get(pv => productVariantIds.Contains(pv.Id), pv => pv.Include(qPv => qPv.Product)).ToListAsync());
+                    var listPv = (await this.Get(pv => productVariantIds.Contains(pv.Id)).ToListAsync());
                     var listUnavailablePv = listPv.Where(pv => pv.InventoryQuantity < req.FirstOrDefault(x => x.productVariantId == pv.Id).quantity);
                     if(listUnavailablePv.Count() > 0) return Option.None<int[], string>(listUnavailablePv.Select(pv => $"Biến thể có SKU là {pv.Sku} hiện tại đã hết hàng.").Aggregate((a, b) => $"{a}\n{b}"));
 
-                    listPv.Select(pv => (req.FirstOrDefault(x => x.productVariantId == pv.Id).quantity, pv)).Where(x => x.pv.InventoryQuantity >= x.quantity)
-                    .ToList()
-                    .ForEach(x =>
-                    {
-                        x.pv.InventoryQuantity -= x.quantity;
-                        this.Update(x.pv);
+                    var listAvailablePv = (listPv.Select(pv => (req.FirstOrDefault(x => x.productVariantId == pv.Id).quantity, pv)).Where(x => x.pv.InventoryQuantity >= x.quantity).ToList());
+                    listAvailablePv
+                        .ForEach(x =>
+                        {
+                            x.pv.InventoryQuantity -= x.quantity;
+                            this.Update(x.pv);
+                        });
 
-                        x.pv.Product.InventoryQuantity -= (x.quantity);
-                        this.DbContext.Products.Update(x.pv.Product);
-                    });
+                    var listProductIdAndQuantity = listAvailablePv.Select(x => (x.pv.ProductId, x.quantity))
+                        .GroupBy(y => y.ProductId)
+                        .Select(y => new {
+                            Key = y.Key,
+                            TotalQuantity = y.Select(iY => iY.quantity).Aggregate((a, b) => a + b)
+                        })
+                        .ToList();
+
+                    var listUpdatedProducts = (await this.DbContext.Products
+                        .Where(p => listProductIdAndQuantity.Select(piaq => piaq.Key)
+                        .Contains(p.Id))
+                        .ToListAsync())
+                        .Select(p => {
+                            p.InventoryQuantity -= listProductIdAndQuantity.First(piaq => piaq.Key == p.Id).TotalQuantity;
+                            return p;
+                        });
+
+                    this.DbContext.Products.UpdateRange(listUpdatedProducts);
+
                     await this.CommitAsync();
                     return Option.Some<int[], string>(productVariantIds);
                 });

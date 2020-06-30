@@ -216,10 +216,6 @@ namespace Doitsu.Ecommerce.Core.Services
             return productsQuery;
         }
 
-
-
-
-
         public async Task<Option<int, string>> CreateProductWithOptionAsync(CreateProductViewModel data)
         {
             using (var transaction = await this.DbContext.Database.BeginTransactionAsync())
