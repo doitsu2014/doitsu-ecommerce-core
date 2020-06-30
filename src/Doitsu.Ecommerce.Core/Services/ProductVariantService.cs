@@ -33,8 +33,8 @@ namespace Doitsu.Ecommerce.Core.Services
         ImmutableList<ProductVariants> BuildListProductVariant(Products product);
         Task<Option<int, string>> IncreaseInventoryQuantityAsync(int productId, int productVariantId, int quantity = 0);
         Task<Option<int, string>> DecreaseInventoryQuantityAsync(int productId, int productVariantId, int quantity = 0);
-        Task<Option<int[], string>> IncreaseBatchPvInventoryQuantityAsync(int[] productVariantIds, int quantity = 0);
-        Task<Option<int[], string>> DecreaseBatchPvInventoryQuantityAsync(int[] productVariantIds, int quantity = 0);
+        Task<Option<int[], string>> IncreaseBatchPvInventoryQuantityAsync((int productVariantId, int quantity)[] listProductIdAndQuantity);
+        Task<Option<int[], string>> DecreaseBatchPvInventoryQuantityAsync((int productVariantId, int quantity)[] listProductIdAndQuantity);
     }
 
     public class ProductVariantService : EcommerceBaseService<ProductVariants>, IProductVariantService
@@ -280,56 +280,56 @@ namespace Doitsu.Ecommerce.Core.Services
                 });
         }
 
-        public async Task<Option<int[], string>> IncreaseBatchPvInventoryQuantityAsync(int[] productVariantIds, int quantity = 0)
+        public async Task<Option<int[], string>> IncreaseBatchPvInventoryQuantityAsync((int productVariantId, int quantity)[] listProductIdAndQuantity)
         {
-            return await (productVariantIds, quantity).SomeNotNull()
+            return await (listProductIdAndQuantity).SomeNotNull()
                 .WithException(string.Empty)
-                .Filter(req => quantity >= 0, $"Không thể thêm số lượng sản phẩm trong kho vì số lượng bạn nhập {quantity} nhỏ hơn 0.")
+                .Filter(req => listProductIdAndQuantity.All(x => x.quantity >= 0), $"Không thể thêm số lượng sản phẩm trong kho vì số lượng bạn nhập nhỏ hơn 0.")
                 .MapAsync(async req =>
                 {
-                    var listPv = await this.Get(pv => req.productVariantIds.Contains(pv.Id), pv => pv.Include(qPv => qPv.Product)).ToListAsync();
-                    listPv.ForEach(pv =>
+                    var productVariantIds = req.Select(x => x.productVariantId).ToArray();
+                    var aggregateQuantity = req.Select(x => x.quantity).Aggregate((a, b) => a + b);
+                    (await this.Get(pv => productVariantIds.Contains(pv.Id), pv => pv.Include(qPv => qPv.Product)).ToListAsync())
+                    .ForEach(pv =>
                     {
-                        pv.InventoryQuantity += quantity;
+                        var pvAndQuantity = req.FirstOrDefault(x => x.productVariantId == pv.Id);
+                        pv.InventoryQuantity += pvAndQuantity.quantity;
                         this.Update(pv);
 
-                        pv.Product.InventoryQuantity += (listPv.Count() * quantity);
+                        pv.Product.InventoryQuantity += pvAndQuantity.quantity;
                         this.DbContext.Products.Update(pv.Product);
                     });
-
                     await this.CommitAsync();
-                    return req.productVariantIds;
+                    return productVariantIds;
                 });
         }
 
-        public async Task<Option<int[], string>> DecreaseBatchPvInventoryQuantityAsync(int[] productVariantIds, int quantity = 0)
+        public async Task<Option<int[], string>> DecreaseBatchPvInventoryQuantityAsync((int productVariantId, int quantity)[] listProductIdAndQuantity)
         {
-            return await (productVariantIds, quantity).SomeNotNull()
+            return await (listProductIdAndQuantity).SomeNotNull()
                 .WithException(string.Empty)
-                .Filter(req => quantity >= 0, $"Không thể giảm số lượng sản phẩm trong kho vì số lượng truyền vào {quantity} nhỏ hơn 0.")
+                .Filter(req => listProductIdAndQuantity.All(x => x.quantity >= 0), $"Không thể giảm số lượng sản phẩm trong kho vì số lượng truyền vào nhỏ hơn 0.")
                 .FlatMapAsync(async req =>
                 {
-                    var listPv = await this.Get(pv => req.productVariantIds.Contains(pv.Id),
-                        pv => pv.Include(qPv => qPv.Product))
-                        .ToListAsync();
-                    var listUnavailablePv = listPv.Where(pv => pv.InventoryQuantity < quantity).ToImmutableList();
+                    var productVariantIds = req.Select(x => x.productVariantId).ToArray();
+                    var aggregateQuantity = req.Select(x => x.quantity).Aggregate((a, b) => a + b);
 
-                    if (listUnavailablePv.Count() > 0)
-                    {
-                        return Option.None<int[], string>(listUnavailablePv.Select(pv => $"Biến thể có SKU là {pv.Sku} hiện tại đã hết hàng.").Aggregate((a, b) => $"{a}\n{b}"));
-                    }
+                    var listPv = (await this.Get(pv => productVariantIds.Contains(pv.Id), pv => pv.Include(qPv => qPv.Product)).ToListAsync());
+                    var listUnavailablePv = listPv.Where(pv => pv.InventoryQuantity < req.FirstOrDefault(x => x.productVariantId == pv.Id).quantity);
+                    if(listUnavailablePv.Count() > 0) return Option.None<int[], string>(listUnavailablePv.Select(pv => $"Biến thể có SKU là {pv.Sku} hiện tại đã hết hàng.").Aggregate((a, b) => $"{a}\n{b}"));
 
-                    var listAvailablePv = listPv.Where(pv => pv.InventoryQuantity >= quantity).ToImmutableList();
-                    listAvailablePv.ForEach(pv =>
+                    listPv.Select(pv => (req.FirstOrDefault(x => x.productVariantId == pv.Id).quantity, pv)).Where(x => x.pv.InventoryQuantity >= x.quantity)
+                    .ToList()
+                    .ForEach(x =>
                     {
-                        pv.InventoryQuantity -= quantity;
-                        this.Update(pv);
-                        pv.Product.InventoryQuantity -= (listAvailablePv.Count() * quantity);
-                        this.DbContext.Products.Update(pv.Product);
+                        x.pv.InventoryQuantity -= x.quantity;
+                        this.Update(x.pv);
+
+                        x.pv.Product.InventoryQuantity -= (x.quantity);
+                        this.DbContext.Products.Update(x.pv.Product);
                     });
-
                     await this.CommitAsync();
-                    return Option.Some<int[], string>(req.productVariantIds);
+                    return Option.Some<int[], string>(productVariantIds);
                 });
         }
 

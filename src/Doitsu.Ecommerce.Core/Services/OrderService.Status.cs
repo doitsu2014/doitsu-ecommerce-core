@@ -170,10 +170,10 @@ namespace Doitsu.Ecommerce.Core.Services
                          var orderItems = req.OrderItems;
 
                          // TODO: Work with normal product
-                         var orderedProductIds = orderItems.Where(oi => oi.ProductVariantId == null).Select(oi => oi.ProductId);
+                         // var orderedProductIds = orderItems.Where(oi => oi.ProductVariantId == null).Select(oi => oi.ProductId);
 
-                         var orderedPvIds = orderItems.Where(oi => oi.ProductVariantId != null).Select(oi => oi.ProductVariantId ?? 0).ToArray();
-                         return await this.productVariantService.DecreaseBatchPvInventoryQuantityAsync(orderedPvIds, 1)
+                         var orderedPvIds = orderItems.Where(oi => oi.ProductVariantId != null).Select(oi => (oi.ProductVariantId.Value, oi.SubTotalQuantity)).ToArray();
+                         return await this.productVariantService.DecreaseBatchPvInventoryQuantityAsync(orderedPvIds)
                              .MapAsync(
                                  async ids => await Task.FromResult(this.Mapper.Map<OrderViewModel>(req))
                              );
