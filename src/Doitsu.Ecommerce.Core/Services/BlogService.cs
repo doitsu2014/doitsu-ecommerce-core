@@ -5,13 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Doitsu.Ecommerce.Core.Abstraction;
 
 using Doitsu.Ecommerce.Core.Data;
 using Doitsu.Ecommerce.Core.Abstraction.Entities;
 using Doitsu.Ecommerce.Core.Abstraction.Identities;
 using Doitsu.Ecommerce.Core.Abstraction.ViewModels;
-using Doitsu.Service.Core;
 using Doitsu.Service.Core.Abstraction;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

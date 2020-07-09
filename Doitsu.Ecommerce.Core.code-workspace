@@ -23,6 +23,16 @@
 		{
 			"name": "Doitsu.Ecommerce.Core.Tests",
 			"path": "test/Doitsu.Ecommerce.Core.Tests"
+		},
+		{
+			"path": "src/Doitsu.Ecommerce.ApplicationCore"
+		},
+		{
+			"path": "src/Doitsu.Ecommerce.Infrastructure"
+		},
+		{
+			"path": "test/Doitsu.Ecommerce.ApplicationCore.Tests"
 		}
-	]
+	],
+	"settings": {}
 }
