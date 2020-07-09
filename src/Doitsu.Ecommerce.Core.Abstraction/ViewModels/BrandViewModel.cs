@@ -33,6 +33,7 @@ namespace Doitsu.Ecommerce.Core.Abstraction.ViewModels
         public string TwitterUrl { get; set; }
         public string LogoSquareUrl { get; set; }
         public string LogoRectangleUrl { get; set; }
+        public string FaviconUrl { get; set; }
         public string Description { get; set; }
         public string YoutubeUrl { get; set; }
         public int? OpenDayOfWeek { get; set; }

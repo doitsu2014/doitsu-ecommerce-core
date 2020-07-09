@@ -216,10 +216,6 @@ namespace Doitsu.Ecommerce.Core.Services
             return productsQuery;
         }
 
-
-
-
-
         public async Task<Option<int, string>> CreateProductWithOptionAsync(CreateProductViewModel data)
         {
             using (var transaction = await this.DbContext.Database.BeginTransactionAsync())
@@ -277,7 +273,10 @@ namespace Doitsu.Ecommerce.Core.Services
                     if (updateProductViewModel == null) return Option.None<int, string>($"Không tìm thấy sản phẩm tương ứng với id {req.productId}");
                     else if ((!await DbContext.ProductOptions.AnyAsync(po => po.Name == req.data.Name)))
                         updateProductViewModel.ProductOptions.Add(req.data);
-                    updateProductViewModel.Name = req.data.Name;
+                        
+                    // Comment
+                    // updateProductViewModel.Name = req.data.Name;
+
                     return await UpdateProductWithOptionAsync(updateProductViewModel);
                 });
         }
