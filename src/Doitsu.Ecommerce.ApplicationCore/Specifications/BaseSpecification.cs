@@ -21,6 +21,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Specifications
         protected BaseSpecification()
         {
         }
+        
         protected BaseSpecification(Expression<Func<T, bool>> criteria)
         {
             AddCriteria(criteria);

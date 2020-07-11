@@ -2,19 +2,20 @@
 using Xunit;
 using System.Collections.Generic;
 using Doitsu.Ecommerce.ApplicationCore.Models.ViewModels;
+using Doitsu.Ecommerce.ApplicationCore.Entities;
 
 namespace Doitsu.Ecommerce.Core.Tests.Helpers
 {
     public class EcommerceCoreFixture : IDisposable
     {
-        public BrandViewModel BrandData { get; }
-        public ICollection<CategoryWithInverseParentViewModel> CategoryData { get; }
-        public ICollection<CreateProductViewModel> ProductData { get; }
-        public ICollection<ProductOptionViewModel> Product1ProductOptionsData { get; }
+        public Brand BrandData { get; }
+        public ICollection<Categories> CategoryData { get; }
+        public ICollection<Products> ProductData { get; }
+        public ICollection<ProductOptions> Product1ProductOptionsData { get; }
 
         public EcommerceCoreFixture()
         {
-            BrandData = new BrandViewModel()
+            BrandData = new Brand()
             {
                 Id = 0,
                 Address = "Kim chỉ nam",
@@ -32,83 +33,97 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 CloseDayOfWeek = (int)DayOfWeek.Sunday
             };
 
-            CategoryData = new List<CategoryWithInverseParentViewModel>()
+            CategoryData = new List<Categories>()
             {
-                new CategoryWithInverseParentViewModel()
+                new Categories()
                 {
                     Id = 0,
                     Name = "Sản phẩm",
                     IsFixed = true,
                     ParentCateId = null,
                     Slug = "san-pham",
-                    InverseParentCate = new List<CategoryWithInverseParentViewModel>()
+                    InverseParentCate = new List<Categories>()
                     {
-                        new CategoryWithInverseParentViewModel()
+                        new Categories()
                         {
-                            Name = "Hàng bán",
-                            IsFixed = true,
+                            Name = "Hàng bán 1",
+                            IsFixed = false,
                             ParentCateId = null,
-                            Slug = "hang-ban"
+                            Slug = "hang-ban-1"
+                        },
+                        new Categories()
+                        {
+                            Name = "Hàng bán 2",
+                            IsFixed = false,
+                            ParentCateId = null,
+                            Slug = "hang-ban-2"
+                        },
+                        new Categories()
+                        {
+                            Name = "Hàng bán 3",
+                            IsFixed = false,
+                            ParentCateId = null,
+                            Slug = "hang-ban-3"
                         }
                     }
                 }
             };
 
-            Product1ProductOptionsData = new List<ProductOptionViewModel>()
+            Product1ProductOptionsData = new List<ProductOptions>()
             {
-                new ProductOptionViewModel()
+                new ProductOptions()
                 {
                     Id = 0,
                     Name = "Nhà Mạng",
-                    ProductOptionValues = new List<ProductOptionValueViewModel>()
+                    ProductOptionValues = new List<ProductOptionValues>()
                     {
-                        new  ProductOptionValueViewModel()
+                        new  ProductOptionValues()
                         {
                             Id = 0,
                             Value = "Vinaphone"
                         },
-                        new  ProductOptionValueViewModel()
+                        new  ProductOptionValues()
                         {
                             Id = 0,
                             Value = "Viettel"
                         },
-                        new  ProductOptionValueViewModel()
+                        new  ProductOptionValues()
                         {
                             Id = 0,
                             Value = "Mobiphone"
                         }
                     }
                 },
-                new ProductOptionViewModel()
+                new ProductOptions()
                 {
                     Id = 0,
                     Name = "Loại tài khoản",
-                    ProductOptionValues = new List<ProductOptionValueViewModel>()
+                    ProductOptionValues = new List<ProductOptionValues>()
                     {
-                        new  ProductOptionValueViewModel()
+                        new  ProductOptionValues()
                         {
                             Id = 0,
                             Value = "Trả trước"
                         },
-                        new  ProductOptionValueViewModel()
+                        new  ProductOptionValues()
                         {
                             Id = 0,
                             Value = "Trả sau"
                         }
                     }
                 },
-                new ProductOptionViewModel()
+                new ProductOptions()
                 {
                     Id = 0,
                     Name = "Có mật khẩu ứng dụng",
-                    ProductOptionValues = new List<ProductOptionValueViewModel>()
+                    ProductOptionValues = new List<ProductOptionValues>()
                     {
-                        new  ProductOptionValueViewModel()
+                        new  ProductOptionValues()
                         {
                             Id = 0,
                             Value = "Có"
                         },
-                        new  ProductOptionValueViewModel()
+                        new  ProductOptionValues()
                         {
                             Id = 0,
                             Value = "Không"
@@ -117,12 +132,12 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 }
             };
 
-            var product1 = new CreateProductViewModel()
+            var product1 = new Products()
             {
                 Id = 0,
-                Code = "GACH-CUOC",
-                Name = "NẠP TRẢ TRƯỚC & TRẢ SAU",
-                Slug = "nap-the-tra-truoc-va-tra-sau",
+                Code = "PV934581023901",
+                Name = "Sản phẩm ảo 01",
+                Slug = "san-pham-ao-01",
                 Price = 0,
                 Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
                 ShortDescription = "Lorem ipsum dolor sit amet consectetur adipisicing elit",
@@ -130,9 +145,37 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 ProductOptions = Product1ProductOptionsData
             };
 
-            ProductData = new List<CreateProductViewModel>()
+            var product2 = new Products()
             {
-                product1
+                Id = 0,
+                Code = "PV934581028401",
+                Name = "Sản phẩm ảo 02",
+                Slug = "san-pham-ao-02",
+                Price = 0,
+                Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
+                ShortDescription = "Lorem ipsum dolor sit amet consectetur adipisicing elit",
+                Weight = 1000,
+                ProductOptions = Product1ProductOptionsData
+            };
+
+            var product3 = new Products()
+            {
+                Id = 0,
+                Code = "PV934581022817",
+                Name = "Sản phẩm ảo 03",
+                Slug = "san-pham-ao-03",
+                Price = 0,
+                Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
+                ShortDescription = "Lorem ipsum dolor sit amet consectetur adipisicing elit",
+                Weight = 1000,
+                ProductOptions = Product1ProductOptionsData
+            };
+
+            ProductData = new List<Products>()
+            {
+                product1,
+                product2,
+                product3
             };
         }
 

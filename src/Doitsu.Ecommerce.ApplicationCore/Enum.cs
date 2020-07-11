@@ -118,4 +118,11 @@ namespace Doitsu.Ecommerce.ApplicationCore
         ascend,
         descend
     }
+    
+    public enum TypeOfCategoryEnum
+    {
+        Normal,
+        Parent,
+        SuperParent
+    }
 }

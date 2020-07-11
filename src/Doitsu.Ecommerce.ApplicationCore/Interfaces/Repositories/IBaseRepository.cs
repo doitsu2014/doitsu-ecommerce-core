@@ -11,6 +11,8 @@ namespace Doitsu.Ecommerce.ApplicationCore.Interfaces.Repositories
 
         Task<IReadOnlyList<TEntity>> ListAsync(ISpecification<TEntity> spec);
 
+        Task<IReadOnlyList<TResult>> ListAsync<TResult>(ISpecification<TEntity,TResult> spec);
+
         Task<TEntity> AddAsync(TEntity entity);
 
         Task<TEntity[]> AddRangeAsync(TEntity[] entities);
