@@ -17,6 +17,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Interfaces
 
         #nullable enable
         string? CacheKey { get; }
+        TimeSpan? CacheTime { get; }
         Expression<Func<T, object>>? OrderBy { get; }
         Expression<Func<T, object>>? ThenBy { get; }
         Expression<Func<T, object>>? OrderByDescending { get; }
