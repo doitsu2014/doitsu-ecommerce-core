@@ -10,8 +10,13 @@ namespace Doitsu.Ecommerce.ApplicationCore.Models.EmailHandlerModels
         public string CredentialServerAddress { get; set; }
         public int CredentialServerPort { get; set; }
         public bool CredentialServerEnableSsl { get; set; }
+
+        // Default Email Configuration
         public MailPayloadInformation FromMail { get; set; }
         public List<MailPayloadInformation> DefaultListBcc { get; set; }
         public List<MailPayloadInformation> DefaultListCc { get; set; }
+        
+        // Email templates configuration
+        public TemplateUrlInformation TemplateUrlInformation { get; set; }
     }
 }

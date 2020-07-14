@@ -4,6 +4,7 @@ using Doitsu.Ecommerce.ApplicationCore;
 using Doitsu.Ecommerce.ApplicationCore.Entities.Identities;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Data.Handlers;
+using Doitsu.Ecommerce.ApplicationCore.Interfaces.RazorPage;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Repositories;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services;
 using Doitsu.Ecommerce.ApplicationCore.Models.EmailHandlerModels;
@@ -13,6 +14,7 @@ using Doitsu.Ecommerce.Infrastructure.Data.EntityChangeHandlers;
 using Doitsu.Ecommerce.Infrastructure.IdentityServer4.Data;
 using Doitsu.Ecommerce.Infrastructure.Repositories;
 using Doitsu.Ecommerce.Infrastructure.Services.EmailService;
+using Doitsu.Ecommerce.Infrastructure.Services.RazorPageRenderer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -72,6 +74,7 @@ namespace Doitsu.Ecommerce.Infrastructure.Extensions
                 services.AddDoitsuEcommerceImageSharpWeb();
 
             #region Services
+            services.AddScoped<IRazorPageRenderer, RazorPageRenderer>();
             services.AddDoitsuEmailService(configuration);
             services.AddDeliveryIntegration(configuration);
             #endregion
