@@ -20,6 +20,7 @@ using Microsoft.Extensions.Options;
 using Doitsu.Ecommerce.ApplicationCore.Models.EmailHandlerModels;
 using System.IO;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.RazorPage;
+using System.Threading;
 
 namespace Doitsu.Ecommerce.ApplicationCore.Tests.Tests
 {
@@ -46,16 +47,24 @@ namespace Doitsu.Ecommerce.ApplicationCore.Tests.Tests
                     var smtpMailServerOptions = optionsMonitor.CurrentValue;
 
                     var env = scope.ServiceProvider.GetService<IWebHostEnvironment>();
-                    var path = Path.Combine( smtpMailServerOptions.TemplateUrlInformation.OrderConfirmationUrl);
-                    using (var reader = new StreamReader(path))
-                    {
-                        var body = await reader.ReadToEndAsync();
-                        var sendMailModel = new SendMailModel() { OrderCode = "#239123ABI" };
-                        var result = await renderer.RenderPartialToStringAsync<SendMailModel>(path, sendMailModel);
-                        await smtpEmailServerHandler.SendEmailMultiplePayloadAsync(smtpMailServerOptions, new List<MessagePayload>() {});
-                    }
-                    var a = 5;
+                    var path = Path.Combine(smtpMailServerOptions.TemplateUrlInformation.OrderConfirmationUrl);
+                    var sendMailModel = new SendMailModel() { OrderCode = "#239123ABI" };
+                    var result = await renderer.RenderPartialToStringAsync<SendMailModel>(path, sendMailModel);
+                    await smtpEmailServerHandler.SendEmailMultiplePayloadAsync(smtpMailServerOptions, new List<MessagePayload>()
+                        {
+                            new MessagePayload()
+                            {
+                                DestEmail = new MailPayloadInformation()
+                                {
+                                    Mail = "thd1152016@gmail.com",
+                                    Name = "DucTH Destination Tester"
+                                },
+                                Body = result,
+                                Subject = $"[Doitsu.Ecommerce.ApplicationCore.Test] Test Sending Email {DateTime.Now.ToString("dd/MM/yyyy")}"
+                            }
 
+                        }, CancellationToken.None);
+                    Assert.True(true);
                 }
             }
         }

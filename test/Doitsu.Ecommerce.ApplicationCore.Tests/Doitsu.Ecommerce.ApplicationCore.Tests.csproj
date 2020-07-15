@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <Content Include="Templates\**\*">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
     <Content Include="Configurations\appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
