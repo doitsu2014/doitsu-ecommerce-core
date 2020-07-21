@@ -1,16 +1,16 @@
 {
 	"folders": [
 		{
-			"path": "src\\Doitsu.Ecommerce.ApplicationCore"
+			"path": "src/Doitsu.Ecommerce.ApplicationCore"
 		},
 		{
-			"path": "src\\Doitsu.Ecommerce.Infrastructure"
+			"path": "src/Doitsu.Ecommerce.Infrastructure"
 		},
 		{
-			"path": "test\\Doitsu.Ecommerce.ApplicationCore.Tests"
+			"path": "test/Doitsu.Ecommerce.ApplicationCore.Tests"
 		},
 		{
-			"path": "src\\Doitsu.Ecommerce.Core"
+			"path": "src/Doitsu.Ecommerce.Core"
 		}
 	]
 }
