@@ -8,7 +8,6 @@ namespace Doitsu.Ecommerce.ApplicationCore.Interfaces.Services.BusinessServices
     public interface IProductService
     {
         ImmutableList<ProductVariants> BuildListProductVariant(Products product);
-        Task<Option<int, string>> UpdateProductVariantsAsync(ProductVariants data);
         Task<Option<int, string>> UpdateProductVariantAnotherDiscountAsync(int productId, int productVariantId, float anotherDiscount);
         Task<Option<int, string>> UpdateProductVariantAnotherPriceAsync(int productId, int productVariantId, decimal anotherPrice);
         Task<Option<int, string>> UpdateProductVariantStatusAsync(int productId, int productVariantId, ProductVariantStatusEnum value);

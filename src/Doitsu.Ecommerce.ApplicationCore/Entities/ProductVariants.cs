@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Data;
-using Doitsu.Ecommerce.ApplicationCore;
 
 namespace Doitsu.Ecommerce.ApplicationCore.Entities
 {

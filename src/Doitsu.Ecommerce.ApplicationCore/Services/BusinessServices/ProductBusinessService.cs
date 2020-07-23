@@ -199,7 +199,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
 
         public async Task<Option<int, string>> DecreaseInventoryQuantityAsync(int productId, int productVariantId, int quantity = 0)
         {
-            return await(productId, productVariantId, quantity).SomeNotNull()
+            return await (productId, productVariantId, quantity).SomeNotNull()
                 .WithException(string.Empty)
                 .Filter(req => quantity >= 0, $"Không thể giảm số lượng sản phẩm trong kho vì số lượng truyền vào {quantity} nhỏ hơn 0.")
                 .MapAsync(async req => (product: await productRepository.FindByKeysAsync(req.productId), productVariant: await productVariantRepository.FindByKeysAsync(productVariantId), quantity))
@@ -299,29 +299,64 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
                 });
         }
 
-        public Task<Option<int, string>> UpdateProductVariantAnotherDiscountAsync(int productId, int productVariantId, float anotherDiscount)
+        public async Task<Option<int, string>> UpdateProductVariantAnotherDiscountAsync(int productId, int productVariantId, float anotherDiscount)
         {
-            throw new System.NotImplementedException();
+            return await (productId, productVariantId, anotherDiscount).SomeNotNull()
+                .WithException(string.Empty)
+                .FilterAsync(async req => (await productRepository.CountAsync(new ProductFilterByIdsSpecification(req.productId))) > 0, "Không tồn tại sản phẩm này.")
+                .FilterAsync(async req => (await productVariantRepository.CountAsync(new ProductVariantFilterByIdsSpecification(req.productVariantId)) > 0), "Không tồn tại biến thể này.")
+                .MapAsync(async req =>
+                {
+                    var productVariant = await productVariantRepository.FindByKeysAsync(productVariantId);
+                    productVariant.AnotherDiscount = req.anotherDiscount;
+                    await productVariantRepository.UpdateAsync(productVariant);
+                    return productVariant.Id;
+                });
         }
 
-        public Task<Option<int, string>> UpdateProductVariantAnotherPriceAsync(int productId, int productVariantId, decimal anotherPrice)
+        public async Task<Option<int, string>> UpdateProductVariantAnotherPriceAsync(int productId, int productVariantId, decimal anotherPrice)
         {
-            throw new System.NotImplementedException();
+            return await (productId, productVariantId, anotherPrice).SomeNotNull()
+                .WithException(string.Empty)
+                .FilterAsync(async req => (await productRepository.CountAsync(new ProductFilterByIdsSpecification(req.productId))) > 0, "Không tồn tại sản phẩm này.")
+                .FilterAsync(async req => (await productVariantRepository.CountAsync(new ProductVariantFilterByIdsSpecification(req.productVariantId)) > 0), "Không tồn tại biến thể này.")
+                .MapAsync(async req =>
+                {
+                    var productVariant = await productVariantRepository.FindByKeysAsync(productVariantId);
+                    productVariant.AnotherPrice = req.anotherPrice;
+                    await productVariantRepository.UpdateAsync(productVariant);
+                    return productVariant.Id;
+                });
         }
 
-        public Task<Option<int, string>> UpdateProductVariantInventoryStatusAsync(int productId, int productVariantId, ProductVariantInventoryStatusEnum value)
+        public async Task<Option<int, string>> UpdateProductVariantStatusAsync(int productId, int productVariantId, ProductVariantStatusEnum value)
         {
-            throw new System.NotImplementedException();
+            return await (productId, productVariantId, value).SomeNotNull()
+                .WithException(string.Empty)
+                .FilterAsync(async req => (await productRepository.CountAsync(new ProductFilterByIdsSpecification(req.productId))) > 0, "Không tồn tại sản phẩm này.")
+                .FilterAsync(async req => (await productVariantRepository.CountAsync(new ProductVariantFilterByIdsSpecification(req.productVariantId)) > 0), "Không tồn tại biến thể này.")
+                .MapAsync(async req =>
+                {
+                    var productVariant = await productVariantRepository.FindByKeysAsync(productVariantId);
+                    productVariant.Status = req.value;
+                    await productVariantRepository.UpdateAsync(productVariant);
+                    return productVariant.Id;
+                });
         }
 
-        public Task<Option<int, string>> UpdateProductVariantsAsync(ProductVariants data)
+        public async Task<Option<int, string>> UpdateProductVariantInventoryStatusAsync(int productId, int productVariantId, ProductVariantInventoryStatusEnum value)
         {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<Option<int, string>> UpdateProductVariantStatusAsync(int productId, int productVariantId, ProductVariantStatusEnum value)
-        {
-            throw new System.NotImplementedException();
+            return await (productId, productVariantId, value).SomeNotNull()
+                .WithException(string.Empty)
+                .FilterAsync(async req => (await productRepository.CountAsync(new ProductFilterByIdsSpecification(req.productId))) > 0, "Không tồn tại sản phẩm này.")
+                .FilterAsync(async req => (await productVariantRepository.CountAsync(new ProductVariantFilterByIdsSpecification(req.productVariantId)) > 0), "Không tồn tại biến thể này.")
+                .MapAsync(async req =>
+                {
+                    var productVariant = await productVariantRepository.FindByKeysAsync(productVariantId);
+                    productVariant.InventoryStatus = req.value;
+                    await productVariantRepository.UpdateAsync(productVariant);
+                    return productVariant.Id;
+                });
         }
     }
 }
