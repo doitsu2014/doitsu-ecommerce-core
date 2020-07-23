@@ -7,6 +7,12 @@ namespace Doitsu.Ecommerce.ApplicationCore.Interfaces.Services.BusinessServices
 {
     public interface IProductService
     {
+        #region Product
+        Task<Option<int, string>> CreateProductWithOptionAsync(Products products);
+        #endregion
+
+        #region Product Variants
+        ImmutableList<ProductVariants> BuildListProductVariant(int productId, string productCode, ProductOptions[] productOptions, ProductVariants[] existedProductVariants);
         ImmutableList<ProductVariants> BuildListProductVariant(Products product);
         Task<Option<int, string>> UpdateProductVariantAnotherDiscountAsync(int productId, int productVariantId, float anotherDiscount);
         Task<Option<int, string>> UpdateProductVariantAnotherPriceAsync(int productId, int productVariantId, decimal anotherPrice);
@@ -16,5 +22,6 @@ namespace Doitsu.Ecommerce.ApplicationCore.Interfaces.Services.BusinessServices
         Task<Option<int, string>> DecreaseInventoryQuantityAsync(int productId, int productVariantId, int quantity = 0);
         Task<Option<int[], string>> IncreaseBatchPvInventoryQuantityAsync((int productVariantId, int quantity)[] listProductIdAndQuantity);
         Task<Option<int[], string>> DecreaseBatchPvInventoryQuantityAsync((int productVariantId, int quantity)[] listProductIdAndQuantity); 
+        #endregion
     }
 }

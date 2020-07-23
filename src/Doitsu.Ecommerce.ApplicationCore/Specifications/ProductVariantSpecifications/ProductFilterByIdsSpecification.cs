@@ -8,6 +8,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Specifications.ProductVariantSpecific
         public ProductFilterByIdsSpecification(int productId)
         {
             AddCriteria(p => productId == p.Id);
+            AddInclude(p => p.ProductVariants);
         }
 
         public ProductFilterByIdsSpecification(int[] productIds)

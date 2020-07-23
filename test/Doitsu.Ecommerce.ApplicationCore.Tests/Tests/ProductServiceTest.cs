@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Doitsu.Ecommerce.ApplicationCore.Entities;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Repositories;
+using Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices;
+using Doitsu.Ecommerce.ApplicationCore.Specifications.ProductVariantSpecifications;
 using Doitsu.Ecommerce.Core.Tests.Helpers;
 using Doitsu.Ecommerce.Infrastructure.Data;
 using Microsoft.AspNetCore.Hosting;
@@ -36,6 +38,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Tests
                 var databaseConfigurer = scope.ServiceProvider.GetService<IDatabaseConfigurer>();
                 var categoryRepository = scope.ServiceProvider.GetService<IBaseEcommerceRepository<Categories>>();
                 var productRepository = scope.ServiceProvider.GetService<IBaseEcommerceRepository<Products>>();
+                var productBusinessService = scope.ServiceProvider.GetService<ProductBusinessService>();
                 await DatabaseHelper.MigrateDatabase(dbContext, databaseConfigurer, webhost, _poolKey);
 
                 // Add Categories
@@ -46,49 +49,23 @@ namespace Doitsu.Ecommerce.ApplicationCore.Tests
                 var firstCategory = await categoryRepository.FirstOrDefaultAsync(categoryFilterSpecification);
 
                 var productData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; }).ToArray();
-                var result = await productRepository.AddRangeAsync(productData); 
+                var result = await productBusinessService.CreateProductWithOptionAsync(productData);
+
             }
 
             using (var scope = scopeFactory.CreateScope())
             {
-                // Truncate data
-                var serviceScopeFactory = scope.ServiceProvider.GetService<IServiceScopeFactory>();
-                var dbContext = scope.ServiceProvider.GetService<EcommerceDbContext>();
-                var categoryService = scope.ServiceProvider.GetService<ICategoryService>();
-                var productService = scope.ServiceProvider.GetService<IProductService>();
-                var productVariantService = scope.ServiceProvider.GetService<IProductVariantService>();
-                var databaseConfigurer = scope.ServiceProvider.GetService<IDatabaseConfigurer>();
-
-
-                await DatabaseHelper.MigrateDatabase(dbContext, databaseConfigurer, webhost, _poolKey);
-
-                // Add Category
-                await categoryService.CreateAsync<CategoryWithInverseParentViewModel>(_fixture.CategoryData);
-                await categoryService.CommitAsync();
-                // Add Products
-                var firstCategory = await categoryService.GetAll(isTracking: false).FirstOrDefaultAsync(x => x.Slug == "hang-ban");
-                var productData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; }).ToImmutableList();
-                var result = await productService.CreateProductWithOptionAsync(productData);
-                await productService.CommitAsync();
-            }
-
-            using (var scope = scopeFactory.CreateScope())
-            {
-                var categoryService = scope.ServiceProvider.GetService<ICategoryService>();
-                var productService = scope.ServiceProvider.GetService<IProductService>();
-                var productVariantService = scope.ServiceProvider.GetService<IProductVariantService>();
+                var productRepository = scope.ServiceProvider.GetService<IBaseEcommerceRepository<Products>>();
+                var productVariantRepository = scope.ServiceProvider.GetService<IBaseEcommerceRepository<ProductVariants>>();
+                var promotionDetailRepository = webhost.Services.GetService<IBaseEcommerceRepository<ProductVariants>>();
 
                 // Add Promotion Detail
-                var promotionDetailService = webhost.Services.GetService<IPromotionDetailService>();
-                var listProductVariantOfProduct01 = (await productService.Get(pro => pro.Code == "GACH-CUOC")
-                        .Include(p => p.ProductVariants)
-                        .AsNoTracking()
-                        .FirstOrDefaultAsync())
+                var listProductVariantOfProduct01 = (await productRepository.FirstOrDefaultAsync(new ProductFilterByCodeSpecification("san-pham-ao-01")))
                     .ProductVariants
                     .Select(x => { x.AnotherDiscount = 25; return x; })
                     .ToImmutableList();
-                productVariantService.UpdateRange(listProductVariantOfProduct01);
-                await productVariantService.CommitAsync();
+
+                await productVariantRepository.UpdateRangeAsync(listProductVariantOfProduct01.ToArray());
             }
         }
 

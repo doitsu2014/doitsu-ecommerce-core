@@ -1,3 +1,4 @@
+using System.Drawing;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -12,10 +13,11 @@ using Doitsu.Ecommerce.ApplicationCore.Utils;
 using Microsoft.Extensions.Logging;
 using Optional;
 using Optional.Async;
+using Ardalis.GuardClauses;
 
 namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
 {
-    public class ProductBusinessService : IProductService
+    public partial class ProductBusinessService : IProductService
     {
         private readonly IBaseEcommerceRepository<Products> productRepository;
         private readonly IBaseEcommerceRepository<ProductVariants> productVariantRepository;
@@ -32,7 +34,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
             this.productVariantRepository = productVariantRepository;
             this.productRepository = productRepository;
         }
-
+        
         private string GetSkuAttributeString(string value, int length = 0)
         {
             if (value.IsNullOrEmpty())
@@ -51,6 +53,85 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
                 noWhiteSpace = noWhiteSpace.Substring(0, length);
                 return noWhiteSpace;
             }
+        }
+
+        public ImmutableList<ProductVariants> BuildListProductVariant(int productId, string productCode, ProductOptions[] productOptions, ProductVariants[] existedProductVariants)
+        {
+            Guard.Against.Null(productOptions, "productOptions");
+            var availableProductOptions = productOptions.Where(po => po.Id == 0 || (po.Id != 0 && po.Active)).ToArray();
+            if(availableProductOptions.Length == 0) return ImmutableList<ProductVariants>.Empty;
+
+            var listDbProductVariants = existedProductVariants?.ToList() ?? new List<ProductVariants>();
+            var result = availableProductOptions
+                .Select(po => po.ProductOptionValues)
+                .CartesianProduct()
+                // Mapping cartesian to product variant
+                .Select(listProductOptionValues =>
+                {
+                    var productVariant = new ProductVariants()
+                    {
+                        ProductId = productId,
+                        AnotherPrice = 0,
+                        AnotherDiscount = 0,
+                        InventoryQuantity = 0,
+                        Sku = productCode,
+                        // Product = product,
+                        ProductVariantOptionValues = new List<ProductVariantOptionValues>()
+                    };
+
+                    foreach (var productOptionValue in listProductOptionValues)
+                    {
+                        // var productOption = product.ProductOptions.FirstOrDefault(po => po.ProductOptionValues.Any(pov => pov.Value == productOptionValue.Value));
+                        productVariant.Sku = string.Join('/', new string[] { productVariant.Sku, GetSkuAttributeString(productOptionValue.Value) });
+                        productVariant.ProductVariantOptionValues.Add(new ProductVariantOptionValues()
+                        {
+                            // ProductOptionId = productOption.Id,
+                            ProductOptionId = productOptionValue.ProductOptionId,
+                            ProductOptionValueId = productOptionValue.Id,
+                            ProductOptionValue = productOptionValue,
+                            ProductOption = productOptionValue.ProductOption
+                        });
+                    }
+
+                    return productVariant;
+                })
+                .Select(productVariant =>
+                {
+                    var exist = listDbProductVariants.FirstOrDefault(dbPv =>
+                    {
+                        if (dbPv.ProductVariantOptionValues.Count != productVariant.ProductVariantOptionValues.Count)
+                        {
+                            return false;
+                        }
+                        var listDbPvovIds = dbPv.ProductVariantOptionValues.Select(dbPvov => dbPvov.ProductOptionValueId);
+                        var listCurrentPvovIds = productVariant.ProductVariantOptionValues.Select(dbPvov => dbPvov.ProductOptionValueId);
+                        if (listDbPvovIds.Except(listCurrentPvovIds).Count() > 0)
+                        {
+                            return false;
+                        }
+                        return true;
+                    });
+
+                    if (exist != null)
+                    {
+                        productVariant.Id = exist.Id;
+                        productVariant.AnotherPrice = exist.AnotherPrice;
+                        productVariant.AnotherDiscount = exist.AnotherDiscount;
+                        productVariant.InventoryQuantity = exist.InventoryQuantity;
+
+                        productVariant.ProductVariantOptionValues = productVariant.ProductVariantOptionValues.Select(pvov =>
+                        {
+                            pvov.Id = pvov.Id;
+                            pvov.ProductVariantId = exist.Id;
+                            return pvov;
+                        }).ToImmutableList();
+                    }
+
+                    return productVariant;
+                })
+                .ToImmutableList();
+
+            return result;
         }
 
         /// <summary>
