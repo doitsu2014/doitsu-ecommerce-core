@@ -8,7 +8,8 @@ namespace Doitsu.Ecommerce.ApplicationCore.Specifications.ProductVariantSpecific
         public ProductFilterByCodeSpecification(string code)
         {
             AddCriteria(p => p.Code == code);
-            AddInclude(p => p.ProductVariants);
+            AddInclude("ProductOptions.ProductOptionValues");
+            AddInclude("ProductVariants.ProductVariantOptionValues");
         }
     }
 }

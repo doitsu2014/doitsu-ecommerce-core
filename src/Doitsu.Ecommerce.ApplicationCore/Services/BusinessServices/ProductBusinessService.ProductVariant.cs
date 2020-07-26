@@ -1,12 +1,9 @@
-using System.Drawing;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Doitsu.Ecommerce.ApplicationCore.Entities;
-using Doitsu.Ecommerce.ApplicationCore.Interfaces;
-using Doitsu.Ecommerce.ApplicationCore.Interfaces.Repositories;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services.BusinessServices;
 using Doitsu.Ecommerce.ApplicationCore.Specifications.ProductVariantSpecifications;
 using Doitsu.Ecommerce.ApplicationCore.Utils;
@@ -17,23 +14,9 @@ using Ardalis.GuardClauses;
 
 namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
 {
-    public partial class ProductBusinessService : IProductService
+    public partial class ProductBusinessService : IProductBusinessService
     {
-        private readonly IBaseEcommerceRepository<Products> productRepository;
-        private readonly IBaseEcommerceRepository<ProductVariants> productVariantRepository;
-        private readonly IEcommerceDatabaseManager databaseManager;
-        private readonly ILogger<ProductBusinessService> logger;
-
-        public ProductBusinessService(IBaseEcommerceRepository<Products> productRepository,
-                                      IBaseEcommerceRepository<ProductVariants> productVariantRepository,
-                                      IEcommerceDatabaseManager databaseManager,
-                                      ILogger<ProductBusinessService> logger)
-        {
-            this.databaseManager = databaseManager;
-            this.logger = logger;
-            this.productVariantRepository = productVariantRepository;
-            this.productRepository = productRepository;
-        }
+        
         
         private string GetSkuAttributeString(string value, int length = 0)
         {

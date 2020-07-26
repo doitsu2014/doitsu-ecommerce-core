@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Doitsu.Ecommerce.ApplicationCore.Entities;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Repositories;
+using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services.BusinessServices;
+using Doitsu.Ecommerce.ApplicationCore.Models.ViewModels;
 using Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices;
 using Doitsu.Ecommerce.ApplicationCore.Specifications.ProductVariantSpecifications;
 using Doitsu.Ecommerce.Core.Tests.Helpers;
@@ -79,9 +81,10 @@ namespace Doitsu.Ecommerce.ApplicationCore.Tests
                 using (var scope = scopeFactory.CreateScope())
                 {
                     // Add Products
-                    var productService = scope.ServiceProvider.GetService<IProductService>();
-                    var productVariantService = scope.ServiceProvider.GetService<IProductVariantService>();
-                    var logger = scope.ServiceProvider.GetService<ILogger<ProductServiceTest>>();
+                    var productRepository = scope.ServiceProvider.GetService<IBaseEcommerceRepository<Products>>();
+                    var productVariantRepository = scope.ServiceProvider.GetService<IBaseEcommerceRepository<ProductVariants>>();
+                    var productBusinessService = scope.ServiceProvider.GetService<ProductBusinessService>();
+
                     var productFilterParams = new List<ProductFilterParamViewModel>()
                     {
                         new ProductFilterParamViewModel()
@@ -103,15 +106,16 @@ namespace Doitsu.Ecommerce.ApplicationCore.Tests
                                 }
                             }).ToArray()
                         }
-                    }.ToArray();
-                    var result = await productVariantService.GetProductVariantIdsFromProductFilterParamsAsync(productFilterParams);
+                    }
+                    .Select(x => (x.Id, x.ProductOptions.Select(y => y.SelectedValueId.Value).ToArray())).ToArray();
+                    var result = await productVariantRepository.ListAsync(new ProductVariantFilterByProductOptionValueIdsSpecification(productFilterParams));
                     Assert.True(result.Count() == 1);
                 }
             }
         }
 
         [Fact]
-        private async Task Test_FindProductFromOptionAsync()
+        private async Task Test_FindProductVariantFromOptionAsync()
         {
             using (var webhost = WebHostBuilderHelper.BuilderWebhostWithInmemoryDb(_poolKey).Build())
             {
@@ -120,17 +124,16 @@ namespace Doitsu.Ecommerce.ApplicationCore.Tests
                 using (var scope = scopeFactory.CreateScope())
                 {
                     // Add Products
-                    var productService = scope.ServiceProvider.GetService<IProductService>();
-                    var productVariantService = scope.ServiceProvider.GetService<IProductVariantService>();
-                    var listProductOptionValues = (await productService.Get(pro => pro.Code == _fixture.ProductData.First().Code)
-                        .Include(p => p.ProductOptions)
-                            .ThenInclude(po => po.ProductOptionValues)
-                        .FirstOrDefaultAsync())
-                    .ProductOptions
-                    .Select(x => productService.Mapper.Map<ProductOptionValueViewModel>(x.ProductOptionValues.First()))
-                    .ToImmutableList();
+                    var productRepository = scope.ServiceProvider.GetService<IBaseEcommerceRepository<Products>>();
+                    var productVariantRepository = scope.ServiceProvider.GetService<IBaseEcommerceRepository<ProductVariants>>();
+                    var productBusinessService = scope.ServiceProvider.GetService<IProductBusinessService>();
 
-                    var result = await productVariantService.FindProductVariantFromOptionsAsync(listProductOptionValues);
+                    var arrayProductOptionIds = (await productRepository.FirstOrDefaultAsync(new ProductFilterByCodeSpecification(_fixture.ProductData.First().Code)))
+                        .ProductOptions
+                        .Select(po => po.ProductOptionValues.First().Id)
+                        .ToArray();
+
+                    var result = await productVariantRepository.FirstOrDefaultAsync(new ProductVariantFilterByProductOptionValueIdsSpecification(arrayProductOptionIds));
                     Assert.True(result != null);
                 }
             }
@@ -146,20 +149,21 @@ namespace Doitsu.Ecommerce.ApplicationCore.Tests
                 using (var scope = scopeFactory.CreateScope())
                 {
                     // Add Products
-                    var productService = scope.ServiceProvider.GetService<IProductService>();
-                    var categoryService = scope.ServiceProvider.GetService<ICategoryService>();
-                    var logger = scope.ServiceProvider.GetService<ILogger<ProductServiceTest>>();
+                    var productRepository = scope.ServiceProvider.GetService<IBaseRepository<Products>>();
+                    var productBusinessService = scope.ServiceProvider.GetService<IProductBusinessService>();
 
                     var firstProductData = _fixture.ProductData.First();
-                    var updatedProduct = await productService.FirstOrDefaultAsync<UpdateProductViewModel>(x => x.Code == firstProductData.Code);
+                    var updatedProduct = await productRepository.FirstOrDefaultAsync(new ProductFilterByCodeSpecification(firstProductData.Code));
                     updatedProduct.Name += "-- change";
                     updatedProduct.ProductOptions.First().ProductOptionValues.First().Status = ProductOptionValueStatusEnum.Unavailable;
-                    updatedProduct.ProductOptions.Last().ProductOptionValues.First().Value = "Changed";
-                    updatedProduct.ProductOptions.Last().ProductOptionValues.Add(new ProductOptionValueViewModel()
+                    updatedProduct.ProductOptions.Last().ProductOptionValues.First().Value = "Changed Product Option Value Testing";
+                    updatedProduct.ProductOptions.Last().ProductOptionValues.Add(new ProductOptionValues()
                     {
-                        Value = "Trả ông nội mày"
+                        Value = "New Product Option Value Testing"
                     });
-                    (await productService.UpdateProductWithOptionAsync(updatedProduct)).MatchSome(res => Assert.True(res > 0));
+
+                    (await productBusinessService.UpdateProductAndRelationAsync(updatedProduct))
+                        .MatchSome(res => Assert.True(res > 0));
                 }
             }
         }

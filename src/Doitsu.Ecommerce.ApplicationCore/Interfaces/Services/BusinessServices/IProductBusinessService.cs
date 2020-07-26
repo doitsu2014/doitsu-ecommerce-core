@@ -5,10 +5,18 @@ using Optional;
 
 namespace Doitsu.Ecommerce.ApplicationCore.Interfaces.Services.BusinessServices
 {
-    public interface IProductService
+    public interface IProductBusinessService
     {
         #region Product
         Task<Option<int, string>> CreateProductWithOptionAsync(Products products);
+        Task<Option<int, string>> UpdateProductAndRelationAsync(Products products);
+        Task<Option<int, string>> DecreaseInventoryQuantity(int productId, int quantity = 0);
+        Task<Option<int, string>> IncreaseInventoryQuantity(int productId, int quantity = 0);
+        #endregion
+
+        #region ProductOptions
+        Task<Option<int, string>> UpdateProductOptionAsync(int productId, ProductOptions data);
+        Task<Option<int, string>> DeleteProductOptionByKeyAsync(int productId, int productOptionId);
         #endregion
 
         #region Product Variants
@@ -21,7 +29,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Interfaces.Services.BusinessServices
         Task<Option<int, string>> IncreaseInventoryQuantityAsync(int productId, int productVariantId, int quantity = 0);
         Task<Option<int, string>> DecreaseInventoryQuantityAsync(int productId, int productVariantId, int quantity = 0);
         Task<Option<int[], string>> IncreaseBatchPvInventoryQuantityAsync((int productVariantId, int quantity)[] listProductIdAndQuantity);
-        Task<Option<int[], string>> DecreaseBatchPvInventoryQuantityAsync((int productVariantId, int quantity)[] listProductIdAndQuantity); 
+        Task<Option<int[], string>> DecreaseBatchPvInventoryQuantityAsync((int productVariantId, int quantity)[] listProductIdAndQuantity);
         #endregion
     }
 }

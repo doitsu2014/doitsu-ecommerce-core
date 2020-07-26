@@ -11,6 +11,9 @@
 		},
 		{
 			"path": "src/Doitsu.Ecommerce.Core"
+		},
+		{
+			"path": "test/Doitsu.Ecommerce.Core.Tests"
 		}
 	]
 }

@@ -8,11 +8,15 @@ namespace Doitsu.Ecommerce.ApplicationCore.Specifications.ProductVariantSpecific
         public ProductFilterByIdsSpecification(int productId)
         {
             AddCriteria(p => productId == p.Id);
+            AddInclude("ProductOptions.ProductOptionValues");
+            AddInclude("ProductVariants.ProductVariantOptionValues");
         }
 
         public ProductFilterByIdsSpecification(int[] productIds)
         {
             AddCriteria(p => productIds.Contains(p.Id));
+            AddInclude("ProductOptions.ProductOptionValues");
+            AddInclude("ProductVariants.ProductVariantOptionValues");
         }
     }
 }
