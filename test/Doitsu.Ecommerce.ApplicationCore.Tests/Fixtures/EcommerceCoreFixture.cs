@@ -11,65 +11,11 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
         public Brand BrandData { get; }
         public ICollection<Categories> CategoryData { get; }
         public ICollection<Products> ProductData { get; }
-        public ICollection<ProductOptions> Product1ProductOptionsData { get; }
 
-        public EcommerceCoreFixture()
+        
+        public ICollection<ProductOptions> GetProductProductOptionsData()
         {
-            BrandData = new Brand()
-            {
-                Id = 0,
-                Address = "Kim chỉ nam",
-                AlternativeAddress = "Kim chỉ nam khác",
-                Description = "Nội dung",
-                Fax = "0946680600",
-                HotLine = "0946680600",
-                Mail = "duc.tran@doitsu.tech",
-                LogoRectangleUrl = "",
-                LogoSquareUrl = "",
-                Name = "Phone Card",
-                OpenTime = TimeSpan.FromHours(10),
-                CloseTime = TimeSpan.FromHours(10),
-                OpenDayOfWeek = (int)DayOfWeek.Monday,
-                CloseDayOfWeek = (int)DayOfWeek.Sunday
-            };
-
-            CategoryData = new List<Categories>()
-            {
-                new Categories()
-                {
-                    Id = 0,
-                    Name = "Sản phẩm",
-                    IsFixed = true,
-                    ParentCateId = null,
-                    Slug = "san-pham",
-                    InverseParentCate = new List<Categories>()
-                    {
-                        new Categories()
-                        {
-                            Name = "Hàng bán 1",
-                            IsFixed = false,
-                            ParentCateId = null,
-                            Slug = "hang-ban-1"
-                        },
-                        new Categories()
-                        {
-                            Name = "Hàng bán 2",
-                            IsFixed = false,
-                            ParentCateId = null,
-                            Slug = "hang-ban-2"
-                        },
-                        new Categories()
-                        {
-                            Name = "Hàng bán 3",
-                            IsFixed = false,
-                            ParentCateId = null,
-                            Slug = "hang-ban-3"
-                        }
-                    }
-                }
-            };
-
-            Product1ProductOptionsData = new List<ProductOptions>()
+            return new List<ProductOptions>()
             {
                 new ProductOptions()
                 {
@@ -131,6 +77,63 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                     }
                 }
             };
+        }
+
+        public EcommerceCoreFixture()
+        {
+            BrandData = new Brand()
+            {
+                Id = 0,
+                Address = "Kim chỉ nam",
+                AlternativeAddress = "Kim chỉ nam khác",
+                Description = "Nội dung",
+                Fax = "0946680600",
+                HotLine = "0946680600",
+                Mail = "duc.tran@doitsu.tech",
+                LogoRectangleUrl = "",
+                LogoSquareUrl = "",
+                Name = "Phone Card",
+                OpenTime = TimeSpan.FromHours(10),
+                CloseTime = TimeSpan.FromHours(10),
+                OpenDayOfWeek = (int)DayOfWeek.Monday,
+                CloseDayOfWeek = (int)DayOfWeek.Sunday
+            };
+
+            CategoryData = new List<Categories>()
+            {
+                new Categories()
+                {
+                    Id = 0,
+                    Name = "Sản phẩm",
+                    IsFixed = true,
+                    ParentCateId = null,
+                    Slug = "san-pham",
+                    InverseParentCate = new List<Categories>()
+                    {
+                        new Categories()
+                        {
+                            Name = "Hàng bán 1",
+                            IsFixed = false,
+                            ParentCateId = null,
+                            Slug = "hang-ban-1"
+                        },
+                        new Categories()
+                        {
+                            Name = "Hàng bán 2",
+                            IsFixed = false,
+                            ParentCateId = null,
+                            Slug = "hang-ban-2"
+                        },
+                        new Categories()
+                        {
+                            Name = "Hàng bán 3",
+                            IsFixed = false,
+                            ParentCateId = null,
+                            Slug = "hang-ban-3"
+                        }
+                    }
+                }
+            };
 
             var product1 = new Products()
             {
@@ -142,7 +145,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
                 ShortDescription = "Lorem ipsum dolor sit amet consectetur adipisicing elit",
                 Weight = 1000,
-                ProductOptions = Product1ProductOptionsData
+                ProductOptions = GetProductProductOptionsData()
             };
 
             var product2 = new Products()
@@ -155,7 +158,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
                 ShortDescription = "Lorem ipsum dolor sit amet consectetur adipisicing elit",
                 Weight = 1000,
-                ProductOptions = Product1ProductOptionsData
+                ProductOptions = GetProductProductOptionsData()
             };
 
             var product3 = new Products()
@@ -168,7 +171,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
                 ShortDescription = "Lorem ipsum dolor sit amet consectetur adipisicing elit",
                 Weight = 1000,
-                ProductOptions = Product1ProductOptionsData
+                ProductOptions = GetProductProductOptionsData() 
             };
 
             ProductData = new List<Products>()

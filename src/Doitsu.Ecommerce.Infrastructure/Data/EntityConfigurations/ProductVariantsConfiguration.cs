@@ -12,10 +12,12 @@ namespace Doitsu.Ecommerce.Infrastructure.Data.EntityConfigurations
         {
             base.Configure(builder);
 
-            builder.HasOne(x => x.Product)
+            builder
+                .HasOne(x => x.Product)
                 .WithMany(x => x.ProductVariants)
                 .IsRequired()
-                .HasForeignKey(x => x.ProductId);
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasIndex(x => x.Sku).IsUnique();
             builder.Property(x => x.Sku).IsRequired().HasMaxLength(256);

@@ -9,6 +9,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Interfaces.Services.BusinessServices
     {
         #region Product
         Task<Option<int, string>> CreateProductWithOptionAsync(Products products);
+        Task<Option<int[], string>> CreateProductWithOptionAsync(Products[] data);
         Task<Option<int, string>> UpdateProductAndRelationAsync(Products products);
         Task<Option<int, string>> DecreaseInventoryQuantity(int productId, int quantity = 0);
         Task<Option<int, string>> IncreaseInventoryQuantity(int productId, int quantity = 0);

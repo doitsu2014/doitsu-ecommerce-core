@@ -16,15 +16,18 @@ namespace Doitsu.Ecommerce.Infrastructure.Data.EntityConfigurations
             builder.HasOne(x => x.ProductVariant)
                 .WithMany(x => x.ProductVariantOptionValues)
                 .HasForeignKey(x => x.ProductVariantId)
-                .IsRequired();
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(x => x.ProductOptionValue)
-                .WithMany(x => x.ProductVariantOptionValues)
-                .HasForeignKey(x => x.ProductOptionValueId);
+            // builder.HasOne(x => x.ProductOptionValue)
+            //     .WithMany(x => x.ProductVariantOptionValues)
+            //     .HasForeignKey(x => x.ProductOptionValueId)
+            //     .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(x => x.ProductOption)
-                .WithMany(x => x.ProductVariantOptionValues)
-                .HasForeignKey(x => x.ProductOptionId);
+            // builder.HasOne(x => x.ProductOption)
+            //     .WithMany(x => x.ProductVariantOptionValues)
+            //     .HasForeignKey(x => x.ProductOptionId)
+            //     .OnDelete(DeleteBehavior.ClientCascade);
         }
     }
 }
