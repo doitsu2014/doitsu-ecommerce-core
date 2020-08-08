@@ -19,6 +19,7 @@ using Microsoft.Extensions.Logging;
 using Optional;
 using Optional.Async;
 using Doitsu.Ecommerce.Core.Services.Interface;
+using Doitsu.Service.Core.Abstraction;
 
 namespace Doitsu.Ecommerce.Core.Services
 {
@@ -26,6 +27,8 @@ namespace Doitsu.Ecommerce.Core.Services
     public interface IProductService : IEcommerceBaseService<Products>
     {
         Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsByCateIdAsync(string cateSlug, int limit = 0);
+
+        Task<DoitsuPaginatedList<ProductOverviewViewModel>> GetPaginatedOverProductsByCateIdAsync(string cateSlug, int currentPage = 1, int limit = 10);
 
         Task<ImmutableList<ProductOverviewViewModel>> GetOverProductsWithIQGreaterThanZeroAsync(string cateSlug);
 
@@ -83,7 +86,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     .ThenInclude(c => c.Products)
                 .Include(c => c.Products)
                 .Where(c => c.Slug == cateSlug);
-                
+
             var productsOfInverseCategories = categories
                 .Where(c => c.InverseParentCate.Count() > 0)
                 .SelectMany(c => c.InverseParentCate.SelectMany(cip => cip.Products))
@@ -96,16 +99,38 @@ namespace Doitsu.Ecommerce.Core.Services
                 .OrderByDescending(p => p.CreatedDate)
                 .AsQueryable();
 
-            if(limit > 0) 
+            if (limit > 0)
             {
                 productsOfInverseCategories = productsOfInverseCategories.Skip(0).Take(limit);
                 products = products.Skip(0).Take(limit);
-            } 
+            }
 
             return ImmutableList<ProductOverviewViewModel>
                 .Empty
                 .AddRange(await products.ProjectTo<ProductOverviewViewModel>(this.Mapper.ConfigurationProvider).ToListAsync())
-                .AddRange(await productsOfInverseCategories.ProjectTo<ProductOverviewViewModel>(this.Mapper.ConfigurationProvider).ToListAsync()); 
+                .AddRange(await productsOfInverseCategories.ProjectTo<ProductOverviewViewModel>(this.Mapper.ConfigurationProvider).ToListAsync());
+        }
+
+        public async Task<DoitsuPaginatedList<ProductOverviewViewModel>> GetPaginatedOverProductsByCateIdAsync(string cateSlug, int currentPage = 1, int limit = 10)
+        {
+            if(currentPage <= 0 || limit <= 0)
+            {
+                return DoitsuPaginatedList<ProductOverviewViewModel>.Empty;
+            }
+
+            var categories = DbContext.Set<Categories>()
+                .Include(c => c.InverseParentCate)
+                    .ThenInclude(c => c.Products)
+                .Include(c => c.Products)
+                .Where(c => c.Slug == cateSlug);
+
+            var products = categories
+                .Select(c => c.Products)
+                .SelectMany(listP => listP)
+                .ProjectTo<ProductOverviewViewModel>(this.Mapper.ConfigurationProvider)
+                .OrderByDescending(p => p.CreatedDate);
+
+            return await DoitsuPaginatedList<ProductOverviewViewModel>.CreateAsync(products, currentPage, limit);
         }
 
         public async Task<ImmutableList<OverviewBuildingProductsViewModel>> GetOverviewBuildingProductsAsync(ImmutableList<CategoryViewModel> buildingCategories)
@@ -273,7 +298,7 @@ namespace Doitsu.Ecommerce.Core.Services
                     if (updateProductViewModel == null) return Option.None<int, string>($"Không tìm thấy sản phẩm tương ứng với id {req.productId}");
                     else if ((!await DbContext.ProductOptions.AnyAsync(po => po.Name == req.data.Name)))
                         updateProductViewModel.ProductOptions.Add(req.data);
-                        
+
                     // Comment
                     // updateProductViewModel.Name = req.data.Name;
 
@@ -315,6 +340,7 @@ namespace Doitsu.Ecommerce.Core.Services
                         return pov;
                     }).ToImmutableList();
                     updatePo.Name = data.Name.Trim();
+                    
                     return await UpdateProductWithOptionAsync(updateProductViewModel);
                 });
         }
@@ -357,7 +383,10 @@ namespace Doitsu.Ecommerce.Core.Services
                             else
                             {
                                 // Add new variant
-                                productEnt.ProductVariants.Add(gPv);
+                                if(gPv.ProductVariantOptionValues.Count > 0)
+                                {
+                                    productEnt.ProductVariants.Add(gPv);
+                                }
                             }
                         });
                         await this.CommitAsync();
