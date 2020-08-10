@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Doitsu.Ecommerce.Core.Tests.Helpers
 {
-     public class InMemorySqliteConfigurer : IDatabaseConfigurer
+     public class InMemorySqliteConfigurer : IDatabaseConfigurer, IDisposable
     {
         private readonly SqliteConnection _connection;
         private readonly ILoggerFactory _loggerFactory;
@@ -24,6 +24,11 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
             builder.UseSqlite(_connection, builder => builder.MigrationsAssembly(migrationAssembly));
             builder.UseLoggerFactory(_loggerFactory);
             builder.EnableSensitiveDataLogging();
+        }
+
+        public void Dispose()
+        {
+            _connection.Close();
         }
     }
 }

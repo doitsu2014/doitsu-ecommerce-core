@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Doitsu.Ecommerce.ApplicationCore.Entities;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services.BusinessServices;
-using Doitsu.Ecommerce.ApplicationCore.Specifications.ProductVariantSpecifications;
+using Doitsu.Ecommerce.ApplicationCore.Specifications.ProductSpecifications;
 using Optional;
 using Optional.Async;
 

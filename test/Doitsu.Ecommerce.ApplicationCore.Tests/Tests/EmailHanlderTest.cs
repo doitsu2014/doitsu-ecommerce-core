@@ -1,19 +1,10 @@
-using System.Linq;
 using System.Threading.Tasks;
-using Doitsu.Ecommerce.ApplicationCore.Interfaces;
 using Doitsu.Ecommerce.Core.Tests.Helpers;
-using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services.BusinessServices;
-using Doitsu.Ecommerce.ApplicationCore.Interfaces.Repositories;
-using Doitsu.Ecommerce.ApplicationCore.Entities;
 using Xunit.Abstractions;
 using Xunit;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Doitsu.Ecommerce.Infrastructure.Data;
-using Doitsu.Ecommerce.ApplicationCore.Services.IdentityManagers;
-using Doitsu.Ecommerce.ApplicationCore.Entities.Identities;
 using System.Collections.Generic;
-using Doitsu.Ecommerce.ApplicationCore;
 using System;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services;
 using Microsoft.Extensions.Options;
@@ -22,7 +13,7 @@ using System.IO;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.RazorPage;
 using System.Threading;
 
-namespace Doitsu.Ecommerce.ApplicationCore.Tests.Tests
+namespace Doitsu.Ecommerce.ApplicationCore.Tests
 {
     [Collection("EcommerceCoreCollection")]
     public class EmailHanlderTest : BaseServiceTest<EcommerceCoreFixture>

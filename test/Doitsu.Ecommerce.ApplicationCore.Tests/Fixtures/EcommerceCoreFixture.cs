@@ -9,10 +9,45 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
     public class EcommerceCoreFixture : IDisposable
     {
         public Brand BrandData { get; }
-        public ICollection<Categories> CategoryData { get; }
-        public ICollection<Products> ProductData { get; }
-
         
+        public ICollection<Categories> GetCategoryData()
+        {
+            return new List<Categories>()
+            {
+                new Categories()
+                {
+                    Id = 0,
+                    Name = "Sản phẩm",
+                    IsFixed = true,
+                    ParentCateId = null,
+                    Slug = "san-pham",
+                    InverseParentCate = new List<Categories>()
+                    {
+                        new Categories()
+                        {
+                            Name = "Hàng bán 1",
+                            IsFixed = false,
+                            ParentCateId = null,
+                            Slug = "hang-ban-1"
+                        },
+                        new Categories()
+                        {
+                            Name = "Hàng bán 2",
+                            IsFixed = false,
+                            ParentCateId = null,
+                            Slug = "hang-ban-2"
+                        },
+                        new Categories()
+                        {
+                            Name = "Hàng bán 3",
+                            IsFixed = false,
+                            ParentCateId = null,
+                            Slug = "hang-ban-3"
+                        }
+                    }
+                }
+            };
+        }
         public ICollection<ProductOptions> GetProductProductOptionsData()
         {
             return new List<ProductOptions>()
@@ -78,6 +113,48 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 }
             };
         }
+        public ICollection<Products> GetProductsData()
+        {
+            return new List<Products>()
+            {
+                new Products()
+                {
+                    Id = 0,
+                    Code = "PV934581023901",
+                    Name = "Sản phẩm ảo 01",
+                    Slug = "san-pham-ao-01",
+                    Price = 0,
+                    Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
+                    ShortDescription = "Lorem ipsum dolor sit amet consectetur adipisicing elit",
+                    Weight = 1000,
+                    ProductOptions = GetProductProductOptionsData()
+                },
+                new Products()
+                {
+                    Id = 0,
+                    Code = "PV934581028401",
+                    Name = "Sản phẩm ảo 02",
+                    Slug = "san-pham-ao-02",
+                    Price = 0,
+                    Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
+                    ShortDescription = "Lorem ipsum dolor sit amet consectetur adipisicing elit",
+                    Weight = 1000,
+                    ProductOptions = GetProductProductOptionsData()
+                },
+                new Products()
+                {
+                    Id = 0,
+                    Code = "PV934581022817",
+                    Name = "Sản phẩm ảo 03",
+                    Slug = "san-pham-ao-03",
+                    Price = 0,
+                    Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
+                    ShortDescription = "Lorem ipsum dolor sit amet consectetur adipisicing elit",
+                    Weight = 1000,
+                    ProductOptions = GetProductProductOptionsData()
+                }
+            };
+        }
 
         public EcommerceCoreFixture()
         {
@@ -97,88 +174,6 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                 CloseTime = TimeSpan.FromHours(10),
                 OpenDayOfWeek = (int)DayOfWeek.Monday,
                 CloseDayOfWeek = (int)DayOfWeek.Sunday
-            };
-
-            CategoryData = new List<Categories>()
-            {
-                new Categories()
-                {
-                    Id = 0,
-                    Name = "Sản phẩm",
-                    IsFixed = true,
-                    ParentCateId = null,
-                    Slug = "san-pham",
-                    InverseParentCate = new List<Categories>()
-                    {
-                        new Categories()
-                        {
-                            Name = "Hàng bán 1",
-                            IsFixed = false,
-                            ParentCateId = null,
-                            Slug = "hang-ban-1"
-                        },
-                        new Categories()
-                        {
-                            Name = "Hàng bán 2",
-                            IsFixed = false,
-                            ParentCateId = null,
-                            Slug = "hang-ban-2"
-                        },
-                        new Categories()
-                        {
-                            Name = "Hàng bán 3",
-                            IsFixed = false,
-                            ParentCateId = null,
-                            Slug = "hang-ban-3"
-                        }
-                    }
-                }
-            };
-
-            var product1 = new Products()
-            {
-                Id = 0,
-                Code = "PV934581023901",
-                Name = "Sản phẩm ảo 01",
-                Slug = "san-pham-ao-01",
-                Price = 0,
-                Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
-                ShortDescription = "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-                Weight = 1000,
-                ProductOptions = GetProductProductOptionsData()
-            };
-
-            var product2 = new Products()
-            {
-                Id = 0,
-                Code = "PV934581028401",
-                Name = "Sản phẩm ảo 02",
-                Slug = "san-pham-ao-02",
-                Price = 0,
-                Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
-                ShortDescription = "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-                Weight = 1000,
-                ProductOptions = GetProductProductOptionsData()
-            };
-
-            var product3 = new Products()
-            {
-                Id = 0,
-                Code = "PV934581022817",
-                Name = "Sản phẩm ảo 03",
-                Slug = "san-pham-ao-03",
-                Price = 0,
-                Description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, beatae dolorem, Quas, beatae dolorem, Quas, beatae dolorem aperiam distinctio ex facere, eos recusandae quod non inventore sint debitis aspernatur similique! Molestiae dicta odio cupiditate quia iusto?",
-                ShortDescription = "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-                Weight = 1000,
-                ProductOptions = GetProductProductOptionsData() 
-            };
-
-            ProductData = new List<Products>()
-            {
-                product1,
-                product2,
-                product3
             };
         }
 

@@ -5,7 +5,7 @@ using Doitsu.Ecommerce.ApplicationCore.Entities;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Repositories;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services.BusinessServices;
-using Doitsu.Ecommerce.ApplicationCore.Specifications.ProductVariantSpecifications;
+using Doitsu.Ecommerce.ApplicationCore.Specifications.ProductSpecifications;
 using Microsoft.Extensions.Logging;
 using Optional;
 using Optional.Async;

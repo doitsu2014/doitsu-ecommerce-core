@@ -7,7 +7,7 @@ using Doitsu.Ecommerce.ApplicationCore.Interfaces;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Repositories;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services.BusinessServices;
 using Doitsu.Ecommerce.ApplicationCore.Models.ViewModels;
-using Doitsu.Ecommerce.ApplicationCore.Specifications.ProductVariantSpecifications;
+using Doitsu.Ecommerce.ApplicationCore.Specifications.ProductSpecifications;
 using Doitsu.Ecommerce.Core.Tests.Helpers;
 using Doitsu.Ecommerce.Infrastructure.Data;
 using Microsoft.AspNetCore.Hosting;
@@ -41,13 +41,13 @@ namespace Doitsu.Ecommerce.ApplicationCore.Tests
                 await DatabaseHelper.MigrateDatabase(dbContext, databaseConfigurer, webhost, _poolKey);
 
                 // Add Categories
-                var createdCategories = await categoryRepository.AddRangeAsync(_fixture.CategoryData.ToArray());
+                var createdCategories = await categoryRepository.AddRangeAsync(_fixture.GetCategoryData().ToArray());
 
                 // Add Products
                 var categoryFilterSpecification = new CategoryFilterSpecification(TypeOfCategoryEnum.Normal, "hang-ban-1");
                 var firstCategory = await categoryRepository.FirstOrDefaultAsync(categoryFilterSpecification);
 
-                var productData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; }).ToArray();
+                var productData = _fixture.GetProductsData().Select(x => { x.CateId = firstCategory.Id; return x; }).ToArray();
                 var result = await productBusinessService.CreateProductWithOptionAsync(productData);
 
             }
@@ -79,32 +79,12 @@ namespace Doitsu.Ecommerce.ApplicationCore.Tests
                     // Add Products
                     var productRepository = scope.ServiceProvider.GetService<IBaseEcommerceRepository<Products>>();
                     var productVariantRepository = scope.ServiceProvider.GetService<IBaseEcommerceRepository<ProductVariants>>();
+                    var productOptionsRepository = scope.ServiceProvider.GetService<IBaseEcommerceRepository<ProductOptions>>();
                     var productBusinessService = scope.ServiceProvider.GetService<IProductBusinessService>();
 
-                    var productFilterParams = new List<ProductFilterParamViewModel>()
-                    {
-                        new ProductFilterParamViewModel()
-                        {
-                            Id = 1,
-                            ProductOptions = (new List<ProductOptionFilterParamViewModel>()
-                            {
-                                new ProductOptionFilterParamViewModel() {
-                                    Id = 1,
-                                    SelectedValueId = 1
-                                },
-                                new ProductOptionFilterParamViewModel() {
-                                    Id = 1,
-                                    SelectedValueId = 4
-                                },
-                                new ProductOptionFilterParamViewModel() {
-                                    Id = 1,
-                                    SelectedValueId = 6
-                                }
-                            }).ToArray()
-                        }
-                    }
-                    .Select(x => (x.Id, x.ProductOptions.Select(y => y.SelectedValueId.Value).ToArray())).ToArray();
-                    var result = await productVariantRepository.ListAsync(new ProductVariantFilterByProductOptionValueIdsSpecification(productFilterParams));
+                    var productVariant = await productVariantRepository.FirstOrDefaultAsync(new ProductVariantWithPvovSpecification());
+                    var povIds = productVariant.ProductVariantOptionValues.Select(pvov => pvov.ProductOptionValueId.Value).ToArray();
+                    var result = await productVariantRepository.ListAsync(new ProductVariantFilterByProductOptionValueIdsSpecification(povIds));
                     Assert.True(result.Count() == 1);
                 }
             }
@@ -124,7 +104,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Tests
                     var productVariantRepository = scope.ServiceProvider.GetService<IBaseEcommerceRepository<ProductVariants>>();
                     var productBusinessService = scope.ServiceProvider.GetService<IProductBusinessService>();
 
-                    var arrayProductOptionIds = (await productRepository.FirstOrDefaultAsync(new ProductFilterByCodeSpecification(_fixture.ProductData.First().Code)))
+                    var arrayProductOptionIds = (await productRepository.FirstOrDefaultAsync(new ProductFilterByCodeSpecification(_fixture.GetProductsData().First().Code)))
                         .ProductOptions
                         .Select(po => po.ProductOptionValues.First().Id)
                         .ToArray();
@@ -145,10 +125,10 @@ namespace Doitsu.Ecommerce.ApplicationCore.Tests
                 using (var scope = scopeFactory.CreateScope())
                 {
                     // Add Products
-                    var productRepository = scope.ServiceProvider.GetService<IBaseRepository<Products>>();
+                    var productRepository = scope.ServiceProvider.GetService<IBaseEcommerceRepository<Products>>();
                     var productBusinessService = scope.ServiceProvider.GetService<IProductBusinessService>();
 
-                    var firstProductData = _fixture.ProductData.First();
+                    var firstProductData = _fixture.GetProductsData().First();
                     var updatedProduct = await productRepository.FirstOrDefaultAsync(new ProductFilterByCodeSpecification(firstProductData.Code));
                     updatedProduct.Name += "-- change";
                     updatedProduct.ProductOptions.First().ProductOptionValues.First().Status = ProductOptionValueStatusEnum.Unavailable;
@@ -167,7 +147,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Tests
         [Fact]
         private async Task Test_DeleteProductOptions()
         {
-            using (var webhost = WebHostBuilderHelper.BuilderWebhostWithRealDb(_poolKey).Build())
+            using (var webhost = WebHostBuilderHelper.BuilderWebhostWithInmemoryDb(_poolKey).Build())
             {
                 var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
                 await InitialDatabaseAsync(webhost);
@@ -176,7 +156,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Tests
                     // Add Products
                     var productRepository = scope.ServiceProvider.GetService<IBaseEcommerceRepository<Products>>();
                     var productBusinessService = scope.ServiceProvider.GetService<IProductBusinessService>();
-                    var firstFixtureProductData = this._fixture.ProductData.First();
+                    var firstFixtureProductData = this._fixture.GetProductsData().First();
                     var firstProduct = await productRepository.FirstOrDefaultAsync(new ProductFilterByCodeSpecification(firstFixtureProductData.Code));
                     (await productBusinessService.DeleteProductOptionByKeyAsync(firstProduct.Id, firstProduct.ProductOptions.First().Id))
                         .MatchSome(res => Assert.True(res > 0));

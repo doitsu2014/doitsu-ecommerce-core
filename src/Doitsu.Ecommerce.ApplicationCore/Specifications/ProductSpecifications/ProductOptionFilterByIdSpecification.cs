@@ -1,7 +1,7 @@
 using Doitsu.Ecommerce.ApplicationCore.Entities;
 using Doitsu.Ecommerce.ApplicationCore.QueryExtensions.Include;
 
-namespace Doitsu.Ecommerce.ApplicationCore.Specifications.ProductVariantSpecifications
+namespace Doitsu.Ecommerce.ApplicationCore.Specifications.ProductSpecifications
 {
     public class ProductOptionFilterByIdSpecification : BaseSpecification<ProductOptions>
     {

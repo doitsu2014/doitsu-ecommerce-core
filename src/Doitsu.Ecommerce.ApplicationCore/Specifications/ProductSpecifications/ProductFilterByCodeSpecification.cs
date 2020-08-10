@@ -1,7 +1,7 @@
 using System.Linq;
 using Doitsu.Ecommerce.ApplicationCore.Entities;
 
-namespace Doitsu.Ecommerce.ApplicationCore.Specifications.ProductVariantSpecifications
+namespace Doitsu.Ecommerce.ApplicationCore.Specifications.ProductSpecifications
 {
     public class ProductFilterByCodeSpecification : BaseSpecification<Products>
     {

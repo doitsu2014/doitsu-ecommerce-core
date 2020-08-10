@@ -1,7 +1,5 @@
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
-using Doitsu.Ecommerce.ApplicationCore;
 using Doitsu.Ecommerce.ApplicationCore.Entities;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Repositories;
@@ -13,7 +11,7 @@ using Specifications.CategorySpecifications;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Tests
+namespace Doitsu.Ecommerce.ApplicationCore.Tests
 {
     [Collection("EcommerceCoreCollection")]
     public class CategoryServiceTest : BaseServiceTest<EcommerceCoreFixture>
@@ -37,13 +35,13 @@ namespace Tests
                 await DatabaseHelper.MigrateDatabase(dbContext, databaseConfigurer, webhost, _poolKey);
 
                 // Add Category
-                var createdCategories = await categoryRepository.AddRangeAsync(_fixture.CategoryData.ToArray());
+                var createdCategories = await categoryRepository.AddRangeAsync(_fixture.GetCategoryData().ToArray());
 
                 // Add Products
                 var categoryFilterSpecification = new CategoryFilterSpecification(TypeOfCategoryEnum.Normal, "hang-ban-1");
                 var firstCategory = await categoryRepository.FirstOrDefaultAsync(categoryFilterSpecification);
 
-                var productData = _fixture.ProductData.Select(x => { x.CateId = firstCategory.Id; return x; }).ToArray();
+                var productData = _fixture.GetProductsData().Select(x => { x.CateId = firstCategory.Id; return x; }).ToArray();
                 var result = await productRepository.AddRangeAsync(productData);
             }
         }
