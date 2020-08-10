@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Doitsu.Ecommerce.ApplicationCore.Specifications.TagSepcifications;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
-using Doitsu.Ecommerce.ApplicationCore.Specifications;
 using Doitsu.Ecommerce.ApplicationCore.Specifications.BlogTagSpecifications;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces;
 

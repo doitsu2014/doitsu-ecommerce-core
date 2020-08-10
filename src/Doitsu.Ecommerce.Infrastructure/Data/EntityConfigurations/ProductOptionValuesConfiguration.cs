@@ -15,7 +15,8 @@ namespace Doitsu.Ecommerce.Infrastructure.Data.EntityConfigurations
             builder.HasOne(x => x.ProductOption)
                 .WithMany(x => x.ProductOptionValues)
                 .IsRequired()
-                .HasForeignKey(x => x.ProductOptionId);
+                .HasForeignKey(x => x.ProductOptionId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Property(x => x.Value).HasMaxLength(256);
             builder.Property(x => x.Status).HasDefaultValue(ProductOptionValueStatusEnum.Available);

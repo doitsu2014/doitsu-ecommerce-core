@@ -20,7 +20,8 @@ namespace Doitsu.Ecommerce.Infrastructure.Data.EntityConfigurations
             builder.HasOne(x => x.Product)
                 .WithMany(x => x.ProductOptions)
                 .IsRequired()
-                .HasForeignKey(x => x.ProductId);
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

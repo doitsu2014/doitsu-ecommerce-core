@@ -1,3 +1,4 @@
+using Ardalis.GuardClauses;
 using Doitsu.Ecommerce.ApplicationCore;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Repositories;
@@ -34,6 +35,13 @@ namespace Doitsu.Ecommerce.Infrastructure.Repositories
             _logger.LogDebug("{functionName} {spec}", nameof(ListAsync), spec);
             var specificationResult = ApplySpecification(spec);
             return await specificationResult.ToListAsync();
+        }
+
+        public virtual async Task<IReadOnlyList<TResult>> ListAsync<TResult>(ISpecification<TEntity, TResult> spec)
+        {
+            Guard.Against.Null(spec, "Argument spec");
+            Guard.Against.Null(spec.Selector, "Argument spec.Selector");
+            return await ApplySpecification(spec).ToListAsync();
         }
 
         public virtual async Task<int> CountAsync(ISpecification<TEntity> spec)
@@ -82,11 +90,6 @@ namespace Doitsu.Ecommerce.Infrastructure.Repositories
             return await _dbContext.Set<TEntity>().FindAsync(keys);
         }
 
-        private IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> spec)
-        {
-            return EfSpecificationEvaluator<TEntity>.GetQuery(_dbContext.Set<TEntity>().AsQueryable(), spec);
-        }
-
         public virtual async Task<TEntity[]> AddRangeAsync(TEntity[] entities)
         {
             await _dbContext.Set<TEntity>().AddRangeAsync(entities);
@@ -130,6 +133,16 @@ namespace Doitsu.Ecommerce.Infrastructure.Repositories
                 entities.Add(entity);
             }
             await this.DeleteRangeAsync(entities.ToArray());
+        }
+
+        private IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> spec)
+        {
+            return EfSpecificationEvaluator<TEntity>.GetQuery(_dbContext.Set<TEntity>().AsQueryable(), spec);
+        }
+
+        private IQueryable<TResult> ApplySpecification<TResult>(ISpecification<TEntity, TResult> spec)
+        {
+            return EfSpecificationEvaluator<TEntity, TResult>.GetQuery(_dbContext.Set<TEntity>().AsQueryable(), spec);
         }
     }
 }

@@ -21,6 +21,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Specifications
         protected BaseSpecification()
         {
         }
+        
         protected BaseSpecification(Expression<Func<T, bool>> criteria)
         {
             AddCriteria(criteria);
@@ -41,6 +42,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Specifications
         public bool IsPagingEnabled { get; private set; } = false;
 
         public string? CacheKey { get; protected set; }
+        public TimeSpan? CacheTime { get; protected set; }
         public bool CacheEnabled { get; private set; }
         #nullable disable
 

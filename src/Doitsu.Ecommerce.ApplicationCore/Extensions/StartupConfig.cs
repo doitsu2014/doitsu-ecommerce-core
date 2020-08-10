@@ -30,6 +30,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Extensions
             #region Config service
             //services.AddDoitsuEcommerceCoreServices();
             services.AddScoped(typeof(IBlogBusinessService), typeof(BlogBusinessService));
+            services.AddScoped(typeof(IProductBusinessService), typeof(ProductBusinessService));
             services.AddScoped(typeof(IBaseEcommerceViewModelService<>), typeof(BaseEcommerceViewModelService<>));
             #endregion
 

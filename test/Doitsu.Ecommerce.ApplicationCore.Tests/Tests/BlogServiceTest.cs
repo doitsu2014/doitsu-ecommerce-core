@@ -13,10 +13,9 @@ using Doitsu.Ecommerce.Infrastructure.Data;
 using Doitsu.Ecommerce.ApplicationCore.Services.IdentityManagers;
 using Doitsu.Ecommerce.ApplicationCore.Entities.Identities;
 using System.Collections.Generic;
-using Doitsu.Ecommerce.ApplicationCore;
 using System;
 
-namespace Doitsu.Ecommerce.Core.Tests
+namespace Doitsu.Ecommerce.ApplicationCore.Tests
 {
     [Collection("EcommerceCoreCollection")]
     public class BlogServiceTest : BaseServiceTest<EcommerceCoreFixture>

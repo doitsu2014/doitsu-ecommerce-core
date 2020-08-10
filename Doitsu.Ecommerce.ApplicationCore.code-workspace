@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "src/Doitsu.Ecommerce.ApplicationCore"
+		},
+		{
+			"path": "src/Doitsu.Ecommerce.Infrastructure"
+		},
+		{
+			"path": "test/Doitsu.Ecommerce.ApplicationCore.Tests"
+		},
+		{
+			"path": "src/Doitsu.Ecommerce.Core"
+		},
+		{
+			"path": "test/Doitsu.Ecommerce.Core.Tests"
+		}
+	],
+	"settings": {
+		"dotnet-test-explorer.testProjectPath": "**/Doitsu.Ecommerce.ApplicationCore.Tests.csproj"
+	}
+}
