@@ -12,11 +12,10 @@ jobs:
         inputs:
             command: 'build'
             projects: 'src/Doitsu.Ecommerce.ApplicationCore/Doitsu.Ecommerce.ApplicationCore.csproj'
-            arguments: '--configuration $(buildConfiguration)    
-            
+            arguments: '--configuration $(buildConfiguration)'
     - task: DotNetCoreCLI@2
         displayName: "Building Doitsu.Ecommerce.Infrastructure Process"
         inputs:
             command: 'build'
             projects: 'src/Doitsu.Ecommerce.ApplicationCore/Doitsu.Ecommerce.ApplicationCore.csproj'
-            arguments: '--configuration $(buildConfiguration)
+            arguments: '--configuration $(buildConfiguration)'

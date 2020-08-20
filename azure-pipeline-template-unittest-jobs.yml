@@ -6,17 +6,12 @@ jobs:
         vmImage: 'Doitsu.Technology.Ubuntu.Agent'
     variables:
         buildConfiguration: 'Release'
+        secretConnectionString: '$(SECRET_CONNECTION_STRING)'        
+        secretGHTKToken: '$(SECRET_GHTK_TOKEN)'        
     steps:
     - task: DotNetCoreCLI@2
-        displayName: "Building Doitsu.Ecommerce.ApplicationCore Process"
-        inputs:
-            command: 'build'
-            projects: 'src/Doitsu.Ecommerce.ApplicationCore/Doitsu.Ecommerce.ApplicationCore.csproj'
-            arguments: '--configuration $(buildConfiguration)    
-            
-    - task: DotNetCoreCLI@2
-        displayName: "Building Doitsu.Ecommerce.Infrastructure Process"
-        inputs:
-            command: 'build'
-            projects: 'src/Doitsu.Ecommerce.ApplicationCore/Doitsu.Ecommerce.ApplicationCore.csproj'
-            arguments: '--configuration $(buildConfiguration)
+      displayName: "Test Process"
+      inputs:
+        command: test
+        projects: '**/*Tests/*.csproj'
+        arguments: '--configuration $(buildConfiguration)' 
