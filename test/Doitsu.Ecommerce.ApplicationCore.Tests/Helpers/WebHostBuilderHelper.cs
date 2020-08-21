@@ -52,12 +52,6 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
         private static IWebHostBuilder StandardWebHostBuilder()
         {
             return WebHost.CreateDefaultBuilder()
-                .UseStartup<Startup>();
-        }
-
-        private static IWebHostBuilder BuildWebhostWithJsonContent()
-        {
-            return StandardWebHostBuilder()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .ConfigureAppConfiguration((context, config) =>
                 {
@@ -65,8 +59,15 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                     config
                         .AddJsonFile($"{path}/appsettings.json", false, true)
                         .AddJsonFile($"{path}/appsettings." + context.HostingEnvironment.EnvironmentName + ".json", true, true)
+                        .AddUserSecrets<Startup>()
                         .AddEnvironmentVariables();
                 })
+                .UseStartup<Startup>();
+        }
+
+        private static IWebHostBuilder BuildWebhostWithJsonContent()
+        {
+            return StandardWebHostBuilder()
                 .ConfigureLogging((context, builder) => builder.ClearProviders())
                 .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
         }
@@ -87,7 +88,7 @@ namespace Doitsu.Ecommerce.Core.Tests.Helpers
                         return dbContext;
                     });
                 })
-                
+
                 ;
         }
 
