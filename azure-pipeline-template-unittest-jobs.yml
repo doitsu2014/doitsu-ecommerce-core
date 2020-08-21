@@ -1,17 +1,17 @@
-jobs:  
+jobs:
   - job: Build
     displayName: Build service
     pool:
-        name: 'Doitsu Technology Linux Pipeplies'
-        vmImage: 'Doitsu.Technology.Ubuntu.Agent'
+      name: "Doitsu Technology Linux Pipeplies"
+      vmImage: "Doitsu.Technology.Ubuntu.Agent"
     variables:
-        buildConfiguration: 'Release'
-        ConnectionStrings.EcommerceDbContext: '$(SECRET_CONNECTION_STRING)'        
-        DeliveryIntegration.Ghtk.ClientSecret: '$(SECRET_GHTK_TOKEN)'        
+      buildConfiguration: "Release"
+      ConnectionStrings.EcommerceDbContext: "$(SECRET_CONNECTION_STRING)"
+      DeliveryIntegration.Ghtk.ClientSecret: "$(SECRET_GHTK_TOKEN)"
     steps:
-    - task: DotNetCoreCLI@2
-      displayName: "Test Process"
-      inputs:
-        command: test
-        projects: '**/*Tests/*.csproj'
-        arguments: '--configuration $(buildConfiguration)' 
+      - task: DotNetCoreCLI@2
+        displayName: "Test Process"
+        inputs:
+          command: test
+          projects: "**/*Tests/*.csproj"
+          arguments: "--configuration $(buildConfiguration)"
