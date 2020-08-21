@@ -6,7 +6,7 @@ jobs:
       vmImage: "Doitsu.Technology.Ubuntu.Agent"
     variables:
       buildConfiguration: "Release"
-    steps:
+    extends:
       - template: azure-pipeline-template-transform-file-jobs.yml
       - task: DotNetCoreCLI@2
         displayName: "Test Process"
