@@ -1,6 +1,6 @@
 jobs:
-  - job: Build
-    displayName: Build service
+  - job: unit_test 
+    displayName: Unit Test 
     pool:
       name: "Doitsu Technology Linux Pipeplies"
       vmImage: "Doitsu.Technology.Ubuntu.Agent"

@@ -55,6 +55,9 @@
     <ProjectReference Include="..\Doitsu.Ecommerce.ApplicationCore\Doitsu.Ecommerce.ApplicationCore.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Images\doitsu-logo.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Update="Resources\GeneralResource.en-US.Designer.cs">
       <DependentUpon>GeneralResource.en-US.resx</DependentUpon>
     </Compile>
