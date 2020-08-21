@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29318.209
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Doitsu.Ecommerce.Core", "src\Doitsu.Ecommerce.Core\Doitsu.Ecommerce.Core.csproj", "{0143AF97-82AD-428B-8A2E-F2EE46AA9C48}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Doitsu.Ecommerce.Core.Tests", "test\Doitsu.Ecommerce.Core.Tests\Doitsu.Ecommerce.Core.Tests.csproj", "{C83A79F7-82F2-496F-881A-6E9A11AAA736}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Doitsu.Ecommerce.Core.DeliveryIntegration", "src\Doitsu.Ecommerce.Core.DeliveryIntegration\Doitsu.Ecommerce.Core.DeliveryIntegration.csproj", "{E0717928-6B3E-4783-9E32-8B1C90CD339E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Doitsu.Ecommerce.Core.Abstraction", "src\Doitsu.Ecommerce.Core.Abstraction\Doitsu.Ecommerce.Core.Abstraction.csproj", "{C6FF44BA-13E0-4D13-99F2-97D68B5F32A5}"
@@ -80,7 +78,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0143AF97-82AD-428B-8A2E-F2EE46AA9C48} = {FDE97434-7DB9-4569-8949-668AEB5F82AC}
-		{C83A79F7-82F2-496F-881A-6E9A11AAA736} = {ECE4838C-320F-4C61-8B68-DF01EB8CDCEF}
 		{E0717928-6B3E-4783-9E32-8B1C90CD339E} = {FDE97434-7DB9-4569-8949-668AEB5F82AC}
 		{C6FF44BA-13E0-4D13-99F2-97D68B5F32A5} = {FDE97434-7DB9-4569-8949-668AEB5F82AC}
 		{4F07D296-4B77-4858-B952-1E98240C1010} = {FDE97434-7DB9-4569-8949-668AEB5F82AC}
