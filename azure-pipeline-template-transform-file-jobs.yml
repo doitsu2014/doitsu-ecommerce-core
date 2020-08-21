@@ -1,6 +1,7 @@
-- task: FileTransform@1
-  displayName: "File Transform: appsettings.json"
-  inputs:
-    folderPath: "$(System.DefaultWorkingDirectory)"
-    fileType: json
-    targetFiles: "**/appsettings.json"
+- steps:
+  - task: FileTransform@1
+    displayName: "File Transform: appsettings.json"
+    inputs:
+      folderPath: "$(System.DefaultWorkingDirectory)"
+      fileType: json
+      targetFiles: "**/appsettings.json"
