@@ -16,12 +16,12 @@ stages:
 - stage: unit_test
   displayName: Unit Test
   dependsOn: build
-  condition: and(succeeded())
+  condition: succeeded()
   jobs:  
   - template: azure-pipeline-template-unittest-jobs.yml
 - stage: deploy
   displayName: Deployment
   dependsOn: unit_test
-  condition: or(succeeded())
+  condition: succeeded()
   jobs:
   - template: azure-pipeline-template-deploy-jobs.yml
