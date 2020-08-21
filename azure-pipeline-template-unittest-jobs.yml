@@ -6,8 +6,8 @@ jobs:
         vmImage: 'Doitsu.Technology.Ubuntu.Agent'
     variables:
         buildConfiguration: 'Release'
-        secretConnectionString: '$(SECRET_CONNECTION_STRING)'        
-        secretGHTKToken: '$(SECRET_GHTK_TOKEN)'        
+        ConnectionStrings.EcommerceDbContext: '$(SECRET_CONNECTION_STRING)'        
+        DeliveryIntegration.Ghtk.ClientSecret: '$(SECRET_GHTK_TOKEN)'        
     steps:
     - task: DotNetCoreCLI@2
       displayName: "Test Process"
