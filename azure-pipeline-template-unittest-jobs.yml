@@ -13,6 +13,9 @@ jobs:
       - bash: echo $(SECRET_CONNECTION_STRING)
       - bash: echo $(SECRET_GHTK_TOKEN)
       - bash: echo $(SECRET_SMTP_CREDENTIAL_PASSWORD)
+      - bash: echo $(ConnectionStrings.EcommerceDbContext)
+      - bash: echo $(DeliveryIntegration.Ghtk.ClientSecret)
+      - bash: echo $(SmtpMailServerOptions.CredentialPassword)
       - task: DotNetCoreCLI@2
         displayName: "Test Process"
         inputs:
