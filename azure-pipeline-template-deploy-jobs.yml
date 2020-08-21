@@ -1,32 +1,49 @@
 jobs:
-    - job: deploy
-      displayName: Deploy Nuget
-      pool:
-          name: "Doitsu Technology Linux Pipeplies"
-          vmImage: "Doitsu.Technology.Ubuntu.Agent"
-      steps:
-          - task: DotNetCoreCLI@2
-            displayName: "Packing Doitsu.Ecommerce.ApplicationCore Process"
-            inputs:
-                command: "pack"
-                arguments: "--configuration $(buildConfiguration)"
-                packagesToPack: "src/Doitsu.Ecommerce.ApplicationCore/Doitsu.Ecommerce.ApplicationCore.csproj"
-                nobuild: true
-                versioningScheme: "off"
-          - task: DotNetCoreCLI@2
-            displayName: "Packing Doitsu.Ecommerce.Infrastructure Process"
-            inputs:
-                command: "pack"
-                arguments: "--configuration $(buildConfiguration)"
-                packagesToPack: "src/Doitsu.Ecommerce.Infrastructure/Doitsu.Ecommerce.Infrastructure.csproj"
-                nobuild: true
-                versioningScheme: "off"
-          - task: NuGetCommand@2
-            inputs:
-                command: "push"
-                feedsToUse: "select"
-                packagesToPush: "$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg"
-                nuGetFeedType: "internal"
-                publishVstsFeed: "Doitsu.Technology"
-                versioningScheme: "off"
-                allowPackageConflicts: true
+  - job: deploy
+    displayName: Deploy Nuget
+    pool:
+      name: "Doitsu Technology Linux Pipeplies"
+      vmImage: "Doitsu.Technology.Ubuntu.Agent"
+    variables:
+      buildConfiguration: "Release"
+      ConnectionStrings.EcommerceDbContext: "$(SECRET_CONNECTION_STRING)"
+      DeliveryIntegration.Ghtk.ClientSecret: "$(SECRET_GHTK_TOKEN)"
+      SmtpMailServerOptions.CredentialPassword: "$(SECRET_SMTP_CREDENTIAL_PASSWORD)"
+    steps:
+      - task: FileTransform@1
+        displayName: "File Transform: appsettings.json"
+        inputs:
+          folderPath: "$(System.DefaultWorkingDirectory)"
+          fileType: json
+          targetFiles: "**/appsettings.json"
+      - task: FileTransform@1
+        displayName: "File Transform: nuget.config"
+        inputs:
+          folderPath: "$(System.DefaultWorkingDirectory)"
+          fileType: xml
+          targetFiles: "nuget.config"
+      - task: DotNetCoreCLI@2
+        displayName: "Packing Doitsu.Ecommerce.ApplicationCore Process"
+        inputs:
+          command: "pack"
+          arguments: "--configuration $(buildConfiguration)"
+          packagesToPack: "src/Doitsu.Ecommerce.ApplicationCore/Doitsu.Ecommerce.ApplicationCore.csproj"
+          nobuild: true
+          versioningScheme: "off"
+      - task: DotNetCoreCLI@2
+        displayName: "Packing Doitsu.Ecommerce.Infrastructure Process"
+        inputs:
+          command: "pack"
+          arguments: "--configuration $(buildConfiguration)"
+          packagesToPack: "src/Doitsu.Ecommerce.Infrastructure/Doitsu.Ecommerce.Infrastructure.csproj"
+          nobuild: true
+          versioningScheme: "off"
+      - task: NuGetCommand@2
+        inputs:
+          command: "push"
+          feedsToUse: "select"
+          packagesToPush: "$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg"
+          nuGetFeedType: "internal"
+          publishVstsFeed: "Doitsu.Technology"
+          versioningScheme: "off"
+          allowPackageConflicts: true

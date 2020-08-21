@@ -1,12 +1,21 @@
 jobs:
   - job: unit_test
-    displayName: Unit Test
+    displayName: "Unit Test"
     pool:
       name: "Doitsu Technology Linux Pipeplies"
       vmImage: "Doitsu.Technology.Ubuntu.Agent"
     variables:
       buildConfiguration: "Release"
+      ConnectionStrings.EcommerceDbContext: "$(SECRET_CONNECTION_STRING)"
+      DeliveryIntegration.Ghtk.ClientSecret: "$(SECRET_GHTK_TOKEN)"
+      SmtpMailServerOptions.CredentialPassword: "$(SECRET_SMTP_CREDENTIAL_PASSWORD)"
     steps:
+      - task: FileTransform@1
+        displayName: "File Transform: appsettings.json"
+        inputs:
+          folderPath: "$(System.DefaultWorkingDirectory)"
+          fileType: json
+          targetFiles: "**/appsettings.json"
       - task: DotNetCoreCLI@2
         displayName: "Test Process"
         inputs:
