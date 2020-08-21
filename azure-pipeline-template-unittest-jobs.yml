@@ -15,7 +15,6 @@ jobs:
       - bash: echo $(SmtpMailServerOptions.CredentialPassword)
       - task: FileTransform@2
         inputs:
-          folderPath: '$(System.DefaultWorkingDirectory)/**/*.zip'
           jsonTargetFiles: '**/Configurations/appsettings.json'
       - task: DotNetCoreCLI@2
         displayName: "Test Process"
