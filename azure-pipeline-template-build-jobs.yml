@@ -1,0 +1,21 @@
+jobs:  
+  - job: Build
+    displayName: Build service
+    pool:
+        name: 'Doitsu Technology Linux Pipeplies'
+        vmImage: 'Doitsu.Technology.Ubuntu.Agent'
+    variables:
+        buildConfiguration: 'Release'
+    steps:
+    - task: DotNetCoreCLI@2
+        displayName: "Building Doitsu.Ecommerce.ApplicationCore Process"
+        inputs:
+            command: 'build'
+            projects: 'src/Doitsu.Ecommerce.ApplicationCore/Doitsu.Ecommerce.ApplicationCore.csproj'
+            arguments: '--configuration $(buildConfiguration)'
+    - task: DotNetCoreCLI@2
+        displayName: "Building Doitsu.Ecommerce.Infrastructure Process"
+        inputs:
+            command: 'build'
+            projects: 'src/Doitsu.Ecommerce.ApplicationCore/Doitsu.Ecommerce.ApplicationCore.csproj'
+            arguments: '--configuration $(buildConfiguration)'
