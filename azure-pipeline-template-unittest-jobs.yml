@@ -10,14 +10,17 @@ jobs:
       DeliveryIntegration.Ghtk.ClientSecret: "$(SECRET_GHTK_TOKEN)"
       SmtpMailServerOptions.CredentialPassword: "$(SECRET_SMTP_CREDENTIAL_PASSWORD)"
     steps:
-      - bash: echo $(ConnectionStrings.EcommerceDbContext)
-      - bash: echo $(DeliveryIntegration.Ghtk.ClientSecret)
-      - bash: echo $(SmtpMailServerOptions.CredentialPassword)
-      - task: FileTransform@2
+      - bash: | 
+          echo $(ConnectionStrings.EcommerceDbContext)
+          echo $(DeliveryIntegration.Ghtk.ClientSecret)
+          echo $(SmtpMailServerOptions.CredentialPassword)
+          echo $(System.DefaultWorkingDirectory)
+      - task: FileTransform@1
+        displayName: 'File Transform: appsettings.json'
         inputs:
-          folderPath: '$(System.DefaultWorkingDirectory)'      
-          fileType: json
-          targetFiles: '**/appsettings.json'
+        folderPath: '$(System.DefaultWorkingDirectory)'
+        fileType: json
+        targetFiles: '**/appsettings.json' 
       - task: DotNetCoreCLI@2
         displayName: "Test Process"
         inputs:
