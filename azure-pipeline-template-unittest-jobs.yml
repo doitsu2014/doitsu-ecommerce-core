@@ -1,13 +1,12 @@
 jobs:
-  - job: unit_test 
-    displayName: Unit Test 
+  - job: unit_test
+    displayName: Unit Test
     pool:
       name: "Doitsu Technology Linux Pipeplies"
       vmImage: "Doitsu.Technology.Ubuntu.Agent"
     variables:
       buildConfiguration: "Release"
-    extends:
-      - template: azure-pipeline-template-transform-file-jobs.yml
+    steps:
       - task: DotNetCoreCLI@2
         displayName: "Test Process"
         inputs:
