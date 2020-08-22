@@ -6,6 +6,8 @@ jobs:
       vmImage: "Doitsu.Technology.Ubuntu.Agent"
     variables:
       buildConfiguration: "Release"
+      secretBuilderEmail: "$(SECRET_BUILDER_EMAIL)"
+      secretBuilderPat: "$(SECRET_BUILDER_PAT)"
       ConnectionStrings.EcommerceDbContext: "$(SECRET_CONNECTION_STRING)"
       DeliveryIntegration.Ghtk.ClientSecret: "$(SECRET_GHTK_TOKEN)"
       SmtpMailServerOptions.CredentialPassword: "$(SECRET_SMTP_CREDENTIAL_PASSWORD)"
@@ -16,12 +18,18 @@ jobs:
           folderPath: "$(System.DefaultWorkingDirectory)"
           fileType: json
           targetFiles: "**/appsettings.json"
-      - task: FileTransform@1
-        displayName: "File Transform: nuget.config"
+      - task: replacetokens@3
         inputs:
-          folderPath: "$(System.DefaultWorkingDirectory)"
-          fileType: xml
-          targetFiles: "nuget.config"
+            rootDirectory: './'
+            targetFiles: '**/*.config'
+            encoding: 'auto'
+            writeBOM: true
+            actionOnMissing: 'warn'
+            keepToken: false
+            tokenPrefix: '#{'
+            tokenSuffix: '}#'
+            useLegacyPattern: false
+            enableTelemetry: true 
       - task: DotNetCoreCLI@2
         displayName: "Packing Doitsu.Ecommerce.ApplicationCore Process"
         inputs:
