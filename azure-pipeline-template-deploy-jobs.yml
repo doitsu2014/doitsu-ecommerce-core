@@ -1,5 +1,7 @@
 jobs:
   - job: deploy
+    dependsOn:
+    - build
     displayName: Deploy Nuget
     pool:
       name: "Doitsu Technology Linux Pipeplies"
