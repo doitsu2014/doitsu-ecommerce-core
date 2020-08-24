@@ -24,5 +24,4 @@ stages:
   dependsOn: unit_test
   condition: succeeded()
   jobs:
-  - template: azure-pipeline-template-build-jobs.yml
   - template: azure-pipeline-template-deploy-jobs.yml
