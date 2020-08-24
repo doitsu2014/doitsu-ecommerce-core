@@ -11,14 +11,14 @@
     <Copyright>2020</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
-    <Summary>Core of doitsu api website service</Summary>
-    <PackageTags>Ecommerce code first;Ecommerce services</PackageTags>
+    <Summary>Application Core of Clean Architecture</Summary>
+    <PackageTags>Application_Core;Clean_Architecture</PackageTags>
     <Description>Doitsu.Ecommerce.Core is a library implement business logic and code first database for a Ecommerce Platform by AspNetCore. It is using Doitsu.Service.Core library as a helper library to implement abstraction.</Description>
-    <RepositoryUrl>https://doitsutechnology@dev.azure.com/doitsutechnology/Doitsu.Technology.Core/_git/Doitsu.Ecommerce.Core</RepositoryUrl>
+    <RepositoryUrl>https://github.com/doitsu2014/doitsu-ecommerce-core</RepositoryUrl>
     <PackageProjectUrl>https://dev.azure.com/doitsutechnology/Doitsu.Technology.Core</PackageProjectUrl>
     <PackageIcon>doitsu-logo.png</PackageIcon>
-    <RepositoryType>Azure Repos</RepositoryType>
-    <PackageReleaseNotes>Update Doitsu.Ecommerce.Feature Features</PackageReleaseNotes>
+    <RepositoryType>Github</RepositoryType>
+    <PackageReleaseNotes>Update features Features</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
