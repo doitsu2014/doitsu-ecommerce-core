@@ -33,19 +33,19 @@ jobs:
       - task: DotNetCoreCLI@2
         displayName: "Packing Doitsu.Ecommerce.ApplicationCore Process"
         inputs:
-          command: "pack"
-          arguments: "--configuration $(buildConfiguration)"
-          packagesToPack: "src/Doitsu.Ecommerce.ApplicationCore/Doitsu.Ecommerce.ApplicationCore.csproj"
-          nobuild: true
-          versioningScheme: "off"
+          command: 'pack'
+          packagesToPack: 'src/Doitsu.Ecommerce.ApplicationCore/Doitsu.Ecommerce.ApplicationCore.csproj'
+          includesymbols: true
+          includesource: true
+          versioningScheme: 'off' 
       - task: DotNetCoreCLI@2
         displayName: "Packing Doitsu.Ecommerce.Infrastructure Process"
         inputs:
           command: "pack"
-          arguments: "--configuration $(buildConfiguration)"
           packagesToPack: "src/Doitsu.Ecommerce.Infrastructure/Doitsu.Ecommerce.Infrastructure.csproj"
-          nobuild: true
-          versioningScheme: "off"
+          includesymbols: true
+          includesource: true
+          versioningScheme: 'off' 
       - task: NuGetCommand@2
         inputs:
           command: "push"
