@@ -1,34 +1,35 @@
-- job: Build
-  displayName: Build service
-  pool:
-    name: "Doitsu Technology Linux Pipeplies"
-    vmImage: "Doitsu.Technology.Ubuntu.Agent"
-  variables:
-    buildConfiguration: "Release"
-    secretBuilderEmail: "$(SECRET_BUILDER_EMAIL)"
-    secretBuilderPat: "$(SECRET_BUILDER_PAT)"
-  steps:
-    - task: replacetokens@3
-      inputs:
-            rootDirectory: "./"
-            targetFiles: "**/*.config"
-            encoding: "auto"
-            writeBOM: true
-            actionOnMissing: "warn"
-            keepToken: false
-            tokenPrefix: "#{"
-            tokenSuffix: "}#"
-            useLegacyPattern: false
-            enableTelemetry: true
-    - task: DotNetCoreCLI@2
-      displayName: "Building Doitsu.Ecommerce.ApplicationCore Process"
-      inputs:
-            command: "build"
-            projects: "src/Doitsu.Ecommerce.ApplicationCore/Doitsu.Ecommerce.ApplicationCore.csproj"
-            arguments: "--configuration $(buildConfiguration)"
-    - task: DotNetCoreCLI@2
-      displayName: "Building Doitsu.Ecommerce.Infrastructure Process"
-      inputs:
-            command: "build"
-            projects: "src/Doitsu.Ecommerce.ApplicationCore/Doitsu.Ecommerce.ApplicationCore.csproj"
-            arguments: "--configuration $(buildConfiguration)"
+jobs:
+    - job: Build
+      displayName: Build service
+      pool:
+            name: "Doitsu Technology Linux Pipeplies"
+            vmImage: "Doitsu.Technology.Ubuntu.Agent"
+      variables:
+            buildConfiguration: "Release"
+            secretBuilderEmail: "$(SECRET_BUILDER_EMAIL)"
+            secretBuilderPat: "$(SECRET_BUILDER_PAT)"
+      steps:
+            - task: replacetokens@3
+              inputs:
+                  rootDirectory: './'
+                  targetFiles: '**/*.config'
+                  encoding: 'auto'
+                  writeBOM: true
+                  actionOnMissing: 'warn'
+                  keepToken: false
+                  tokenPrefix: '#{'
+                  tokenSuffix: '}#'
+                  useLegacyPattern: false
+                  enableTelemetry: true
+            - task: DotNetCoreCLI@2
+              displayName: "Building Doitsu.Ecommerce.ApplicationCore Process"
+              inputs:
+                  command: "build"
+                  projects: "src/Doitsu.Ecommerce.ApplicationCore/Doitsu.Ecommerce.ApplicationCore.csproj"
+                  arguments: "--configuration $(buildConfiguration)"
+            - task: DotNetCoreCLI@2
+              displayName: "Building Doitsu.Ecommerce.Infrastructure Process"
+              inputs:
+                  command: "build"
+                  projects: "src/Doitsu.Ecommerce.ApplicationCore/Doitsu.Ecommerce.ApplicationCore.csproj"
+                  arguments: "--configuration $(buildConfiguration)"
