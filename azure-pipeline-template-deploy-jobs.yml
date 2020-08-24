@@ -33,18 +33,16 @@ jobs:
             useLegacyPattern: false
             enableTelemetry: true 
       - task: DotNetCoreCLI@2
-        displayName: "Packing Doitsu.Ecommerce.ApplicationCore Process"
+        displayName: "Building Process"
+        inputs:
+            command: "build"
+            projects: "**/*.csproj"
+            arguments: "--configuration $(buildConfiguration)"
+      - task: DotNetCoreCLI@2
+        displayName: "Packing Process"
         inputs:
           command: 'pack'
-          packagesToPack: 'src/Doitsu.Ecommerce.ApplicationCore/Doitsu.Ecommerce.ApplicationCore.csproj'
-          includesymbols: true
-          includesource: true
-          versioningScheme: 'off' 
-      - task: DotNetCoreCLI@2
-        displayName: "Packing Doitsu.Ecommerce.Infrastructure Process"
-        inputs:
-          command: "pack"
-          packagesToPack: "src/Doitsu.Ecommerce.Infrastructure/Doitsu.Ecommerce.Infrastructure.csproj"
+          packagesToPack: '**/*.csproj'
           includesymbols: true
           includesource: true
           versioningScheme: 'off' 
