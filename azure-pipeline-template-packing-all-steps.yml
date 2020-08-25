@@ -1,0 +1,18 @@
+steps:
+  - task: DotNetCoreCLI@2
+    displayName: "Packing Process"
+    inputs:
+      command: "pack"
+      packagesToPack: "**/*.csproj"
+      includesymbols: true
+      includesource: true
+      versioningScheme: "off"
+  - task: NuGetCommand@2
+    inputs:
+      command: "push"
+      feedsToUse: "select"
+      packagesToPush: "$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg"
+      nuGetFeedType: "internal"
+      publishVstsFeed: "Doitsu.Technology"
+      versioningScheme: "off"
+      allowPackageConflicts: true
