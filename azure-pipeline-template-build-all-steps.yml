@@ -1,0 +1,7 @@
+steps:
+- task: DotNetCoreCLI@2
+  displayName: "Building Process"
+  inputs:
+    command: "build"
+    projects: "**/*.csproj"
+    arguments: "--configuration $(buildConfiguration)"

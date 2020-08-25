@@ -21,15 +21,4 @@ jobs:
                   tokenSuffix: '}#'
                   useLegacyPattern: false
                   enableTelemetry: true
-            - task: DotNetCoreCLI@2
-              displayName: "Building Doitsu.Ecommerce.ApplicationCore Process"
-              inputs:
-                  command: "build"
-                  projects: "src/Doitsu.Ecommerce.ApplicationCore/Doitsu.Ecommerce.ApplicationCore.csproj"
-                  arguments: "--configuration $(buildConfiguration)"
-            - task: DotNetCoreCLI@2
-              displayName: "Building Doitsu.Ecommerce.Infrastructure Process"
-              inputs:
-                  command: "build"
-                  projects: "src/Doitsu.Ecommerce.ApplicationCore/Doitsu.Ecommerce.ApplicationCore.csproj"
-                  arguments: "--configuration $(buildConfiguration)"
+            - template: './azure-pipeline-template-build-all-steps.yml'
