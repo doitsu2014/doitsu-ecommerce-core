@@ -6,7 +6,7 @@
 name: $(Build.SourceBranchName).$(date:yyyyMMdd).$(rev:r)
 
 trigger:
-- task/187
+- feature/*
 
 stages:
 - stage: build

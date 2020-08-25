@@ -1,20 +1,104 @@
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading.Tasks;
 using Doitsu.Ecommerce.ApplicationCore.Entities;
 using Doitsu.Ecommerce.ApplicationCore.Entities.Identities;
+using Doitsu.Ecommerce.ApplicationCore.Interfaces;
+using Doitsu.Ecommerce.ApplicationCore.Interfaces.Repositories;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services.BusinessServices;
 using Doitsu.Ecommerce.ApplicationCore.Models.ExportModels;
 using Doitsu.Ecommerce.ApplicationCore.Models.ViewModels;
+using Doitsu.Ecommerce.ApplicationCore.Services.IdentityManagers;
+using Doitsu.Ecommerce.ApplicationCore.Specifications.OrderSpecifications;
+using Microsoft.Extensions.Logging;
 using Optional;
+using Optional.Async;
 
 namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
 {
-    public class OrderBusinessService : IOrderBusinessService
+    public partial class OrderBusinessService : IOrderBusinessService
     {
-        public Task<Option<Orders, string>> CancelOrderAsync(string orderCode, int userId, string cancelNote = "")
+        private readonly ILogger<OrderBusinessService> logger;
+        private readonly IBaseEcommerceRepository<Orders> orderRepository;
+        private readonly IBaseEcommerceRepository<Products> productRepository;
+        private readonly IBaseEcommerceRepository<ProductVariants> productVariantRepository;
+        private readonly IBaseEcommerceRepository<UserTransaction> userTransactionRepository;
+        private readonly EcommerceIdentityUserManager<EcommerceIdentityUser> userManager;
+        // private readonly IServiceScopeFactory serviceScopeFactory;
+        // private readonly IDeliveryIntegrator deliveryIntegrator;
+        private readonly IEcommerceDatabaseManager databaseManager;
+
+        public OrderBusinessService(ILogger<OrderBusinessService> logger,
+                                    IEcommerceDatabaseManager databaseManager,
+                                    IBaseEcommerceRepository<Orders> orderRepository,
+                                    IBaseEcommerceRepository<Products> productRepository,
+                                    IBaseEcommerceRepository<ProductVariants> productVariantRepository,
+                                    IBaseEcommerceRepository<UserTransaction> userTransactionRepository)
         {
-            throw new NotImplementedException();
+            this.logger = logger;
+            this.databaseManager = databaseManager;
+            this.orderRepository = orderRepository;
+            this.userTransactionRepository = userTransactionRepository;
+            this.productRepository = productRepository;
+            this.productVariantRepository = productVariantRepository;
+        }
+
+        public async Task<Option<Orders, string>> CancelOrderAsync(string orderCode, int userId, string cancelNote = "")
+        {
+            using (var transaction = await this.databaseManager.GetDatabaseContextTransactionAsync())
+            {
+                return await CancelOrderInternalAsync(orderCode, userId, cancelNote)
+                    .MapAsync(async res =>
+                    {
+                        await transaction.CommitAsync();
+                        return res;
+                    });
+            }
+        }
+
+        private async Task<Option<Orders, string>> CancelOrderInternalAsync(string orderCode, int auditUserId, string cancelNote = "")
+        {
+            return await (orderCode, auditUserId).SomeNotNull()
+                .WithException(string.Empty)
+                .Filter(d => !d.orderCode.IsNullOrEmpty(), "Mã đơn hàng gửi lên rỗng.")
+                .FlatMapAsync(async d =>
+                {
+                    var order = await this.orderRepository.FirstOrDefaultAsync(new OrderFilterByOrderCodeSpecification(d.orderCode));
+                    var auditUser = await this.userManager.FindByIdAsync(auditUserId.ToString());
+                    if (auditUser == null)
+                    {
+                        return Option.None<Orders, string>("Tài khoản đang thao tác hủy đơn hàng không tồn tại hoặc bị xóa.");
+                    }
+                    var isInRoleAdmin = await this.userManager.IsInRoleAsync(auditUser, Constants.UserRoles.ADMIN);
+                    if (order == null)
+                    {
+                        return Option.None<Orders, string>("Không tìm thấy đơn hàng phù hợp để hủy đơn.");
+                    }
+                    else if (!isInRoleAdmin && (OrderStatusEnum)order.Status != OrderStatusEnum.New)
+                    {
+                        return Option.None<Orders, string>($"Đơn hàng {orderCode} không phải là đơn hàng MỚI nên không thể hủy.");
+                    }
+                    else if ((OrderStatusEnum)order.Status == OrderStatusEnum.Done)
+                    {
+                        return Option.None<Orders, string>($"Đơn hàng {orderCode} đã HOÀN THÀNH nên không thể hủy.");
+                    }
+                    else if ((OrderStatusEnum)order.Status == OrderStatusEnum.Cancel)
+                    {
+                        return Option.None<Orders, string>($"Đơn hàng {orderCode} đã được HỦY nên không thể hủy.");
+                    }
+                    else
+                    {
+                        order.Status = (int)OrderStatusEnum.Cancel;
+                        order.CancelNote = $"{cancelNote}.";
+                        await this.orderRepository.UpdateAsync(order);
+
+                        var userTransaction = this.userTransactionRepository.PrepareUserTransaction(this.Mapper.Map<OrderDetailViewModel>(order), ImmutableList<ProductVariantViewModel>.Empty, order.UserId, UserTransactionTypeEnum.Rollback);
+                        await this.userTransactionRepository.UpdateUserBalanceAsync(userTransaction, order.UserId);
+                        await userTransactionRepository.CreateAsync(userTransaction);
+                        return Option.Some<Orders, string>(Mapper.Map<Orders>(order));
+                    }
+                });
         }
 
         public Task<Option<Orders, string>> CancelSummaryOrderAsync(int summaryOrderId, int auditUserId, string cancelNote = "")
@@ -47,10 +131,26 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
             throw new NotImplementedException();
         }
 
-        public Task<Option<Orders, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum, int auditUserId, string note = "", bool isWorkingInventoryQuantity = false)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<Option<Orders, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum, int auditUserId, string note = "", bool isWorkingInventoryQuantity = false) => await (orderId, auditUserId, statusEnum, note, isWorkingInventoryQuantity).SomeNotNull()
+            .WithException(string.Empty)
+            .FilterAsync(async d => await this.orderRepository.AnyAsync(new OrderFilterByIdSpecification(d.orderId)), "Không thể tim thấy đơn hàng cần đổi trạng thái")
+            .FlatMapAsync(async d =>
+            {
+                var orderCode = (await this.orderRepository.ListAsync(new OrderFilterByIdSpecification(d.orderId))).Select(o => o.Code).FirstOrDefault();
+                switch (statusEnum)
+                {
+                    case OrderStatusEnum.Cancel:
+                        return await CancelOrderAsync(orderCode, d.auditUserId, d.note);
+                    case OrderStatusEnum.Done:
+                        return await CompleteOrderAsync(orderCode, d.auditUserId, d.note);
+                    case OrderStatusEnum.Processing:
+                        return await ChangeStatusToProcessOrderAsync(orderCode, d.auditUserId);
+                    case OrderStatusEnum.Delivery:
+                        return await ChangeStatusToDeliveryOrderAsync(orderCode, d.auditUserId, d.isWorkingInventoryQuantity);
+                    default:
+                        return Option.None<Orders, string>("Không thể chuyển đơn hàng sang trạng thái này.");
+                }
+            });
 
         public Task<Option<Orders, string>> ChangeStatusToDeliveryOrderAsync(string orderCode, int userId, bool isWorkingInventoryQuantity = false)
         {
@@ -77,7 +177,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
             throw new NotImplementedException();
         }
 
-        public Task<Option<Orders, string>> CreateDepositOrderAsync(OrderViewModel request)
+        public Task<Option<Orders, string>> CreateDepositOrderAsync(Orders request)
         {
             throw new NotImplementedException();
         }
@@ -92,7 +192,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
             throw new NotImplementedException();
         }
 
-        public Task<Option<Orders, string>> CreateSummaryOrderAsync(CreateSummaryOrderViewModel inverseOrders, int userId)
+        public Task<Option<Orders, string>> CreateSummaryOrderAsync(CreateSummaryOrders inverseOrders, int userId)
         {
             throw new NotImplementedException();
         }

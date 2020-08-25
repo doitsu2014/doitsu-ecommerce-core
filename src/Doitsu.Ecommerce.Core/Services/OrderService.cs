@@ -16,7 +16,6 @@ using Doitsu.Ecommerce.Core.DeliveryIntegration.Common;
 using Doitsu.Ecommerce.Core.IdentitiesExtension;
 using Doitsu.Ecommerce.Core.Services.Interface;
 using Doitsu.Ecommerce.Core.Abstraction.ViewModels;
-using Doitsu.Service.Core;
 using Doitsu.Service.Core.Services.EmailService;
 using Doitsu.Utils;
 
