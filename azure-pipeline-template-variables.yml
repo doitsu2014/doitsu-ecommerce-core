@@ -1,0 +1,7 @@
+variables:
+  buildConfiguration: "Release"
+  secretBuilderEmail: "$(SECRET_BUILDER_EMAIL)"
+  secretBuilderPat: "$(SECRET_BUILDER_PAT)"
+  ConnectionStrings.EcommerceDbContext: "$(SECRET_CONNECTION_STRING)"
+  DeliveryIntegration.Ghtk.ClientSecret: "$(SECRET_GHTK_TOKEN)"
+  SmtpMailServerOptions.CredentialPassword: "$(SECRET_SMTP_CREDENTIAL_PASSWORD)"

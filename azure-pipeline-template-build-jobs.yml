@@ -5,7 +5,7 @@ jobs:
       name: "Doitsu Technology Linux Pipeplies"
       vmImage: "Doitsu.Technology.Ubuntu.Agent"
     variables:
-      buildConfiguration: "Release"
+      - template: './azure-pipeline-template-variables.yml'
     steps:
       - template: "./azure-pipeline-template-transform-config-files-steps.yml"
       - template: "./azure-pipeline-template-build-all-steps.yml"
