@@ -91,12 +91,12 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
                     {
                         order.Status = (int)OrderStatusEnum.Cancel;
                         order.CancelNote = $"{cancelNote}.";
-                        await this.orderRepository.UpdateAsync(order);
-
-                        var userTransaction = this.userTransactionRepository.PrepareUserTransaction(this.Mapper.Map<OrderDetailViewModel>(order), ImmutableList<ProductVariantViewModel>.Empty, order.UserId, UserTransactionTypeEnum.Rollback);
-                        await this.userTransactionRepository.UpdateUserBalanceAsync(userTransaction, order.UserId);
-                        await userTransactionRepository.CreateAsync(userTransaction);
-                        return Option.Some<Orders, string>(Mapper.Map<Orders>(order));
+                        return await this.UpdateUserBalanceAsync(order, ImmutableList<ProductVariants>.Empty, UserTransactionTypeEnum.Rollback)
+                            .MapAsync(async d =>
+                            {
+                                await this.orderRepository.UpdateAsync(order);
+                                return order;
+                            });
                     }
                 });
         }
