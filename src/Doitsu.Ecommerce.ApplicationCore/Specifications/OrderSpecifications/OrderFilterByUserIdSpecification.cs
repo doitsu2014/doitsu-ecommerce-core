@@ -12,7 +12,6 @@ namespace Doitsu.Ecommerce.ApplicationCore.Specifications.OrderSpecifications
                 o => o.Include(qO => qO.OrderItems).ThenInclude(qO => qO.Product)
                         .Include(qO => qO.OrderItems).ThenInclude(qO => qO.ProductVariant)
             );
-
             ApplyOrderBy(o => o.CreatedDate);
         }
         

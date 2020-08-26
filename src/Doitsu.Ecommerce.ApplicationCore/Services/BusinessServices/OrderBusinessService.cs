@@ -101,8 +101,37 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
                 });
         }
 
-        public Task<Option<Orders, string>> CancelSummaryOrderAsync(int summaryOrderId, int auditUserId, string cancelNote = "")
+        public async Task<Option<Orders, string>> CancelSummaryOrderAsync(int summaryOrderId, int auditUserId, string cancelNote = "")
         {
+            using (var transaction = await this.databaseManager.GetDatabaseContextTransactionAsync())
+            {
+                return await(summaryOrderId, auditUserId, cancelNote).SomeNotNull()
+                    .WithException("Mã của Đơn Tổng không hợp lệ.")
+                    .MapAsync(async req =>
+                    {
+                        var summaryOrder = await this.GetAsTracking(o => o.Id == req && o.Type == OrderTypeEnum.Summary)
+                            .FirstOrDefaultAsync();
+                        summaryOrder.Status = (int)OrderStatusEnum.Cancel;
+                        summaryOrder.CancelNote = $"{cancelNote}";
+                        this.Update(summaryOrder);
+
+                        var listUpdatingInverseOrderCode = (await this.GetAsNoTracking(o => o.SummaryOrderId == summaryOrder.Id && o.Type == OrderTypeEnum.Sale)
+                            .Where(inverseOrder => inverseOrder.Status != (int)OrderStatusEnum.Done)
+                            .Select(io => io.Code)
+                            .ToListAsync())
+                            .ToImmutableList();
+
+                        foreach (var updatingOrderCode in listUpdatingInverseOrderCode)
+                        {
+                            await CancelOrderInternalAsync(updatingOrderCode, auditUserId, cancelNote);
+                        }
+
+                        await this.CommitAsync();
+                        await transaction.CommitAsync();
+                        return this.Mapper.Map<OrderViewModel>(summaryOrder);
+                    });
+            }
+
             throw new NotImplementedException();
         }
 
