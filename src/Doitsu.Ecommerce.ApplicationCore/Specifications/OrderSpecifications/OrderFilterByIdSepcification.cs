@@ -13,5 +13,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Specifications.OrderSpecifications
                         .Include(qO => qO.OrderItems).ThenInclude(qO => qO.ProductVariant)
             );
         }
+
+
     }
 }

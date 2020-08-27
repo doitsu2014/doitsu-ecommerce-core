@@ -105,30 +105,35 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
         {
             using (var transaction = await this.databaseManager.GetDatabaseContextTransactionAsync())
             {
-                return await(summaryOrderId, auditUserId, cancelNote).SomeNotNull()
+                return await (summaryOrderId, auditUserId, cancelNote).SomeNotNull()
                     .WithException("Mã của Đơn Tổng không hợp lệ.")
                     .MapAsync(async req =>
                     {
-                        var summaryOrder = await this.GetAsTracking(o => o.Id == req && o.Type == OrderTypeEnum.Summary)
-                            .FirstOrDefaultAsync();
+                        var summaryOrder = await this.orderRepository.FirstOrDefaultAsync(new OrderSummaryFilterByIdSpecification(req.summaryOrderId));
                         summaryOrder.Status = (int)OrderStatusEnum.Cancel;
                         summaryOrder.CancelNote = $"{cancelNote}";
-                        this.Update(summaryOrder);
+                        await this.orderRepository.UpdateAsync(summaryOrder);
+                        return (summaryOrder, req.auditUserId, req.cancelNote);
+                    })
+                    .MapAsync(async d =>
+                    {
+                        // var listUpdatingInverseOrderCode = (await this.GetAsNoTracking(o => o.SummaryOrderId == summaryOrder.Id && o.Type == OrderTypeEnum.Sale)
+                        //     .Where(inverseOrder => inverseOrder.Status != (int)OrderStatusEnum.Done)
+                        //     .Select(io => io.Code)
+                        //     .ToListAsync())
+                        //     .ToImmutableList();
+                        var listSaleOrderCode = d.summaryOrder.InverseSummaryOrders
+                                    .Where(io => io.Status != (int)OrderStatusEnum.Done)
+                                    .Select(io => io.Code)
+                                    .ToImmutableList();
 
-                        var listUpdatingInverseOrderCode = (await this.GetAsNoTracking(o => o.SummaryOrderId == summaryOrder.Id && o.Type == OrderTypeEnum.Sale)
-                            .Where(inverseOrder => inverseOrder.Status != (int)OrderStatusEnum.Done)
-                            .Select(io => io.Code)
-                            .ToListAsync())
-                            .ToImmutableList();
-
-                        foreach (var updatingOrderCode in listUpdatingInverseOrderCode)
+                        foreach (var updatingOrderCode in listSaleOrderCode)
                         {
-                            await CancelOrderInternalAsync(updatingOrderCode, auditUserId, cancelNote);
+                            await CancelOrderInternalAsync(updatingOrderCode, d.auditUserId, d.cancelNote);
                         }
 
-                        await this.CommitAsync();
                         await transaction.CommitAsync();
-                        return this.Mapper.Map<OrderViewModel>(summaryOrder);
+                        return d.summaryOrder;
                     });
             }
 
@@ -206,11 +211,6 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
             throw new NotImplementedException();
         }
 
-        public Task<Option<Orders, string>> CreateDepositOrderAsync(Orders request)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task<Option<Orders, string>> CreateNormalOrderWithOptionAsync(CreateOrderWithOptionViewModel request)
         {
             throw new NotImplementedException();
@@ -221,7 +221,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
             throw new NotImplementedException();
         }
 
-        public Task<Option<Orders, string>> CreateSummaryOrderAsync(CreateSummaryOrders inverseOrders, int userId)
+        public Task<Option<Orders, string>> CreateSummaryOrderAsync(CreateSummaryOrderViewModel inverseOrders, int userId)
         {
             throw new NotImplementedException();
         }
@@ -252,6 +252,11 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
         }
 
         public Task<Option<OrderExportExcelWrapper, string>> GetSummaryOrderPhoneCardWebsiteStyleAsExcelBytesAsync(int summaryOrderId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Option<Orders, string>> CreateDepositOrderAsync(OrderViewModel request)
         {
             throw new NotImplementedException();
         }
