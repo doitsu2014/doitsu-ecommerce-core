@@ -136,33 +136,83 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
                         return d.summaryOrder;
                     });
             }
-
-            throw new NotImplementedException();
         }
 
-        public Task<Option<Orders, string>> ChangeOrderCancelNote(int orderId, string note = "")
+        public async Task<Option<Orders, string>> ChangeOrderCancelNote(int orderId, string note = "")
         {
-            throw new NotImplementedException();
+            return await (orderId, note)
+                .SomeNotNull()
+                .WithException(string.Empty)
+                .MapAsync(async d => (order: await this.orderRepository.FirstOrDefaultAsync(new OrderFilterByIdSpecification(d.orderId)), d.note))
+                .FilterAsync(async d => await Task.FromResult(d.order != null), "Không tìm thấy đơn hàng cần thay đổi")
+                .MapAsync(async data =>
+                {
+                    data.order.CancelNote = note;
+                    await this.orderRepository.UpdateAsync(data.order);
+                    return data.order;
+                });
         }
 
-        public Task<Option<Orders, string>> ChangeOrderDeliveryProviderCodeAsync(int orderId, string code)
+        public async Task<Option<Orders, string>> ChangeOrderDeliveryProviderCodeAsync(int orderId, string code)
         {
-            throw new NotImplementedException();
+            return await (orderId, code)
+                    .SomeNotNull()
+                    .WithException(string.Empty)
+                    .Filter(data => !data.code.IsNullOrEmpty(), "Phải nhập mã vận chuyển")
+                    .MapAsync(async d => (order: await this.orderRepository.FirstOrDefaultAsync(new OrderFilterByIdSpecification(d.orderId)), d.code))
+                    .FilterAsync(async data => await Task.FromResult(data.order != null), "Không tìm thấy đơn hàng cần thay đổi")
+                    .MapAsync(async data =>
+                    {
+                        data.order.DeliveryProviderCode = data.code;
+                        await this.orderRepository.UpdateAsync(data.order);
+                        return data.order;
+                    });
         }
 
-        public Task<Option<Orders, string>> ChangeOrderNote(int orderId, string note = "")
+        public async Task<Option<Orders, string>> ChangeOrderNote(int orderId, string note = "")
         {
-            throw new NotImplementedException();
+            return await (orderId, note)
+                .SomeNotNull()
+                .WithException(string.Empty)
+                .MapAsync(async d => (order: await this.orderRepository.FirstOrDefaultAsync(new OrderFilterByIdSpecification(d.orderId)), d.note))
+                .FilterAsync(async d => await Task.FromResult(d.order != null), "Không tìm thấy đơn hàng cần thay đổi")
+                .MapAsync(async data =>
+                {
+                    data.order.Note = note;
+                    await this.orderRepository.UpdateAsync(data.order);
+                    return data.order;
+                });
         }
 
-        public Task<Option<Orders, string>> ChangeOrderPaymentProofImageUrlAsync(int orderId, string proof = "")
+        public async Task<Option<Orders, string>> ChangeOrderPaymentProofImageUrlAsync(int orderId, string proof = "")
         {
-            throw new NotImplementedException();
+            return await (orderId, proof)
+                .SomeNotNull()
+                .WithException(string.Empty)
+                .MapAsync(async d => (order: await this.orderRepository.FirstOrDefaultAsync(new OrderFilterByIdSpecification(d.orderId)), d.proof))
+                .FilterAsync(async d => await Task.FromResult(d.order != null), "Không tìm thấy đơn hàng cần thay đổi")
+                .MapAsync(async data =>
+                {
+                    data.order.PaymentProofImageUrl = data.proof;
+                    await this.orderRepository.UpdateAsync(data.order);
+                    return data.order;
+                }); 
         }
 
-        public Task<Option<Orders, string>> ChangeOrderPaymentValueAsync(int orderId, decimal? paymentValue)
+        public async Task<Option<Orders, string>> ChangeOrderPaymentValueAsync(int orderId, decimal? paymentValue)
         {
-            throw new NotImplementedException();
+           return await (orderId, paymentValue)
+                .SomeNotNull()
+                .WithException(string.Empty)
+                .Filter(data => data.paymentValue != null, "Phải nhập giá trị thanh toán")
+                .MapAsync(async d => (order: await this.orderRepository.FirstOrDefaultAsync(new OrderFilterByIdSpecification(d.orderId)), d.paymentValue))
+                .FilterAsync(async d => await Task.FromResult(d.order != null), "Không tìm thấy đơn hàng cần thay đổi")
+                .MapAsync(async data =>
+                {
+                    data.order.PaymentValue = data.paymentValue.Value;
+                    await this.orderRepository.UpdateAsync(data.order);
+                    return data.order;
+                });  
         }
 
         public async Task<Option<Orders, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum, int auditUserId, string note = "", bool isWorkingInventoryQuantity = false) => await (orderId, auditUserId, statusEnum, note, isWorkingInventoryQuantity).SomeNotNull()
