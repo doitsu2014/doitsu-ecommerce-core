@@ -41,7 +41,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Interfaces.Services.BusinessServices
         Task<Option<Orders, string>> ChangeOrderCancelNote(int orderId, string note = "");
         Task<Option<Orders, string>> ChangeOrderPaymentProofImageUrlAsync(int orderId, string proof = "");
         Task<Option<Orders, string>> ChangeOrderPaymentValueAsync(int orderId, decimal? paymentValue);
-        Task<Option<Orders, string>> ChangeStatusToDeliveryOrderAsync(string orderCode, int userId, bool isWorkingInventoryQuantity = false);
+        Task<Option<Orders, string>> ChangeStatusToDeliveryOrderAsync(string orderCode, int userId);
         Task<Option<Orders, string>> ChangeStatusToProcessOrderAsync(string orderCode, int userId);
         Task<Option<Orders, string>> ChangeOrderDeliveryProviderCodeAsync(int orderId, string code); 
     }

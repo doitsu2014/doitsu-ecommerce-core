@@ -5,7 +5,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Specifications.OrderSpecifications
 {
     public class OrderFilterByOrderCodeSpecification : BaseSpecification<Orders>
     {
-        public OrderFilterByOrderCodeSpecification(string orderCode) : base(o => o.Code == orderCode)
+        public OrderFilterByOrderCodeSpecification(string orderCode) : base(o => o.Code == orderCode && o.Type != OrderTypeEnum.Summary)
         {
             AddInclude(o => o.UserTransactions);
             AddIncludes(
@@ -14,7 +14,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Specifications.OrderSpecifications
             );
         }
 
-        public OrderFilterByOrderCodeSpecification(string orderCode, OrderTypeEnum orderTypeEnum) : base(o => o.Code == orderCode && o.Type != OrderTypeEnum.Summary)
+        public OrderFilterByOrderCodeSpecification(string orderCode, OrderTypeEnum orderTypeEnum) : base(o => o.Code == orderCode && o.Type == orderTypeEnum)
         {
         }
     }

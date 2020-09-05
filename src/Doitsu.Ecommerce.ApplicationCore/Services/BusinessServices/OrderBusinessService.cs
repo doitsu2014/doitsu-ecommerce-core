@@ -25,8 +25,10 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
         private readonly IBaseEcommerceRepository<ProductVariants> productVariantRepository;
         private readonly IBaseEcommerceRepository<UserTransaction> userTransactionRepository;
         private readonly EcommerceIdentityUserManager<EcommerceIdentityUser> userManager;
+
         // private readonly IServiceScopeFactory serviceScopeFactory;
         // private readonly IDeliveryIntegrator deliveryIntegrator;
+
         private readonly IEcommerceDatabaseManager databaseManager;
 
         public OrderBusinessService(ILogger<OrderBusinessService> logger,
@@ -46,15 +48,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
 
         public async Task<Option<Orders, string>> CancelOrderAsync(string orderCode, int userId, string cancelNote = "")
         {
-            using (var transaction = await this.databaseManager.GetDatabaseContextTransactionAsync())
-            {
-                return await CancelOrderInternalAsync(orderCode, userId, cancelNote)
-                    .MapAsync(async res =>
-                    {
-                        await transaction.CommitAsync();
-                        return res;
-                    });
-            }
+            return await CancelOrderInternalAsync(orderCode, userId, cancelNote);
         }
 
         private async Task<Option<Orders, string>> CancelOrderInternalAsync(string orderCode, int auditUserId, string cancelNote = "")
@@ -103,39 +97,30 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
 
         public async Task<Option<Orders, string>> CancelSummaryOrderAsync(int summaryOrderId, int auditUserId, string cancelNote = "")
         {
-            using (var transaction = await this.databaseManager.GetDatabaseContextTransactionAsync())
-            {
-                return await (summaryOrderId, auditUserId, cancelNote).SomeNotNull()
-                    .WithException("Mã của Đơn Tổng không hợp lệ.")
-                    .MapAsync(async req =>
-                    {
-                        var summaryOrder = await this.orderRepository.FirstOrDefaultAsync(new OrderSummaryFilterByIdSpecification(req.summaryOrderId));
-                        summaryOrder.Status = (int)OrderStatusEnum.Cancel;
-                        summaryOrder.CancelNote = $"{cancelNote}";
-                        await this.orderRepository.UpdateAsync(summaryOrder);
-                        return (summaryOrder, req.auditUserId, req.cancelNote);
-                    })
-                    .MapAsync(async d =>
-                    {
-                        // var listUpdatingInverseOrderCode = (await this.GetAsNoTracking(o => o.SummaryOrderId == summaryOrder.Id && o.Type == OrderTypeEnum.Sale)
-                        //     .Where(inverseOrder => inverseOrder.Status != (int)OrderStatusEnum.Done)
-                        //     .Select(io => io.Code)
-                        //     .ToListAsync())
-                        //     .ToImmutableList();
-                        var listSaleOrderCode = d.summaryOrder.InverseSummaryOrders
-                                    .Where(io => io.Status != (int)OrderStatusEnum.Done)
-                                    .Select(io => io.Code)
-                                    .ToImmutableList();
+            return await (summaryOrderId, auditUserId, cancelNote).SomeNotNull()
+                .WithException("Mã của Đơn Tổng không hợp lệ.")
+                .MapAsync(async req =>
+                {
+                    var summaryOrder = await this.orderRepository.FirstOrDefaultAsync(new OrderSummaryFilterByIdSpecification(req.summaryOrderId));
+                    summaryOrder.Status = (int)OrderStatusEnum.Cancel;
+                    summaryOrder.CancelNote = $"{cancelNote}";
+                    await this.orderRepository.UpdateAsync(summaryOrder);
+                    return (summaryOrder, req.auditUserId, req.cancelNote);
+                })
+                .MapAsync(async d =>
+                {
+                    var listSaleOrderCode = d.summaryOrder.InverseSummaryOrders
+                            .Where(io => io.Status != (int)OrderStatusEnum.Done)
+                            .Select(io => io.Code)
+                            .ToImmutableList();
 
-                        foreach (var updatingOrderCode in listSaleOrderCode)
-                        {
-                            await CancelOrderInternalAsync(updatingOrderCode, d.auditUserId, d.cancelNote);
-                        }
+                    foreach (var updatingOrderCode in listSaleOrderCode)
+                    {
+                        await CancelOrderInternalAsync(updatingOrderCode, d.auditUserId, d.cancelNote);
+                    }
 
-                        await transaction.CommitAsync();
-                        return d.summaryOrder;
-                    });
-            }
+                    return d.summaryOrder;
+                });
         }
 
         public async Task<Option<Orders, string>> ChangeOrderCancelNote(int orderId, string note = "")
@@ -196,23 +181,23 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
                     data.order.PaymentProofImageUrl = data.proof;
                     await this.orderRepository.UpdateAsync(data.order);
                     return data.order;
-                }); 
+                });
         }
 
         public async Task<Option<Orders, string>> ChangeOrderPaymentValueAsync(int orderId, decimal? paymentValue)
         {
-           return await (orderId, paymentValue)
-                .SomeNotNull()
-                .WithException(string.Empty)
-                .Filter(data => data.paymentValue != null, "Phải nhập giá trị thanh toán")
-                .MapAsync(async d => (order: await this.orderRepository.FirstOrDefaultAsync(new OrderFilterByIdSpecification(d.orderId)), d.paymentValue))
-                .FilterAsync(async d => await Task.FromResult(d.order != null), "Không tìm thấy đơn hàng cần thay đổi")
-                .MapAsync(async data =>
-                {
-                    data.order.PaymentValue = data.paymentValue.Value;
-                    await this.orderRepository.UpdateAsync(data.order);
-                    return data.order;
-                });  
+            return await (orderId, paymentValue)
+                 .SomeNotNull()
+                 .WithException(string.Empty)
+                 .Filter(data => data.paymentValue != null, "Phải nhập giá trị thanh toán")
+                 .MapAsync(async d => (order: await this.orderRepository.FirstOrDefaultAsync(new OrderFilterByIdSpecification(d.orderId)), d.paymentValue))
+                 .FilterAsync(async d => await Task.FromResult(d.order != null), "Không tìm thấy đơn hàng cần thay đổi")
+                 .MapAsync(async data =>
+                 {
+                     data.order.PaymentValue = data.paymentValue.Value;
+                     await this.orderRepository.UpdateAsync(data.order);
+                     return data.order;
+                 });
         }
 
         public async Task<Option<Orders, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum, int auditUserId, string note = "", bool isWorkingInventoryQuantity = false) => await (orderId, auditUserId, statusEnum, note, isWorkingInventoryQuantity).SomeNotNull()
@@ -230,20 +215,54 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
                     case OrderStatusEnum.Processing:
                         return await ChangeStatusToProcessOrderAsync(orderCode, d.auditUserId);
                     case OrderStatusEnum.Delivery:
-                        return await ChangeStatusToDeliveryOrderAsync(orderCode, d.auditUserId, d.isWorkingInventoryQuantity);
+                        return await ChangeStatusToDeliveryOrderAsync(orderCode, d.auditUserId);
                     default:
                         return Option.None<Orders, string>("Không thể chuyển đơn hàng sang trạng thái này.");
                 }
             });
 
-        public Task<Option<Orders, string>> ChangeStatusToDeliveryOrderAsync(string orderCode, int userId, bool isWorkingInventoryQuantity = false)
+        public async Task<Option<Orders, string>> ChangeStatusToDeliveryOrderAsync(string orderCode, int userId)
         {
-            throw new NotImplementedException();
+            return await (await (orderCode, userId)
+                .SomeNotNull()
+                .WithException(string.Empty)
+                .Filter(req => req.orderCode.IsNotNullOrEmpty(), "Mã của Đơn Tổng không hợp lệ.")
+                .Filter(req => req.userId > 0, "Id của người dùng không hợp lệ.")
+                .MapAsync(async req => (
+                    order: await this.orderRepository.FirstOrDefaultAsync(new OrderFilterByOrderCodeSpecification(req.orderCode)),
+                    auditUser: await userManager.FindByIdAsync(userId.ToString())
+                )))
+                .Filter(req => req.auditUser != null, "Tài khoản đang thao tác xử lý đơn hàng không tồn tại hoặc bị xóa.")
+                .Filter(req => req.order != null, $"Không tìm thấy đơn hàng phù hợp với mã đơn {orderCode}")
+                .FilterAsync(async req => await userManager.IsInRoleAsync(req.auditUser, Constants.UserRoles.ADMIN), $"Đơn hàng {orderCode} không thể xử lý do người thao tác không phải là {Constants.UserRoles.ADMIN}.")
+                .MapAsync(async req =>
+                {
+                    req.order.Status = (int)OrderStatusEnum.Delivery;
+                    await this.orderRepository.UpdateAsync(req.order);
+                    return req.order;
+                });
         }
 
-        public Task<Option<Orders, string>> ChangeStatusToProcessOrderAsync(string orderCode, int userId)
+        public async Task<Option<Orders, string>> ChangeStatusToProcessOrderAsync(string orderCode, int userId)
         {
-            throw new NotImplementedException();
+            return await (await (orderCode, userId)
+                .SomeNotNull()
+                .WithException(string.Empty)
+                .Filter(req => req.orderCode.IsNotNullOrEmpty(), "Mã của Đơn Tổng không hợp lệ.")
+                .Filter(req => req.userId > 0, "Id của người dùng không hợp lệ.")
+                .MapAsync(async req => (
+                    order: await this.orderRepository.FirstOrDefaultAsync(new OrderFilterByOrderCodeSpecification(req.orderCode)),
+                    auditUser: await userManager.FindByIdAsync(userId.ToString())
+                )))
+                .Filter(req => req.auditUser != null, "Tài khoản đang thao tác xử lý đơn hàng không tồn tại hoặc bị xóa.")
+                .Filter(req => req.order != null, $"Không tìm thấy đơn hàng phù hợp với mã đơn {orderCode}")
+                .FilterAsync(async req => await userManager.IsInRoleAsync(req.auditUser, Constants.UserRoles.ADMIN), $"Đơn hàng {orderCode} không thể xử lý do người thao tác không phải là {Constants.UserRoles.ADMIN}.") 
+                .MapAsync(async req =>
+                {
+                    req.order.Status = (int)OrderStatusEnum.Processing;
+                    await this.orderRepository.UpdateAsync(req.order);
+                    return req.order;
+                });
         }
 
         public Task<Option<string, string>> CheckoutCartAsync(CheckoutCartViewModel data, EcommerceIdentityUser user)
