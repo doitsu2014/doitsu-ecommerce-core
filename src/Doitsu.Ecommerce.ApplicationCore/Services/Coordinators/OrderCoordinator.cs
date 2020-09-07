@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Doitsu.Ecommerce.ApplicationCore.Entities;
@@ -12,34 +13,44 @@ using Optional.Async;
 
 namespace Doitsu.Ecommerce.ApplicationCore.Services.Coordinators
 {
-    public class OrderStatusCoordinator : IOrderStatusCoordinator
+    public class OrderCoordinator : IOrderCoordinator
     {
-        private readonly ILogger<OrderStatusCoordinator> logger;
+        private readonly ILogger<OrderCoordinator> logger;
         private readonly IBaseEcommerceRepository<Orders> orderRepository;
         private readonly IBaseEcommerceRepository<Products> productRepository;
         private readonly IBaseEcommerceRepository<ProductVariants> productVariantRepository;
         private readonly IBaseEcommerceRepository<UserTransaction> userTransactionRepository;
         private readonly IOrderBusinessService orderBusinessService;
         private readonly IProductBusinessService productBusinessService;
+        private readonly IUserTransactionBusinessService userTransactionBusinessService;
         private readonly IEcommerceDatabaseManager databaseManager;
 
-        public OrderStatusCoordinator(ILogger<OrderStatusCoordinator> logger,
-                                    IBaseEcommerceRepository<Orders> orderRepository,
-                                    IBaseEcommerceRepository<Products> productRepository,
-                                    IBaseEcommerceRepository<ProductVariants> productVariantRepository,
-                                    IBaseEcommerceRepository<UserTransaction> userTransactionRepository,
-                                    IOrderBusinessService orderBusinessService,
-                                    IProductBusinessService productBusinessService,
-                                    IEcommerceDatabaseManager databaseManager)
+        public OrderCoordinator(ILogger<OrderCoordinator> logger,
+                                IOrderBusinessService orderBusinessService,
+                                IProductBusinessService productBusinessService,
+                                IUserTransactionBusinessService userTransactionBusinessService,
+                                IEcommerceDatabaseManager databaseManager)
         {
             this.logger = logger;
-            this.orderRepository = orderRepository;
-            this.productRepository = productRepository;
-            this.productVariantRepository = productVariantRepository;
-            this.userTransactionRepository = userTransactionRepository;
             this.orderBusinessService = orderBusinessService;
             this.productBusinessService = productBusinessService;
+            this.userTransactionBusinessService = userTransactionBusinessService;
             this.databaseManager = databaseManager;
+        }
+
+        public async Task<Option<Orders, string>> CancelOrderAsync(string orderCode, int userId, string cancelNote = "")
+        {
+            using (var transaction = await databaseManager.GetDatabaseContextTransactionAsync())
+            {
+                return await this.orderBusinessService.CancelOrderAsync(orderCode, userId, cancelNote)
+                    .FlatMapAsync(async order => await this.userTransactionBusinessService
+                        .UpdateUserBalanceAsync(order, ImmutableList<ProductVariants>.Empty, UserTransactionTypeEnum.Rollback)
+                        .MapAsync(async d =>
+                        {
+                            await transaction.CommitAsync();
+                            return order;
+                        }));
+            }
         }
 
         public async Task<Option<Orders, string>> ChangeOrderStatus(string orderCode, OrderStatusEnum statusEnum, int auditUserId, string note = "", bool isWorkingInventoryQuantity = false)

@@ -25,10 +25,6 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
         private readonly IBaseEcommerceRepository<ProductVariants> productVariantRepository;
         private readonly IBaseEcommerceRepository<UserTransaction> userTransactionRepository;
         private readonly EcommerceIdentityUserManager<EcommerceIdentityUser> userManager;
-
-        // private readonly IServiceScopeFactory serviceScopeFactory;
-        // private readonly IDeliveryIntegrator deliveryIntegrator;
-
         private readonly IEcommerceDatabaseManager databaseManager;
 
         public OrderBusinessService(ILogger<OrderBusinessService> logger,
@@ -46,12 +42,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
             this.productVariantRepository = productVariantRepository;
         }
 
-        public async Task<Option<Orders, string>> CancelOrderAsync(string orderCode, int userId, string cancelNote = "")
-        {
-            return await CancelOrderInternalAsync(orderCode, userId, cancelNote);
-        }
-
-        private async Task<Option<Orders, string>> CancelOrderInternalAsync(string orderCode, int auditUserId, string cancelNote = "")
+        public async Task<Option<Orders, string>> CancelOrderAsync(string orderCode, int auditUserId, string cancelNote = "")
         {
             return await (orderCode, auditUserId).SomeNotNull()
                 .WithException(string.Empty)
@@ -85,12 +76,8 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
                     {
                         order.Status = (int)OrderStatusEnum.Cancel;
                         order.CancelNote = $"{cancelNote}.";
-                        return await this.UpdateUserBalanceAsync(order, ImmutableList<ProductVariants>.Empty, UserTransactionTypeEnum.Rollback)
-                            .MapAsync(async d =>
-                            {
-                                await this.orderRepository.UpdateAsync(order);
-                                return order;
-                            });
+                        await orderRepository.UpdateAsync(order);
+                        return Option.Some<Orders, string>(order);
                     }
                 });
         }
@@ -116,7 +103,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
 
                     foreach (var updatingOrderCode in listSaleOrderCode)
                     {
-                        await CancelOrderInternalAsync(updatingOrderCode, d.auditUserId, d.cancelNote);
+                        var a = await CancelOrderAsync(updatingOrderCode, d.auditUserId, d.cancelNote);
                     }
 
                     return d.summaryOrder;
