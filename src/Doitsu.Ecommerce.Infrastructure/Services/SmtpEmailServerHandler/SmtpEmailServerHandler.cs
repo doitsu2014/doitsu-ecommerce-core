@@ -12,7 +12,7 @@ using System;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services;
 using Doitsu.Ecommerce.ApplicationCore.Models.EmailHandlerModels;
 
-namespace Doitsu.Ecommerce.Infrastructure.Services.EmailService
+namespace Doitsu.Ecommerce.Infrastructure.Services.SmtpEmailServerHandler
 {
     public class SmtpEmailServerHandler : ISmtpEmailServerHandler
     {

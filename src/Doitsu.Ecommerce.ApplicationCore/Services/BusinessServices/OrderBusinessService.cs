@@ -6,12 +6,15 @@ using System.Threading.Tasks;
 using Doitsu.Ecommerce.ApplicationCore.Entities;
 using Doitsu.Ecommerce.ApplicationCore.Entities.Identities;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces;
+using Doitsu.Ecommerce.ApplicationCore.Interfaces.RazorPage;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Repositories;
+using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services.BusinessServices;
 using Doitsu.Ecommerce.ApplicationCore.Models.ExportModels;
 using Doitsu.Ecommerce.ApplicationCore.Models.ViewModels;
 using Doitsu.Ecommerce.ApplicationCore.Services.IdentityManagers;
 using Doitsu.Ecommerce.ApplicationCore.Specifications.OrderSpecifications;
+using Doitsu.Ecommerce.ApplicationCore.Utils;
 using Microsoft.Extensions.Logging;
 using Optional;
 using Optional.Async;
@@ -26,20 +29,25 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
         private readonly IBaseEcommerceRepository<Products> productRepository;
         private readonly IBaseEcommerceRepository<ProductVariants> productVariantRepository;
         private readonly IBaseEcommerceRepository<UserTransaction> userTransactionRepository;
+        private readonly ISmtpEmailServerHandler smtpEmailServerHandler;
         private readonly EcommerceIdentityUserManager<EcommerceIdentityUser> userManager;
         private readonly IEcommerceDatabaseManager databaseManager;
+
 
         public OrderBusinessService(ILogger<OrderBusinessService> logger,
                                     IEcommerceDatabaseManager databaseManager,
                                     IBaseEcommerceRepository<Orders> orderRepository,
                                     IBaseEcommerceRepository<Products> productRepository,
                                     IBaseEcommerceRepository<ProductVariants> productVariantRepository,
-                                    IBaseEcommerceRepository<UserTransaction> userTransactionRepository)
+                                    IBaseEcommerceRepository<UserTransaction> userTransactionRepository,
+                                    ISmtpEmailServerHandler smtpEmailServerHandler,
+                                    IRazorPageRenderer razorPageRenderer)
         {
             this.logger = logger;
             this.databaseManager = databaseManager;
             this.orderRepository = orderRepository;
             this.userTransactionRepository = userTransactionRepository;
+            this.smtpEmailServerHandler = smtpEmailServerHandler;
             this.productRepository = productRepository;
             this.productVariantRepository = productVariantRepository;
         }
@@ -194,27 +202,6 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
                  });
         }
 
-        public async Task<Option<Orders, string>> ChangeOrderStatus(int orderId, OrderStatusEnum statusEnum, int auditUserId, string note = "", bool isWorkingInventoryQuantity = false) => await (orderId, auditUserId, statusEnum, note, isWorkingInventoryQuantity).SomeNotNull()
-            .WithException(string.Empty)
-            .FilterAsync(async d => await this.orderRepository.AnyAsync(new OrderFilterByIdSpecification(d.orderId)), "Không thể tim thấy đơn hàng cần đổi trạng thái")
-            .FlatMapAsync(async d =>
-            {
-                var orderCode = (await this.orderRepository.ListAsync(new OrderFilterByIdSpecification(d.orderId))).Select(o => o.Code).FirstOrDefault();
-                switch (statusEnum)
-                {
-                    case OrderStatusEnum.Cancel:
-                        return await CancelOrderAsync(orderCode, d.auditUserId, d.note);
-                    case OrderStatusEnum.Done:
-                        return await CompleteOrderAsync(orderCode, d.auditUserId, d.note);
-                    case OrderStatusEnum.Processing:
-                        return await ChangeStatusToProcessOrderAsync(orderCode, d.auditUserId);
-                    case OrderStatusEnum.Delivery:
-                        return await ChangeStatusToDeliveryOrderAsync(orderCode, d.auditUserId);
-                    default:
-                        return Option.None<Orders, string>("Không thể chuyển đơn hàng sang trạng thái này.");
-                }
-            });
-
         public async Task<Option<Orders, string>> ChangeStatusToDeliveryOrderAsync(string orderCode, int userId)
         {
             return await (await (orderCode, userId)
@@ -259,11 +246,67 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
                 });
         }
 
-        public Task<Option<string, string>> CheckoutCartAsync(CheckoutCartViewModel data, EcommerceIdentityUser user)
+        public async Task<Option<string, string>> CheckoutCartAsync(CheckoutCartViewModel data, EcommerceIdentityUser user)
         {
-            throw new NotImplementedException();
-        }
+            using (var trans = await this.databaseManager.GetDatabaseContextTransactionAsync())
+            {
+                return await new { data, user }
+                    .SomeNotNull()
+                    .WithException(string.Empty)
+                    .MapAsync(async d =>
+                    {
+                        var order = new Orders();
+                        order.Status = (int)OrderStatusEnum.New;
+                        order.Discount = 0;
+                        order.Code = DataUtils.GenerateCode(Constants.OrderInformation.ORDER_CODE_LENGTH).ToUpper();
+                        order.TotalPrice = data.TotalPrice;
+                        order.FinalPrice = data.TotalPrice;
+                        order.TotalQuantity = data.TotalQuantity;
+                        order.UserId = user.Id;
 
+                        foreach (var item in data.CartItems)
+                        {
+                            var orderItem = new OrderItems
+                            {
+                                Discount = 0,
+                                ProductId = item.Id,
+                                OrderId = order.Id,
+                                SubTotalPrice = item.SubTotal,
+                                SubTotalQuantity = item.SubQuantity,
+                                SubTotalFinalPrice = item.SubTotal
+                            };
+                            if (order.OrderItems == null) order.OrderItems = new List<OrderItems>();
+                            order.OrderItems.Add(orderItem);
+                        }
+                        await this.orderRepository.AddAsync(order);
+                        trans.Commit();
+                        return order;
+                    })
+                    .MapAsync(async o =>
+                    {
+                        // TODO: Write util to prepare email sender content.
+                        try
+                        {
+                            var messagePayloads = new List<MessagePayload>()
+                            {
+                                await smtpEmailServerHandler.PrepareLeaderOrderMailConfirmAsync(user, order),
+                                await smtpEmailServerHandler.PrepareCustomerOrderMailConfirm(user, order)
+                            };
+                            var emailResult = await emailService.SendEmailWithBachMocWrapperAsync(messagePayloads);
+                            emailResult.MatchNone(error =>
+                            {
+                                logger.LogInformation("Send mails to confirm order code {Code} on {CreatedDate} failure: {error}", user.Id, order.Code, order.CreatedDate, error);
+                            });
+                            logger.LogInformation("User {Id} completed order code {Code} on {CreatedDate}", user.Id, order.Code, order.CreatedDate);
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.LogError(ex, "Process user order fail");
+                        }
+                        return o;
+                    });
+            }
+        }
         public Task<Option<Orders, string>> CompleteOrderAsync(string orderCode, int userId, string note = "")
         {
             throw new NotImplementedException();

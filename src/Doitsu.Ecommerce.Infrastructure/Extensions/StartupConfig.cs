@@ -13,7 +13,7 @@ using Doitsu.Ecommerce.Infrastructure.Data;
 using Doitsu.Ecommerce.Infrastructure.Data.EntityChangeHandlers;
 using Doitsu.Ecommerce.Infrastructure.IdentityServer4.Data;
 using Doitsu.Ecommerce.Infrastructure.Repositories;
-using Doitsu.Ecommerce.Infrastructure.Services.EmailService;
+using Doitsu.Ecommerce.Infrastructure.Services.SmtpEmailServerHandler;
 using Doitsu.Ecommerce.Infrastructure.Services.RazorPageRenderer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

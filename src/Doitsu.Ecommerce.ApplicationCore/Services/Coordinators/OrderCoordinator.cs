@@ -40,7 +40,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.Coordinators
             this.databaseManager = databaseManager;
         }
 
-        public async Task<Option<Orders, string>> CancelOrderAsync(string orderCode, int userId, string cancelNote = "")
+        public async Task<Option<Orders, string>> CancelOrderAndUpdateUserBalanceAsync(string orderCode, int userId, string cancelNote = "")
         {
             using (var transaction = await databaseManager.GetDatabaseContextTransactionAsync())
             {
@@ -55,7 +55,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.Coordinators
             }
         }
 
-        public async Task<Option<Orders, string>> CancelSummaryOrderAsync(int summaryOrderId, int auditUserId, string cancelNote = "")
+        public async Task<Option<Orders, string>> CancelSummaryOrderAndUpdateUserBalanceAsync(int summaryOrderId, int auditUserId, string cancelNote = "")
         {
             using (var transaction = await databaseManager.GetDatabaseContextTransactionAsync())
             {

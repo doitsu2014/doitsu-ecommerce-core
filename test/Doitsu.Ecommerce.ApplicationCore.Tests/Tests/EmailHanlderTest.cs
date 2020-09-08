@@ -1,17 +1,17 @@
-using System.Threading.Tasks;
-using Doitsu.Ecommerce.Core.Tests.Helpers;
-using Xunit.Abstractions;
 using Xunit;
+using Xunit.Abstractions;
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
-using System;
-using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services;
 using Microsoft.Extensions.Options;
+using Doitsu.Ecommerce.Core.Tests.Helpers;
+using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services;
 using Doitsu.Ecommerce.ApplicationCore.Models.EmailHandlerModels;
-using System.IO;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.RazorPage;
-using System.Threading;
 
 namespace Doitsu.Ecommerce.ApplicationCore.Tests
 {
