@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Doitsu.Ecommerce.ApplicationCore.Specifications.OrderSpecifications;
 using Microsoft.Extensions.Logging;
 using Optional;
 using Optional.Async;
+using Optional.Collections;
 
 namespace Doitsu.Ecommerce.ApplicationCore.Services.Coordinators
 {
@@ -50,6 +52,33 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.Coordinators
                             await transaction.CommitAsync();
                             return order;
                         }));
+            }
+        }
+
+        public async Task<Option<Orders, string>> CancelSummaryOrderAsync(int summaryOrderId, int auditUserId, string cancelNote = "")
+        {
+            using (var transaction = await databaseManager.GetDatabaseContextTransactionAsync())
+            {
+                return await this.orderBusinessService.CancelSummaryOrderAsync(summaryOrderId, auditUserId, cancelNote)
+                    .MapAsync(async o => await Task.FromResult((o, auditUserId, cancelNote)))
+                    .FlatMapAsync(async req =>
+                    {
+                        var listResult = new List<Option<(int userId, UserTransaction userTransaction), string>>();
+                        foreach (var saleOrder in req.o.InverseSummaryOrders)
+                        {
+                            listResult.Add(await this.userTransactionBusinessService.UpdateUserBalanceAsync(saleOrder, ImmutableList<ProductVariants>.Empty, UserTransactionTypeEnum.Rollback));
+                        }
+                        if (!listResult.All(r => r.HasValue))
+                        {
+                            return Option.None<Orders, string>(listResult.Exceptions().Aggregate((a, b) => $"{a},\n{b}"));
+                        }
+                        return Option.Some<Orders, string>(req.o);
+                    })
+                    .MapAsync(async d =>
+                    {
+                        await transaction.CommitAsync();
+                        return d;
+                    });
             }
         }
 

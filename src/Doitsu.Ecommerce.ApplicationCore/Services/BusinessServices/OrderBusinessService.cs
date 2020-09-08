@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ using Doitsu.Ecommerce.ApplicationCore.Specifications.OrderSpecifications;
 using Microsoft.Extensions.Logging;
 using Optional;
 using Optional.Async;
+using Optional.Collections;
 
 namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
 {
@@ -94,19 +96,24 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
                     await this.orderRepository.UpdateAsync(summaryOrder);
                     return (summaryOrder, req.auditUserId, req.cancelNote);
                 })
-                .MapAsync(async d =>
+                .FlatMapAsync(async d =>
                 {
                     var listSaleOrderCode = d.summaryOrder.InverseSummaryOrders
                             .Where(io => io.Status != (int)OrderStatusEnum.Done)
                             .Select(io => io.Code)
                             .ToImmutableList();
 
+                    var listResult = new List<Option<Orders, string>>();
                     foreach (var updatingOrderCode in listSaleOrderCode)
                     {
-                        var a = await CancelOrderAsync(updatingOrderCode, d.auditUserId, d.cancelNote);
+                        listResult.Add(await CancelOrderAsync(updatingOrderCode, d.auditUserId, d.cancelNote));
+                    }
+                    if (!listResult.All(r => r.HasValue))
+                    {
+                        return Option.None<Orders, string>(listResult.Exceptions().Aggregate((a, b) => $"{a},\n{b}"));
                     }
 
-                    return d.summaryOrder;
+                    return Option.Some<Orders, string>(d.summaryOrder);
                 });
         }
 
@@ -243,7 +250,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
                 )))
                 .Filter(req => req.auditUser != null, "Tài khoản đang thao tác xử lý đơn hàng không tồn tại hoặc bị xóa.")
                 .Filter(req => req.order != null, $"Không tìm thấy đơn hàng phù hợp với mã đơn {orderCode}")
-                .FilterAsync(async req => await userManager.IsInRoleAsync(req.auditUser, Constants.UserRoles.ADMIN), $"Đơn hàng {orderCode} không thể xử lý do người thao tác không phải là {Constants.UserRoles.ADMIN}.") 
+                .FilterAsync(async req => await userManager.IsInRoleAsync(req.auditUser, Constants.UserRoles.ADMIN), $"Đơn hàng {orderCode} không thể xử lý do người thao tác không phải là {Constants.UserRoles.ADMIN}.")
                 .MapAsync(async req =>
                 {
                     req.order.Status = (int)OrderStatusEnum.Processing;
