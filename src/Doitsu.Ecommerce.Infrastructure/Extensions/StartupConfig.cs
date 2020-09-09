@@ -190,6 +190,7 @@ namespace Doitsu.Ecommerce.Infrastructure.Extensions
             services.Configure<SmtpMailServerOptions>(configuration.GetSection("SmtpMailServerOptions"));
             services.Configure<LeaderMail>(configuration.GetSection("LeaderEmail"));
             services.AddTransient(typeof(ISmtpEmailServerHandler), typeof(SmtpEmailServerHandler));
+            services.AddScoped(typeof(IMailBuilder), typeof(MailBuilder));
             return services;
         }
 

@@ -38,7 +38,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Tests
                     var smtpMailServerOptions = optionsMonitor.CurrentValue;
 
                     var env = scope.ServiceProvider.GetService<IWebHostEnvironment>();
-                    var path = Path.Combine(smtpMailServerOptions.TemplateUrlInformation.OrderConfirmationUrl);
+                    var path = Path.Combine(smtpMailServerOptions.TemplateUrlInformation.OrderConfirmationTemplateUrl);
                     var sendMailModel = new SendMailModel() { OrderCode = "#239123ABI" };
                     var result = await renderer.RenderPartialToStringAsync<SendMailModel>(path, sendMailModel);
                     await smtpEmailServerHandler.SendEmailMultiplePayloadAsync(smtpMailServerOptions, new List<MessagePayload>()
