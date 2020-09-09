@@ -106,22 +106,32 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
                 })
                 .FlatMapAsync(async d =>
                 {
-                    var listSaleOrderCode = d.summaryOrder.InverseSummaryOrders
+                    var exceptions = (await d.summaryOrder.InverseSummaryOrders
                             .Where(io => io.Status != (int)OrderStatusEnum.Done)
                             .Select(io => io.Code)
-                            .ToImmutableList();
+                            .SequenceTransformAsync(async code => await CancelOrderAsync(code, d.auditUserId, d.cancelNote)))
+                            .ToImmutableList()
+                            .Exceptions();
 
-                    var listResult = new List<Option<Orders, string>>();
-                    foreach (var updatingOrderCode in listSaleOrderCode)
+                    if (exceptions.Count() > 0)
                     {
-                        listResult.Add(await CancelOrderAsync(updatingOrderCode, d.auditUserId, d.cancelNote));
+                        return Option.None<Orders, string>(exceptions.Aggregate((a, b) => $"{a},\n{b}"));
                     }
-                    if (!listResult.All(r => r.HasValue))
+                    else
                     {
-                        return Option.None<Orders, string>(listResult.Exceptions().Aggregate((a, b) => $"{a},\n{b}"));
+                        return Option.Some<Orders, string>(d.summaryOrder);
                     }
 
-                    return Option.Some<Orders, string>(d.summaryOrder);
+                    // var listResult = new List<Option<Orders, string>>();
+                    // foreach (var updatingOrderCode in listSaleOrderCode)
+                    // {
+                    //     listResult.Add(await CancelOrderAsync(updatingOrderCode, d.auditUserId, d.cancelNote));
+                    // }
+
+                    // if (!listResult.All(r => r.HasValue))
+                    // {
+                    //     return Option.None<Orders, string>(listResult.Exceptions().Aggregate((a, b) => $"{a},\n{b}"));
+                    // }
                 });
         }
 

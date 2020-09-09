@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Doitsu.Ecommerce.ApplicationCore
@@ -160,6 +161,16 @@ namespace Doitsu.Ecommerce.ApplicationCore
         {
             CultureInfo cul = CultureInfo.GetCultureInfo("vi-VN");   // try with "en-US"
             return value.ToString("#,###", cul.NumberFormat);
+        }
+
+        public static async Task<IEnumerable<TResult>> SequenceTransformAsync<T, TResult>(this IEnumerable<T> source, Func<T, Task<TResult>> transformMethodAsync)
+        {
+            var listResult = new List<TResult>();
+            foreach(var ele in source)
+            {
+                listResult.Add(await transformMethodAsync(ele));
+            }
+            return listResult;
         }
     }
 }
