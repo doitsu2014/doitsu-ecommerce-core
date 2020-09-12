@@ -188,6 +188,7 @@ namespace Doitsu.Ecommerce.Infrastructure.Extensions
         internal static IServiceCollection AddDoitsuEmailService(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<SmtpMailServerOptions>(configuration.GetSection("SmtpMailServerOptions"));
+            services.Configure<MailTemplateConfiguration>(configuration.GetSection("MailTemplateConfiguration"));
             services.Configure<LeaderMail>(configuration.GetSection("LeaderEmail"));
             services.AddTransient(typeof(ISmtpEmailServerHandler), typeof(SmtpEmailServerHandler));
             services.AddScoped(typeof(IMailBuilder), typeof(MailBuilder));

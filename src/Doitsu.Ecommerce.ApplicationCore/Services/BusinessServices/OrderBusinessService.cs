@@ -10,12 +10,14 @@ using Doitsu.Ecommerce.ApplicationCore.Interfaces.RazorPage;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Repositories;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services.BusinessServices;
+using Doitsu.Ecommerce.ApplicationCore.Models.EmailHandlerModels;
 using Doitsu.Ecommerce.ApplicationCore.Models.ExportModels;
 using Doitsu.Ecommerce.ApplicationCore.Models.ViewModels;
 using Doitsu.Ecommerce.ApplicationCore.Services.IdentityManagers;
 using Doitsu.Ecommerce.ApplicationCore.Specifications.OrderSpecifications;
 using Doitsu.Ecommerce.ApplicationCore.Utils;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Optional;
 using Optional.Async;
 using Optional.Collections;
@@ -30,8 +32,10 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
         private readonly IBaseEcommerceRepository<ProductVariants> productVariantRepository;
         private readonly IBaseEcommerceRepository<UserTransaction> userTransactionRepository;
         private readonly ISmtpEmailServerHandler smtpEmailServerHandler;
+        private readonly IMailBuilder mailBuilder;
         private readonly EcommerceIdentityUserManager<EcommerceIdentityUser> userManager;
         private readonly IEcommerceDatabaseManager databaseManager;
+        private readonly MailTemplateConfiguration mailTemplateConfiguration;
 
 
         public OrderBusinessService(ILogger<OrderBusinessService> logger,
@@ -41,15 +45,18 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
                                     IBaseEcommerceRepository<ProductVariants> productVariantRepository,
                                     IBaseEcommerceRepository<UserTransaction> userTransactionRepository,
                                     ISmtpEmailServerHandler smtpEmailServerHandler,
-                                    IRazorPageRenderer razorPageRenderer)
+                                    IMailBuilder mailBuilder,
+                                    IOptions<MailTemplateConfiguration> mailTemplateConfigurationOption)
         {
             this.logger = logger;
             this.databaseManager = databaseManager;
             this.orderRepository = orderRepository;
             this.userTransactionRepository = userTransactionRepository;
             this.smtpEmailServerHandler = smtpEmailServerHandler;
+            this.mailBuilder = mailBuilder;
             this.productRepository = productRepository;
             this.productVariantRepository = productVariantRepository;
+            this.mailTemplateConfiguration = mailTemplateConfigurationOption.Value;
         }
 
         public async Task<Option<Orders, string>> CancelOrderAsync(string orderCode, int auditUserId, string cancelNote = "")
@@ -295,25 +302,26 @@ namespace Doitsu.Ecommerce.ApplicationCore.Services.BusinessServices
                     .MapAsync(async o =>
                     {
                         // TODO: Write util to prepare email sender content.
-                        try
-                        {
-                            var messagePayloads = new List<MessagePayload>()
-                            {
-                                await smtpEmailServerHandler.PrepareLeaderOrderMailConfirmAsync(user, order),
-                                await smtpEmailServerHandler.PrepareCustomerOrderMailConfirm(user, order)
-                            };
-                            var emailResult = await emailService.SendEmailWithBachMocWrapperAsync(messagePayloads);
-                            emailResult.MatchNone(error =>
-                            {
-                                logger.LogInformation("Send mails to confirm order code {Code} on {CreatedDate} failure: {error}", user.Id, order.Code, order.CreatedDate, error);
-                            });
-                            logger.LogInformation("User {Id} completed order code {Code} on {CreatedDate}", user.Id, order.Code, order.CreatedDate);
-                        }
-                        catch (Exception ex)
-                        {
-                            logger.LogError(ex, "Process user order fail");
-                        }
-                        return o;
+                        // Move send email service to Controller
+                        // try
+                        // {
+                        //     var messagePayloads = new List<MessagePayload>()
+                        //     {
+                        //         await mailBuilder.PrepareMessagePayloadAsync<Orders>(user, order),
+                        //         await mailBuilder.PrepareCustomerOrderMailConfirm(user, order)
+                        //     };
+                        //     var emailResult = await smtpEmailServerHandler.SendEmailMultiplePayloadAsync(messagePayloads);
+                        //     emailResult.MatchNone(error =>
+                        //     {
+                        //         logger.LogInformation("Send mails to confirm order code {Code} on {CreatedDate} failure: {error}", user.Id, order.Code, order.CreatedDate, error);
+                        //     });
+                        //     logger.LogInformation("User {Id} completed order code {Code} on {CreatedDate}", user.Id, order.Code, order.CreatedDate);
+                        // }
+                        // catch (Exception ex)
+                        // {
+                        //     logger.LogError(ex, "Process user order fail");
+                        // }
+                        return await Task.FromResult(o.Code);
                     });
             }
         }

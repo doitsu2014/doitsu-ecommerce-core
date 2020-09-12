@@ -1,17 +1,13 @@
 using Xunit;
 using Xunit.Abstractions;
-using System;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Doitsu.Ecommerce.Core.Tests.Helpers;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services;
 using Doitsu.Ecommerce.ApplicationCore.Models.EmailHandlerModels;
-using Doitsu.Ecommerce.ApplicationCore.Interfaces.RazorPage;
 
 namespace Doitsu.Ecommerce.ApplicationCore.Tests
 {
@@ -24,37 +20,23 @@ namespace Doitsu.Ecommerce.ApplicationCore.Tests
         }
 
         [Fact]
-        private async Task Test_CreateBlogWithTags()
+        private async Task Test_SendMultipleEmailAndMailBuilder()
         {
             using (var webhost = WebHostBuilderHelper.BuilderWebhostWithInmemoryDb(_poolKey).Build())
             {
                 var scopeFactory = webhost.Services.GetService<IServiceScopeFactory>();
                 using (var scope = scopeFactory.CreateScope())
                 {
-                    // Add Products
-                    var renderer = scope.ServiceProvider.GetService<IRazorPageRenderer>();
+                    var mailBuilder = scope.ServiceProvider.GetService<IMailBuilder>();
                     var smtpEmailServerHandler = scope.ServiceProvider.GetService<ISmtpEmailServerHandler>();
-                    var optionsMonitor = scope.ServiceProvider.GetService<IOptionsMonitor<SmtpMailServerOptions>>();
-                    var smtpMailServerOptions = optionsMonitor.CurrentValue;
-
-                    var env = scope.ServiceProvider.GetService<IWebHostEnvironment>();
-                    var path = Path.Combine(smtpMailServerOptions.TemplateUrlInformation.OrderConfirmationTemplateUrl);
-                    var sendMailModel = new SendMailModel() { OrderCode = "#239123ABI" };
-                    var result = await renderer.RenderPartialToStringAsync<SendMailModel>(path, sendMailModel);
-                    await smtpEmailServerHandler.SendEmailMultiplePayloadAsync(smtpMailServerOptions, new List<MessagePayload>()
-                        {
-                            new MessagePayload()
-                            {
-                                DestEmail = new MailPayloadInformation()
-                                {
-                                    Mail = "thd1152016@gmail.com",
-                                    Name = "DucTH Destination Tester"
-                                },
-                                Body = result,
-                                Subject = $"[Doitsu.Ecommerce.ApplicationCore.Test] Test Sending Email {DateTime.Now.ToString("dd/MM/yyyy")}"
-                            }
-
-                        }, CancellationToken.None);
+                    var mailTemplateConfiguration = scope.ServiceProvider.GetService<IOptions<MailTemplateConfiguration>>().Value;
+                    var sendMailModel = new SendMailModel() { OrderCode = "AXP28319248129" };
+                    var result = await mailBuilder.PrepareMessagePayloadAsync<SendMailModel>(mailTemplateConfiguration.CustomerOrderConfirmationMailTemplate,
+                                                                                             sendMailModel,
+                                                                                             $"[Doitsu.Ecommerce.ApplicationCore.Test] Bạn đã vừa hoàn thành đơn hàng #{sendMailModel.OrderCode}",
+                                                                                             "thd1152016@gmail.com",
+                                                                                             "DucTH Destination Name");
+                    await smtpEmailServerHandler.SendEmailMultiplePayloadAsync(new List<MessagePayload>() { result }, CancellationToken.None);
                     Assert.True(true);
                 }
             }

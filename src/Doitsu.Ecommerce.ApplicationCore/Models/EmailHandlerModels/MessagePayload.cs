@@ -4,9 +4,8 @@ namespace Doitsu.Ecommerce.ApplicationCore.Models.EmailHandlerModels
     {
         public string Subject { get; set; }
         public string Body { get; set; }
-        public MailPayloadInformation DestEmail { get; set; }
-        public MailPayloadInformation CcEmail { get; set; } = null;
-        public MailPayloadInformation BccEmail { get; set; } = null;
-
+        public EmailAddressInformation[] DestEmails { get; set; }
+        public EmailAddressInformation[] CcEmails { get; set; } = null;
+        public EmailAddressInformation[] BccEmails { get; set; } = null;
     }
 }

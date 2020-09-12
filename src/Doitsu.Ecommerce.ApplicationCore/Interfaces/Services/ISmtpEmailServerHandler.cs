@@ -7,10 +7,7 @@ namespace Doitsu.Ecommerce.ApplicationCore.Interfaces.Services
 {
     public interface ISmtpEmailServerHandler
     {
-        void SendEmail(SmtpMailServerOptions options, MessagePayload messagePayload);
-
-        void SendEmailNonBlocking(SmtpMailServerOptions options, MessagePayload messagePayload, object userToken = null);
-
-        Task SendEmailMultiplePayloadAsync(SmtpMailServerOptions options, List<MessagePayload> messagePayloads, CancellationToken token);
+        void SendEmail(MessagePayload messagePayload);
+        Task SendEmailMultiplePayloadAsync(List<MessagePayload> messagePayloads, CancellationToken token);
     }
 }

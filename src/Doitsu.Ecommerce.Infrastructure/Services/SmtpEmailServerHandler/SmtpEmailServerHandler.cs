@@ -11,46 +11,41 @@ using Microsoft.Extensions.Logging;
 using System;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services;
 using Doitsu.Ecommerce.ApplicationCore.Models.EmailHandlerModels;
+using Microsoft.Extensions.Options;
 
 namespace Doitsu.Ecommerce.Infrastructure.Services.SmtpEmailServerHandler
 {
     public class SmtpEmailServerHandler : ISmtpEmailServerHandler
     {
         private readonly ILogger<SmtpEmailServerHandler> logger;
+        private readonly SmtpMailServerOptions options;
 
-        public SmtpEmailServerHandler(ILogger<SmtpEmailServerHandler> logger)
+        public SmtpEmailServerHandler(ILogger<SmtpEmailServerHandler> logger,
+            IOptionsMonitor<SmtpMailServerOptions> smtpMailServerOptions)
         {
             this.logger = logger;
+            this.options = smtpMailServerOptions.CurrentValue;
         }
 
-        private Option<MailMessage> PrepareMessage(SmtpMailServerOptions options, MessagePayload messagePayload)
+        private Option<MailMessage> PrepareMailMessage(MessagePayload messagePayload)
         {
             return (options, messagePayload).Some()
                 .Map(data =>
                 {
                     var message = new MailMessage();
                     message.From = new MailAddress(options.FromMail.Mail, options.FromMail.Name);
-                    message.To.Add(new MailAddress(messagePayload.DestEmail.Mail, messagePayload.DestEmail.Name));
 
+                    messagePayload.DestEmails.Select(x => new MailAddress(x.Mail, x.Name)).ToList().ForEach(x => message.To.Add(x));
+                    messagePayload.CcEmails?.Select(x => new MailAddress(x.Mail, x.Name)).ToList().ForEach(x => message.CC.Add(x));
+                    messagePayload.BccEmails?.Select(x => new MailAddress(x.Mail, x.Name)).ToList().ForEach(x => message.Bcc.Add(x));
                     options.DefaultListCc?.ForEach(x =>
-                        {
-                            message.CC.Add(new MailAddress(x.Mail, x.Name));
-                        });
-
-                    if (messagePayload.CcEmail != null)
                     {
-                        message.CC.Add(new MailAddress(messagePayload.CcEmail.Mail, messagePayload.CcEmail.Name));
-                    }
-
+                        message.CC.Add(new MailAddress(x.Mail, x.Name));
+                    });
                     options.DefaultListBcc?.ForEach(x =>
-                        {
-                            message.Bcc.Add(new MailAddress(x.Mail, x.Name));
-                        });
-
-                    if (messagePayload.BccEmail != null)
                     {
-                        message.Bcc.Add(new MailAddress(messagePayload.BccEmail.Mail, messagePayload.BccEmail.Name));
-                    }
+                        message.Bcc.Add(new MailAddress(x.Mail, x.Name));
+                    });
 
                     message.Subject = messagePayload.Subject;
                     message.Body = messagePayload.Body;
@@ -59,11 +54,11 @@ namespace Doitsu.Ecommerce.Infrastructure.Services.SmtpEmailServerHandler
                 });
         }
 
-        public void SendEmail(SmtpMailServerOptions options, MessagePayload messagePayload)
+        public void SendEmail(MessagePayload messagePayload)
         {
             if (options.Enabled)
             {
-                PrepareMessage(options, messagePayload).MatchSome(
+                PrepareMailMessage(messagePayload).MatchSome(
                     message =>
                     {
                         using (var client = new SmtpClient(options.CredentialServerAddress))
@@ -90,11 +85,11 @@ namespace Doitsu.Ecommerce.Infrastructure.Services.SmtpEmailServerHandler
             }
         }
 
-        public async Task SendEmailMultiplePayloadAsync(SmtpMailServerOptions options, List<MessagePayload> messagePayloads, CancellationToken token)
+        public async Task SendEmailMultiplePayloadAsync(List<MessagePayload> messagePayloads, CancellationToken token)
         {
             if (options.Enabled)
             {
-                await messagePayloads.Select(mp => PrepareMessage(options, mp))
+                await messagePayloads.Select(mp => PrepareMailMessage(mp))
                     .ParallelForEachAsync(async optionMp => await optionMp
                         .MapAsync(async mp =>
                         {
@@ -127,74 +122,6 @@ namespace Doitsu.Ecommerce.Infrastructure.Services.SmtpEmailServerHandler
                         maxDegreeOfParallelism: 4,
                         cancellationToken: CancellationToken.None
                     );
-            }
-        }
-
-        public async Task SendEmailAsync(SmtpMailServerOptions options, List<MessagePayload> messagePayloads)
-        {
-            if(options.Enabled)
-            {
-                using (SmtpClient smtpClient = new SmtpClient(options.CredentialServerAddress))
-                {
-                    smtpClient.Port = options.CredentialServerPort;
-                    smtpClient.Credentials = new NetworkCredential(options.CredentialEmail, options.CredentialPassword);
-                    smtpClient.EnableSsl = options.CredentialServerEnableSsl;
-                    List<Task> sentEmailActions = new List<Task>();
-                    foreach (MessagePayload messagePayload in messagePayloads)
-                    {
-                        PrepareMessage(options, messagePayload).MatchSome(
-                            mp =>
-                            {
-                                sentEmailActions.Add(smtpClient.SendMailAsync(mp));
-                            }
-                        );
-                    }
-                    await Task.WhenAll(sentEmailActions);
-                }
-            }
-        }
-
-        public void SendEmailNonBlocking(SmtpMailServerOptions options, MessagePayload messagePayload, object userToken = null)
-        {
-            if (options.Enabled)
-            {
-                using (var message = new MailMessage())
-                {
-                    message.From = new MailAddress(options.FromMail.Mail, options.FromMail.Name);
-                    message.To.Add(new MailAddress(messagePayload.DestEmail.Mail, messagePayload.DestEmail.Name));
-
-                    options.DefaultListCc?.ForEach(x =>
-                    {
-                        message.CC.Add(new MailAddress(x.Mail, x.Name));
-                    });
-
-                    if (messagePayload.CcEmail != null)
-                    {
-                        message.CC.Add(new MailAddress(messagePayload.CcEmail.Mail, messagePayload.CcEmail.Name));
-                    }
-
-                    options.DefaultListBcc?.ForEach(x =>
-                    {
-                        message.Bcc.Add(new MailAddress(x.Mail, x.Name));
-                    });
-                    if (messagePayload.BccEmail != null)
-                    {
-                        message.Bcc.Add(new MailAddress(messagePayload.BccEmail.Mail, messagePayload.BccEmail.Name));
-                    }
-
-                    message.Subject = messagePayload.Subject;
-                    message.Body = messagePayload.Body;
-                    message.IsBodyHtml = true;
-
-                    using (var client = new SmtpClient(options.CredentialServerAddress))
-                    {
-                        client.Port = options.CredentialServerPort;
-                        client.Credentials = new NetworkCredential(options.CredentialEmail, options.CredentialPassword);
-                        client.EnableSsl = options.CredentialServerEnableSsl;
-                        client.SendAsync(message, userToken);
-                    }
-                }
-
             }
         }
     }

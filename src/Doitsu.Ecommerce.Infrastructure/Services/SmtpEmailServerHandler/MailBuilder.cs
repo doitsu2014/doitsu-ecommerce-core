@@ -1,9 +1,7 @@
-using System.IO;
 using System.Threading.Tasks;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.RazorPage;
 using Doitsu.Ecommerce.ApplicationCore.Interfaces.Services;
 using Doitsu.Ecommerce.ApplicationCore.Models.EmailHandlerModels;
-using Doitsu.Ecommerce.Infrastructure.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
 
@@ -13,7 +11,6 @@ namespace Doitsu.Ecommerce.Infrastructure.Services.SmtpEmailServerHandler
     {
         private readonly IRazorPageRenderer renderer;
         private readonly IWebHostEnvironment env;
-        private readonly SmtpMailServerOptions smtpMailServerOptions;
 
         public MailBuilder(
             IRazorPageRenderer renderer,
@@ -22,22 +19,25 @@ namespace Doitsu.Ecommerce.Infrastructure.Services.SmtpEmailServerHandler
         {
             this.renderer = renderer;
             this.env = env;
-            this.smtpMailServerOptions = optionsMonitor.CurrentValue;
         }
 
-        public async Task<MessagePayload> PrepareCustomerOrderConfirmationMail<TData>(TData data, string customerMail, string customerName, string subject)
+        public async Task<MessagePayload> PrepareMessagePayloadAsync<TData>(MailTemplate mailTemplate, TData data, string subject, string destinationMail, string destinationName)
         {
-            var path = Path.Combine(smtpMailServerOptions.TemplateUrlInformation.OrderConfirmationTemplateUrl);
-            var content = await renderer.RenderPartialToStringAsync<TData>(path, data);
+            var content = await renderer.RenderPartialToStringAsync<TData>(mailTemplate.Url, data);
             return new MessagePayload()
             {
                 Body = content,
-                DestEmail = new MailPayloadInformation()
+                DestEmails = new EmailAddressInformation[]
                 {
-                    Name = customerName,
-                    Mail = customerMail
+                    new EmailAddressInformation()
+                    {
+                        Name = destinationName,
+                        Mail = destinationMail
+                    }
                 },
-                Subject = subject
+                CcEmails = mailTemplate.CcEmails,
+                BccEmails = mailTemplate.CcEmails,
+                Subject = string.Format(subject)
             };
         }
     }
