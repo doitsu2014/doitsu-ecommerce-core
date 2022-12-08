@@ -31,7 +31,7 @@
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.4" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.4" />
         <PackageReference Include="Optional" Version="5.0.0-alpha" />
-        <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     </ItemGroup>
     <ItemGroup>
         <None Include="Images\doitsu-logo.png" Pack="true" PackagePath="" />
